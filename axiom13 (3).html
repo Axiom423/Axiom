@@ -1,0 +1,2749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Axiom</title>
+<meta name="description" content="Axiom — SteamRip (But Better), a free userscript that cleans up SteamRip and adds multiplayer info, uploader profiles, favorites, notes and more.">
+<meta name="theme-color" content="#060607">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><rect width=%27100%27 height=%27100%27 rx=%2750%27 fill=%27black%27/><text x=%2750%27 y=%2768%27 font-size=%2760%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27Georgia%27>A</text></svg>">
+<style>
+:root{--bg:#060607;--fg:#f4f4f5;--mute:#8d8d93;--dim:#4f4f55;--line:rgba(255,255,255,.08);--card:rgba(255,255,255,.03);--st:#5a5a5f;color-scheme:dark}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);min-height:100vh;font:15px/1.6 -apple-system,BlinkMacSystemFont,"Inter","Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse 70% 45% at 50% -8%,rgba(255,255,255,.10),transparent 70%),radial-gradient(ellipse at center,transparent 50%,#000 140%)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+main{position:relative;z-index:1;max-width:440px;margin:0 auto;padding:calc(76px + env(safe-area-inset-top,0px)) 22px calc(44px + env(safe-area-inset-bottom,0px));transition:max-width .3s}
+main.wide{max-width:760px}
+.view{display:none;animation:in .5s both}.view.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* shared card with cursor spotlight */
+.c{position:relative;border:1px solid var(--line);border-radius:16px;background:var(--card);overflow:hidden;transition:border-color .25s,transform .25s}
+.c::before{content:"";position:absolute;inset:0;background:radial-gradient(240px circle at var(--x,50%) var(--y,0%),rgba(255,255,255,.08),transparent 70%);opacity:0;transition:opacity .3s;pointer-events:none}
+.c:hover{border-color:rgba(255,255,255,.18)}.c:hover::before{opacity:1}
+
+/* home */
+.top{display:flex;align-items:center;gap:18px}
+.pfp{position:relative;width:76px;height:76px;flex:none}
+.pfp::before{content:"";position:absolute;inset:-5px;border-radius:50%;background:conic-gradient(from 0deg,rgba(255,255,255,.5),rgba(255,255,255,.05),rgba(255,255,255,.5));-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 1.5px),#000 calc(100% - 1px));mask:radial-gradient(farthest-side,transparent calc(100% - 1.5px),#000 calc(100% - 1px));animation:spin 8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.img{width:100%;height:100%;border-radius:50%;background:#141414 center/cover;display:grid;place-items:center;font:600 28px Georgia,serif}
+.dot{position:absolute;right:0;bottom:0;width:18px;height:18px;border-radius:50%;background:var(--st);border:3px solid var(--bg);transition:background .4s}
+h1{font:400 44px/1 "Iowan Old Style","Palatino Linotype",Georgia,serif;letter-spacing:-.02em;background:linear-gradient(180deg,#fff 30%,#85858b);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mute);font-size:13px;margin-top:8px}.sub b{color:var(--fg);font-weight:500}
+.roles{margin-top:22px;display:flex;gap:8px;flex-wrap:wrap}
+.roles span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#d2d2d6;border:1px solid var(--line);border-radius:99px;padding:4px 12px;background:var(--card)}
+.card{margin-top:24px;padding:18px}
+.who b{display:block;font-weight:600}.who span{color:var(--mute);font-size:13px}
+.state{display:flex;align-items:center;gap:8px;color:var(--mute);font-size:13px;margin-top:12px}
+.state i{width:7px;height:7px;border-radius:50%;background:var(--st);flex:none}
+.act{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);gap:12px;align-items:center}.act.on{display:flex}
+.art{width:48px;height:48px;border-radius:9px;background:#161616 center/cover;flex:none}
+.act b,.act span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.act div{min-width:0}
+.act span{color:var(--mute);font-size:13px}
+.bar{height:3px;background:var(--line);border-radius:3px;margin-top:8px;overflow:hidden;display:none}.bar i{display:block;height:100%;width:0;background:#fff}
+.btns{display:flex;gap:8px;margin-top:16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:10px;font:inherit;font-size:13px;font-weight:500;text-decoration:none;cursor:pointer;border:1px solid var(--line);color:var(--fg);background:transparent;transition:.2s}
+.btns .btn{flex:1}
+.btn.main{background:var(--fg);color:#000;border-color:var(--fg)}.btn.main:hover{background:#fff;box-shadow:0 0 28px rgba(255,255,255,.2)}
+.btn:hover{border-color:rgba(255,255,255,.3)}
+.links{margin-top:22px;display:grid;gap:10px}
+.link{display:flex;justify-content:space-between;align-items:center;padding:15px 18px;color:var(--fg);text-decoration:none}
+.link:hover{transform:translateY(-2px)}
+.link em{font-style:normal;color:var(--dim);font-size:12px;margin-right:14px}
+.link .a{color:var(--dim);transition:.25s}.link:hover .a{color:#fff;transform:translateX(3px)}
+.link.dead{color:var(--mute);cursor:default;background:none;border-style:dashed}.link.dead:hover{transform:none}
+.tag{margin-left:10px;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border:1px solid rgba(255,255,255,.22);padding:2px 9px;border-radius:99px;white-space:nowrap}
+.end{color:var(--dim);font-size:12px;margin-top:16px;text-align:center}
+footer{display:flex;justify-content:space-between;color:var(--dim);font-size:12px;margin-top:30px}
+kbd{font:inherit;border:1px solid var(--line);border-radius:5px;padding:0 6px;color:var(--mute)}
+
+/* steamrip page */
+.back{display:inline-flex;gap:6px;color:var(--mute);text-decoration:none;font-size:13px;margin-bottom:26px;transition:.2s}.back:hover{color:var(--fg);transform:translateX(-3px)}
+.hero{padding:34px 28px;border-radius:22px;background:radial-gradient(ellipse 90% 100% at 0% 0%,rgba(255,255,255,.08),transparent 60%),var(--card)}
+.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute)}
+h2.t{font:400 clamp(34px,7vw,50px)/1.05 "Iowan Old Style","Palatino Linotype",Georgia,serif;letter-spacing:-.025em;margin-top:10px;background:linear-gradient(180deg,#fff 35%,#8a8a90);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--mute);margin-top:12px;max-width:520px}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.chip{font-size:12px;color:var(--mute);border:1px solid var(--line);border-radius:99px;padding:2px 11px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}.row .btn{flex:0 0 auto;padding:11px 20px}
+.sec{margin-top:46px}
+.sec h3{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);font-weight:500;margin-bottom:14px;display:flex;align-items:center;gap:12px}
+.sec h3::after{content:"";flex:1;height:1px;background:var(--line)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.item{padding:16px 18px}
+.item b{display:block;font-weight:600;font-size:14px}
+.item span{display:block;color:var(--mute);font-size:13px;margin-top:4px;line-height:1.5}
+.item i{font-style:normal;float:right;color:var(--dim);font-size:12px}
+.fix b::before{content:"✓";color:#3ba55d;margin-right:8px}
+.steps{display:grid;gap:10px;counter-reset:s}
+.step{display:flex;gap:16px;align-items:flex-start;padding:16px 18px;counter-increment:s}
+.step::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--fg);color:#000;font-weight:600;font-size:13px}
+.step p{color:var(--mute);font-size:14px}.step b{color:var(--fg);font-weight:600}
+.step small{display:block;color:var(--dim);font-size:12px;margin-top:3px}
+.win{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#09090a}
+.win header{display:flex;align-items:center;gap:7px;padding:11px 14px;border-bottom:1px solid var(--line);color:var(--mute);font-size:12px}
+.win header i{width:10px;height:10px;border-radius:50%;background:#2b2b2f}
+.win header span{margin-left:auto}
+pre{margin:0;padding:16px;max-height:400px;overflow:auto;font:12px/1.6 ui-monospace,"SF Mono",Menlo,Consolas,monospace;color:#cfcfd4;white-space:pre;tab-size:2}
+#toast{position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);background:var(--fg);color:#000;padding:9px 16px;border-radius:99px;font-size:13px;font-weight:500;opacity:0;transition:.3s;pointer-events:none;z-index:9}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+.aurora{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.aurora i{position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.07),transparent 65%);filter:blur(20px);animation:drift 22s ease-in-out infinite alternate}
+.aurora i:nth-child(1){left:-140px;top:12%}
+.aurora i:nth-child(2){right:-160px;top:48%;animation-duration:28s;animation-delay:-8s}
+@keyframes drift{to{transform:translate(90px,-70px) scale(1.15)}}
+.top,.roles,.card,.links>*,.end,footer{animation:in .7s backwards}
+.roles{animation-delay:.06s}.card{animation-delay:.12s}.links>*:nth-child(1){animation-delay:.2s}.links>*:nth-child(2){animation-delay:.26s}.links>*:nth-child(3){animation-delay:.32s}.links>*:nth-child(4){animation-delay:.38s}.end{animation-delay:.44s}
+.rv{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease,border-color .25s}
+.rv.in{opacity:1;transform:none}
+#prog{position:fixed;top:0;left:0;height:2px;width:0;background:#fff;z-index:20;opacity:0;transition:opacity .3s}
+#prog.on{opacity:.8}
+#sticky{position:fixed;top:0;left:0;right:0;z-index:15;padding:calc(10px + env(safe-area-inset-top,0px)) 18px 10px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(6,6,7,.72);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);transform:translateY(-110%);transition:transform .3s}
+#sticky.on{transform:none}
+#sticky b{font:400 17px Georgia,serif}
+#sticky .btn{padding:7px 14px}
+.jump{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.jump button{font:inherit;font-size:12px;color:var(--mute);background:var(--card);border:1px solid var(--line);border-radius:99px;padding:5px 14px;cursor:pointer;transition:.2s}
+.jump button:hover{color:var(--fg);border-color:rgba(255,255,255,.3)}
+.mini{margin-left:auto;font:inherit;font-size:11px;color:var(--mute);background:transparent;border:1px solid var(--line);border-radius:7px;padding:3px 10px;cursor:pointer;transition:.2s}
+.mini:hover{color:var(--fg);border-color:rgba(255,255,255,.3)}
+.win header span{margin-left:12px}
+.win header .mini+span,.win header span{margin-left:auto}
+.win pre{max-height:170px;overflow:hidden;transition:max-height .35s ease}
+.win.open pre{max-height:520px;overflow:auto}
+.expand{display:block;width:100%;padding:11px;background:#0c0c0e;border:0;border-top:1px solid var(--line);color:var(--mute);font:inherit;font-size:12px;cursor:pointer;transition:.2s}
+.expand:hover{color:var(--fg)}
+.btn:focus-visible,.link:focus-visible,.jump button:focus-visible,.mini:focus-visible,.expand:focus-visible,.back:focus-visible{outline:2px solid rgba(255,255,255,.7);outline-offset:3px}
+.win header .mini{order:3;margin-left:auto}
+.win header .mini+span,.win header span{order:2;margin-left:12px}
+.seg{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:99px;background:var(--card);margin-bottom:14px}
+.seg button{font:inherit;font-size:13px;color:var(--mute);background:transparent;border:0;border-radius:99px;padding:6px 16px;cursor:pointer;transition:.2s}
+.seg button.on{background:var(--fg);color:#000;font-weight:600}
+.seg button:focus-visible{outline:2px solid rgba(255,255,255,.7);outline-offset:2px}
+.faq{display:grid;gap:10px}
+.faq details{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:0 18px;transition:border-color .25s}
+.faq details[open]{border-color:rgba(255,255,255,.18)}
+.faq summary{list-style:none;cursor:pointer;padding:15px 0;font-weight:600;font-size:14px;display:flex;justify-content:space-between;gap:12px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";color:var(--dim);font-weight:400;transition:transform .2s}
+.faq details[open] summary::after{transform:rotate(45deg)}
+.faq p{color:var(--mute);font-size:13.5px;padding:0 0 16px;line-height:1.6}
+.faq summary:focus-visible{outline:2px solid rgba(255,255,255,.7);outline-offset:3px;border-radius:8px}
+pre::-webkit-scrollbar{width:8px;height:8px}pre::-webkit-scrollbar-thumb{background:#26262a;border-radius:8px}
+main{z-index:1}
+@media(max-width:600px){.grid{grid-template-columns:1fr}.hero{padding:26px 20px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="aurora"><i></i><i></i></div><div id="prog"></div>
+<div id="sticky"><b>SteamRip (But Better)</b><button class="btn main" id="srCopy3">Copy code</button></div>
+<main id="main">
+
+<div class="view on" id="home">
+  <section class="top">
+    <div class="pfp"><div class="img" id="pfp">A</div><div class="dot" id="dot"></div></div>
+    <div><h1>Axiom</h1><p class="sub">real name <b>Mason</b></p></div>
+  </section>
+  <div class="roles"><span>SR Staff</span><span>SR Uploader</span></div>
+
+  <section class="card c">
+    <div class="who"><b id="dn">axiom423</b><span id="un">@axiom423</span></div>
+    <div class="state"><i></i><span id="st">Connecting…</span></div>
+    <div class="act" id="act">
+      <div class="art" id="art"></div>
+      <div style="flex:1"><b id="actName"></b><span id="actD1"></span><div class="bar" id="bar"><i id="barI"></i></div></div>
+    </div>
+    <div class="btns">
+      <a class="btn main" href="https://discord.com/users/1338747411065208882" target="_blank" rel="noopener">Message</a>
+      <button class="btn" id="copy">Copy username</button>
+    </div>
+  </section>
+
+  <nav class="links">
+    <a class="link c" href="https://github.com/Axiom423" target="_blank" rel="noopener"><div><em>01</em>GitHub<span class="tag">New permanent GitHub</span></div><span class="a">↗</span></a>
+    <a class="link c" href="#steamrip"><div><em>02</em>SteamRip (But Better)</div><span class="a">→</span></a>
+    <div class="link c dead"><div><em>03</em>No more</div></div>
+    <div class="link c dead"><div><em>04</em>things</div></div>
+  </nav>
+  <p class="end">that’s everything. i have nothing else to share.</p>
+  <footer><span id="clock"></span><span>press <kbd>C</kbd> to copy</span></footer>
+</div>
+
+<div class="view" id="sr">
+  <a class="back" href="#">← Back</a>
+  <section class="hero c">
+    <div class="eyebrow">Userscript · by Axiom</div>
+    <h2 class="t">SteamRip (But Better)</h2>
+    <p class="lead">Cleans up SteamRip and adds the tools the site should have had. Free, runs only in your browser.</p>
+    <div class="meta"><span class="chip" id="ver">v1.3.0</span><span class="chip">steamrip.com</span><span class="chip">Tampermonkey</span><span class="chip">Desktop</span></div>
+    <div class="row">
+      <button class="btn main" id="srCopy">Copy code</button>
+      <button class="btn" id="srDl">Download .user.js</button>
+      <a class="btn" href="#install">How to install ↓</a>
+    </div>
+  </section>
+
+  <nav class="jump"><button data-go="fixesSec">Fixes</button><button data-go="addsSec">Adds</button><button data-go="install">Install</button><button data-go="faqSec">FAQ</button><button data-go="codeSec">Code</button></nav>
+  <section class="sec" id="fixesSec"><h3>What it fixes</h3><div class="grid" id="fixes"></div></section>
+  <section class="sec" id="addsSec"><h3>What it adds</h3><div class="grid" id="adds"></div></section>
+  <section class="sec" id="install"><h3>How to install</h3>
+    <div class="seg" id="seg"><button data-b="chrome" class="on">Chrome / Edge</button><button data-b="firefox">Firefox</button></div>
+    <div class="steps" id="steps"></div>
+  </section>
+  <section class="sec" id="faqSec"><h3>FAQ</h3><div class="faq" id="faq"></div></section>
+  <section class="sec" id="codeSec"><h3>Code</h3>
+    <div class="win"><header><i></i><i></i><i></i><button class="mini" id="srCopy2">Copy</button><span id="codeInfo">steamrip.user.js</span></header><pre id="code"></pre><button class="expand" id="codeToggle">Show full code</button></div>
+  </section>
+  <footer><span>© <span class="yr"></span> Axiom</span><span>use at your own risk</span></footer>
+</div>
+</main>
+<div id="toast"></div>
+
+<!-- Userscript source (read by the page; edit here to update the code box) -->
+<script type="text/plain" id="srcode">
+// ==UserScript==
+// @name         SteamRip++
+// @namespace    https://steamrip.com/
+// @version      1.3.0
+// @description  Cleaner titles, comments off, Multiplayer info, uploader profiles, favorites, game notes & status, quick search, shortcuts and a Settings panel.
+// @author       Axiom
+// @match        https://steamrip.com/*
+// @match        https://www.steamrip.com/*
+// @run-at       document-end
+// @grant        GM_getValue
+// @grant        GM_setValue
+// @grant        GM_listValues
+// @grant        GM_deleteValue
+// @grant        GM_setClipboard
+// @grant        GM_registerMenuCommand
+// ==/UserScript==
+
+(function () {
+  'use strict';
+
+  const ORIGIN = location.origin;
+  let profileActive = false;
+  let visitedCache = null;
+  const SHARE_SELECTORS = ['.share-links', '.post-share', '.share-buttons', '#share-buttons-top', '#share-buttons-bottom'];
+  const RELATED_SELECTORS = ['#related-posts', '.related-posts', '.related-posts-list'];
+  const ROUTE = 'spp-author=';
+  const VERSION = '1.3.0';
+
+  const store = {
+    get(k, d) { try { return typeof GM_getValue === 'function' ? GM_getValue(k, d) : d; } catch { return d; } },
+    set(k, v) { try { if (typeof GM_setValue === 'function') GM_setValue(k, v); } catch {} }
+  };
+  const parse = (s, d) => { try { const v = JSON.parse(s); return v == null ? d : v; } catch { return d; } };
+  const qsa = (sel, root) => { try { return Array.from((root || document).querySelectorAll(sel)); } catch { return []; } };
+  const decode = (s) => { const t = document.createElement('textarea'); t.innerHTML = String(s == null ? '' : s); return t.value; };
+  function make(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  const DEFAULTS = {
+    hideComments: true,
+    hideCounts: true,
+    hideAds: true,
+    hideSocial: true,
+    hideShare: false,
+    hideRelated: false,
+    progressBar: true,
+    polish: true,
+    prefetch: true,
+    accent: 'auto',
+    wideLayout: false,
+    quickSearch: true,
+    lightbox: true,
+    newSince: true,
+    keepHistory: true,
+    hideTopRanges: true,
+    cleanTitles: true,
+    mpRow: true,
+    mpBadge: true,
+    jumpBtn: true,
+    pageSize: 20,
+    mpOnlyDefault: false,
+    mpOnlyLists: false,
+    trackVisited: true,
+    hideVisited: false,
+    newTab: false,
+    infiniteScroll: false,
+    backToTop: true,
+    favBtn: true,
+    notes: true,
+    dock: true,
+    statusBadge: true,
+    hideDone: false,
+    shortcuts: true,
+    showCredit: true,
+  };
+  const settings = Object.assign({}, DEFAULTS, parse(store.get('spp_settings', '{}'), {}));
+  Object.keys(settings).forEach((k) => { if (!(k in DEFAULTS)) delete settings[k]; });
+  function saveSettings() { store.set('spp_settings', JSON.stringify(settings)); }
+
+  function restRoot() {
+    const l = document.querySelector('link[rel="https://api.w.org/"]');
+    return l && l.href ? l.href : ORIGIN + '/wp-json/';
+  }
+  function joinBase(base, route, query) {
+    base = base.replace(/\/$/, '');
+    if (base.indexOf('?') !== -1) return base + route + (query ? '&' + query : '');
+    return base + route + (query ? '?' + query : '');
+  }
+  function restCandidates(path) {
+    if (!/^\/wp-json\//.test(path)) return [path.startsWith('http') ? path : ORIGIN + path];
+    const route = path.replace(/^\/wp-json/, '');
+    const qi = route.indexOf('?');
+    const r = qi < 0 ? route : route.slice(0, qi);
+    const q = qi < 0 ? '' : route.slice(qi + 1);
+    const out = [];
+    const root = restRoot();
+    if (root.indexOf('?') === -1) out.push(joinBase(root, r, q));
+    out.push(ORIGIN + '/?rest_route=' + r + (q ? '&' + q : ''));
+    out.push(joinBase(ORIGIN + '/wp-json', r, q));
+    return Array.from(new Set(out));
+  }
+  async function fetchJSONUrl(url) {
+    const r = await fetch(url, { credentials: 'same-origin', headers: { Accept: 'application/json' } });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    return { data, pages: parseInt(r.headers.get('X-WP-TotalPages') || '1', 10) || 1, total: parseInt(r.headers.get('X-WP-Total') || '0', 10) || 0 };
+  }
+  async function getJSON(path) {
+    let last = new Error('no url');
+    for (const url of restCandidates(path)) {
+      try { return await fetchJSONUrl(url); } catch (e) { last = e; }
+    }
+    throw last;
+  }
+
+  function cleanTitle(s) {
+    return String(s)
+      .replace(/free\s*download/gi, '')
+      .replace(/\s*[\(\[]\s*(?:v|ver\.?\s*|version\s*)\d[^\)\]]*[\)\]]/gi, ' ')
+      .replace(/\s*[\(\[]\s*build\s*\d[^\)\]]*[\)\]]/gi, ' ')
+      .replace(/\s+\bv\d[\w.\-]*/gi, ' ')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/[\s\-–—:+|,]+$/, '')
+      .trim();
+  }
+
+  const SKIP_TAGS = /^(SCRIPT|STYLE|CODE|PRE|TEXTAREA|NOSCRIPT|INPUT)$/;
+  const NEEDS_CLEAN = /free\s*download|\bv\d|\bver\.?\s*\d|build\s*\d/i;
+
+  function cleanTexts() {
+    try {
+      const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      const nodes = [];
+      while (w.nextNode()) nodes.push(w.currentNode);
+      for (const n of nodes) {
+        const p = n.parentElement;
+        if (!p || SKIP_TAGS.test(p.tagName) || p.closest('#spp-modal')) continue;
+        const v = n.nodeValue;
+        if (!NEEDS_CLEAN.test(v)) continue;
+        let out = v.replace(/free\s*download/gi, '');
+        const titleCtx = p.closest('a, h1, h2, h3, h4, h5, h6, .post-title, .widget-title') && !p.closest('.entry-content');
+        if (titleCtx) {
+          const m = out.match(/^(\s*)([\s\S]*?)(\s*)$/);
+          out = m[1] + cleanTitle(m[2]) + m[3];
+        }
+        if (out !== v) n.nodeValue = out;
+      }
+    } catch {}
+    qsa('a[title], a[aria-label], img[alt]').forEach((e) => {
+      ['title', 'aria-label', 'alt'].forEach((attr) => {
+        const val = e.getAttribute(attr);
+        if (val && NEEDS_CLEAN.test(val)) {
+          const c = cleanTitle(val);
+          if (c !== val) e.setAttribute(attr, c);
+        }
+      });
+    });
+  }
+
+  const COMMENT_SELECTORS = [
+    '#hyvor-talk-view', '.hyvor-talk-iframe', '[id*="hyvor"]', '[class*="hyvor"]',
+    'iframe[src*="talk.hyvor"]', 'iframe[src*="discuss"]', 'iframe[src*="comment"]',
+    '#comments', '.comments-area', '.comments-wrap', '#respond', '.comment-respond',
+    '.comment-form', '.commentlist', '#commentlist', '.post-comments', '.article-comments',
+    'section.comments', '.tie-comments'
+  ];
+  const COUNT_SELECTORS = ['.meta-comment', '.comments-link', '.post-comments-link', '.spp-nocount'];
+  const AD_SELECTORS = [
+    'ins.adsbygoogle', '.adsbygoogle', '[id^="google_ads_iframe"]', '[id^="div-gpt-ad"]',
+    'iframe[src*="googlesyndication"]', 'iframe[src*="doubleclick"]', 'iframe[src*="adsterra"]',
+    'iframe[src*="exoclick"]', 'iframe[src*="popads"]', '.stream-item-above-post', '.stream-item-below-post'
+  ];
+  const COUNT_TEXT = /^\s*(?:[\d.,]+\s*(?:k\s*)?comments?|comments?\s*(?:\(\s*[\d.,]+\s*\))?|no\s+comments?|leave\s+a\s+(?:comment|reply)|be\s+the\s+first\s+to\s+comment)\s*$/i;
+  const BARE_COMMENTS = /^\s*comments?\s*$/i;
+
+  function markCounts() {
+    if (!settings.hideCounts) return;
+    qsa('a[href*="#comment"], a[href*="#respond"]').forEach((a) => {
+      if (a.closest('#spp-modal') || a.closest('#comments, #respond')) return;
+      (a.closest('.meta-item, .meta-comment, .comments-link') || a).classList.add('spp-nocount');
+    });
+    // catches "1027 comments" even when the number and the word sit in different tags
+    try {
+      if (!document.body) return;
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+      const hits = [];
+      let node;
+      while ((node = walker.nextNode())) {
+        const v = node.nodeValue;
+        if (!v || v.length > 40 || !/comment/i.test(v)) continue;
+        let el = node.parentElement;
+        let best = null;
+        for (let up = 0; el && up < 3 && el !== document.body; up++, el = el.parentElement) {
+          if (el.closest('#spp-modal, [id^="spp-"], script, style, textarea, input')) { best = null; break; }
+          const t = el.textContent.trim();
+          if (t.length >= 40 || !COUNT_TEXT.test(t)) break;
+          best = el;
+        }
+        if (!best || best.classList.contains('spp-nocount')) continue;
+        if (BARE_COMMENTS.test(best.textContent) && best.closest('nav, header, footer, .menu, .nav, .main-nav')) continue;
+        hits.push(best);
+      }
+      hits.forEach((e) => (e.closest('.meta-item, .meta-comment') || e).classList.add('spp-nocount'));
+    } catch {}
+  }
+
+  function cleanDocTitle() {
+    try {
+      if (profileActive) return;
+      let t = document.title;
+      t = t.replace(/\s»\s/g, ' — ').replace(/Free Pre-installed Steam Games/gi, '');
+      t = cleanTitle(t).replace(/^[\s—-]+|[\s—-]+$/g, '').replace(/steamrip(?!\+\+)/gi, 'SteamRip++');
+      if (t && t !== document.title) document.title = t;
+    } catch {}
+  }
+
+  const RANGE_RE = /^\s*(?:today|daily|weekly|monthly|yearly|all[\s\-]*time|last\s*(?:24\s*hours?|7\s*days?|30\s*days?|week|month|year)|this\s*(?:week|month|year)|24\s*h(?:ours?)?|7\s*days?|30\s*days?)\s*$/i;
+  function hideTopRanges() {
+    if (!settings.hideTopRanges || !/^\/top-games/i.test(location.pathname)) return;
+    qsa('select').forEach((s) => {
+      const opts = Array.from(s.options);
+      if (opts.length > 1 && opts.every((o) => RANGE_RE.test(o.textContent))) s.classList.add('spp-hide');
+    });
+    qsa('a, button, li, span, label, div, option').forEach((e) => {
+      if (e.childElementCount || e.closest('#spp-modal') || e.tagName === 'OPTION') return;
+      if (!RANGE_RE.test(e.textContent)) return;
+      let box = e;
+      for (let i = 0; i < 4; i++) {
+        const p = box.parentElement;
+        if (!p || p === document.body || p === document.documentElement) break;
+        if (Array.from(p.children).every((k) => RANGE_RE.test(k.textContent))) box = p; else break;
+      }
+      box.classList.add('spp-hide');
+    });
+  }
+
+  function hideSocial() {
+    if (!settings.hideSocial) return;
+    qsa('a[href*="discord."], a[href*="reddit.com"], a[href*="redd.it"], a[class*="discord"], a[class*="reddit"]').forEach((a) => {
+      if (a.closest('#spp-modal, #spp-profile, #spp-credit, .entry-content')) return;
+      const li = a.closest('li');
+      (li && li.querySelectorAll('a[href]').length <= 1 ? li : a).classList.add('spp-social-hide');
+    });
+    qsa('nav li > a, #main-nav li > a, .main-menu li > a, .components li > a').forEach((a) => {
+      if (/^\s*(discord|reddit)\s*$/i.test(a.textContent)) (a.closest('li') || a).classList.add('spp-social-hide');
+    });
+  }
+
+  const MP_TYPES = {
+    onlinefix: 'Online with other SteamRIP copies only (OnlineFix)',
+    official: 'Official servers supported (keep the game on the latest version; an alt account is recommended due to ban risk)',
+    lan: 'LAN MP (use Radmin VPN, Hamachi or Tunngle to play online)',
+    plutonium: 'Needs the Plutonium launcher',
+    patch_outdated: 'OnlineFix patch outdated',
+    outdated: 'Game version outdated (will not work with the OnlineFix patch)',
+    unsure: 'Unsure, needs testing',
+    note: ''
+  };
+  // [title, type, note]
+  const MP_DATA = [
+    ["A Game About Chopping Trees", "onlinefix", ""],
+    ["A Way Out", "note", "No onlinefix, look into Hamachi or Parsec for Co-op"],
+    ["Angels Fall First", "lan", ""],
+    ["Abiotic Factor", "onlinefix", ""],
+    ["Absolver", "onlinefix", ""],
+    ["Airport Security Sucks!", "onlinefix", ""],
+    ["Ale & Tale Tavern", "onlinefix", ""],
+    ["Aliens vs Predator", "onlinefix", ""],
+    ["Among Us", "official", ""],
+    ["Among Us VR", "onlinefix", ""],
+    ["Approximately Up", "onlinefix", ""],
+    ["ARK: Survival Ascended", "onlinefix", ""],
+    ["BACKROOMS: APPREHENSION", "onlinefix", ""],
+    ["Backrooms: Code Yellow", "onlinefix", ""],
+    ["Backrooms: Escape Together", "onlinefix", ""],
+    ["Backrooms: Extractions", "onlinefix", ""],
+    ["Backrooms Lost Runners", "onlinefix", ""],
+    ["Backseat Drivers", "onlinefix", ""],
+    ["Baladins", "onlinefix", ""],
+    ["Bang-On Balls: Chronicles", "onlinefix", ""],
+    ["BeamNG.drive", "onlinefix", ""],
+    ["Behind The Backrooms", "onlinefix", ""],
+    ["Big Walk", "official", "You can play on official servers using the Join Code Feature"],
+    ["BIGFOOT", "outdated", ""],
+    ["Biped 2", "official", ""],
+    ["Bloons TD6", "official", ""],
+    ["Bodycam", "official", ""],
+    ["BOMBANANA!", "onlinefix", ""],
+    ["Bopl Battle", "onlinefix", ""],
+    ["Brain Show Party Quiz", "onlinefix", ""],
+    ["Bread & Fred", "onlinefix", ""],
+    ["Buckshot Roulette", "onlinefix", ""],
+    ["Bully: Scholarship Edition", "note", "Modded multiplayer"],
+    ["Bum: Revenge", "onlinefix", ""],
+    ["Burglin’ Gnomes", "onlinefix", ""],
+    ["Call of Duty: Black Ops", "plutonium", ""],
+    ["Call of Duty: Black Ops II", "plutonium", ""],
+    ["Call of Duty: Black Ops III", "note", "Only bots / Splitscreen"],
+    ["Call of Duty: Infinite Warfare", "onlinefix", ""],
+    ["Call of Duty: Modern Warfare Remastered 2017", "onlinefix", ""],
+    ["Call of Duty: Modern Warfare 2019", "note", "Bots/Coop"],
+    ["Call of Duty: Modern Warfare 2 2009", "onlinefix", ""],
+    ["Call of Duty: Modern Warfare II", "lan", "Multiplayer/Co-Op with Bots"],
+    ["Call of Duty: Modern Warfare 3 2011", "plutonium", ""],
+    ["Call of Duty: Modern Warfare III", "note", "Zombies/MP with bots"],
+    ["Call of Duty: WWII", "onlinefix", ""],
+    ["Call of Duty: World at War", "plutonium", ""],
+    ["Call to Arms: Panzer Elite", "note", "No skirmish, Campaign Co-op only"],
+    ["Car For Sale Simulator 2023", "outdated", ""],
+    ["Car Service Together", "onlinefix", ""],
+    ["CarX Drift Racing Online 2", "onlinefix", ""],
+    ["Card Shop Simulator Multiplayer", "onlinefix", ""],
+    ["Carry The Glass", "onlinefix", ""],
+    ["Cat Mail Co.", "onlinefix", ""],
+    ["Chained Together", "onlinefix", ""],
+    ["Cheaters Cheetah", "onlinefix", ""],
+    ["Class of ’09: Puzzle Showdown", "onlinefix", ""],
+    ["Climb The Backrooms", "onlinefix", ""],
+    ["Cloudheim", "onlinefix", ""],
+    ["Content Warning", "onlinefix", ""],
+    ["Cook-Out", "onlinefix", ""],
+    ["Cooking Simulator 2: Better Together", "onlinefix", ""],
+    ["Core Keeper", "onlinefix", ""],
+    ["Counter-Strike: Source", "lan", ""],
+    ["Crab Champions", "onlinefix", ""],
+    ["Craftopia", "lan", ""],
+    ["Crashout Crew", "onlinefix", ""],
+    ["Cricket 26 – The Official Game of the Ashes", "official", ""],
+    ["Crime Simulator", "onlinefix", ""],
+    ["Crimson Capes", "lan", ""],
+    ["Crimson Moon", "official", ""],
+    ["CRYO", "onlinefix", ""],
+    ["Cubic Odyssey", "onlinefix", ""],
+    ["Dale & Dawson Stationery Supplies", "onlinefix", ""],
+    ["Darksiders Genesis", "onlinefix", ""],
+    ["DAVIGO: VR vs. PC", "patch_outdated", ""],
+    ["Dawn of Defiance", "patch_outdated", ""],
+    ["Dawson Oaks Trailer Park", "onlinefix", ""],
+    ["DayZ", "onlinefix", "Few Russian Servers Only"],
+    ["Deadly Delivery", "official", ""],
+    ["Dead Island 2", "official", ""],
+    ["Dead Rising 4", "lan", ""],
+    ["Deceive Inc", "outdated", ""],
+    ["Deep Rock Galactic", "onlinefix", ""],
+    ["Demonologist", "onlinefix", ""],
+    ["Descenders", "onlinefix", ""],
+    ["Destroy All Humans! 2 – Reprobed", "note", "Shared/Splitscreen co-op"],
+    ["DEATH STRANDING 2: ON THE BEACH", "onlinefix", ""],
+    ["DEVOUR", "official", ""],
+    ["Deep Rock Galactic: Rogue Core", "official", ""],
+    ["Dig, Dig, Die", "onlinefix", ""],
+    ["Dirty Business", "onlinefix", ""],
+    ["Don’t Panic! It is Just Turbulence", "onlinefix", ""],
+    ["DON’T SCREAM TOGETHER", "onlinefix", ""],
+    ["Don’t Starve Together", "lan", ""],
+    ["DRAGON BALL FighterZ", "onlinefix", ""],
+    ["Dragon Ball Xenoverse 1", "onlinefix", ""],
+    ["DRAGON BALL: Sparking! ZERO", "onlinefix", ""],
+    ["Drive Beyond Horizons", "onlinefix", ""],
+    ["Drunkn Bar Fight VR", "onlinefix", ""],
+    ["Dumb Ways to Build", "onlinefix", ""],
+    ["DuneCrawl", "onlinefix", ""],
+    ["Dying Light The Following", "official", ""],
+    ["Dying Light 2 Stay Human", "official", ""],
+    ["Dying Light: The Beast", "official", ""],
+    ["EARTH DEFENSE FORCE 5", "onlinefix", ""],
+    ["Eco Global Survival Game", "lan", ""],
+    ["Elden ring Nightreign", "onlinefix", ""],
+    ["Escape Simulator 2", "onlinefix", ""],
+    ["Escape the Ayuwoki: Horror Night", "onlinefix", ""],
+    ["Escape the Backrooms", "onlinefix", ""],
+    ["Europa Universalis V", "onlinefix", ""],
+    ["EVERYBODY’S GOLF HOT SHOTS", "onlinefix", ""],
+    ["Evil West", "onlinefix", ""],
+    ["Farming Simulator 19", "onlinefix", ""],
+    ["Farming Simulator 22", "official", ""],
+    ["Farming Simulator 25", "official", ""],
+    ["Far Far West", "onlinefix", ""],
+    ["Fast Food Simulator", "onlinefix", ""],
+    ["FBC: Firebreak", "official", ""],
+    ["Fears to Fathom – Scratch Creek", "onlinefix", ""],
+    ["F.E.A.R. 3", "lan", ""],
+    ["FlyKnight", "onlinefix", ""],
+    ["Forza Horizon 3", "onlinefix", ""],
+    ["Forza Horizon 4", "official", ""],
+    ["Forza Horizon 5", "official", ""],
+    ["Forza Horizon 6", "official", ""],
+    ["Forza Motorsport", "official", ""],
+    ["FPV Kamikaze Drone", "onlinefix", ""],
+    ["Friendly Steps", "onlinefix", ""],
+    ["Friday the 13th: The Game", "onlinefix", ""],
+    ["Funnel Runners", "onlinefix", ""],
+    ["Gang Beasts", "onlinefix", ""],
+    ["Gamble With Your Friends", "onlinefix", ""],
+    ["Garfield Kart – Furious Racing", "onlinefix", "Invites don't work, must be on same server"],
+    ["Generation Zero", "onlinefix", ""],
+    ["Ghost Janitors", "onlinefix", ""],
+    ["Goblin Company", "onlinefix", ""],
+    ["GODBREAKERS", "official", "For legit players, use the lobby code to connect"],
+    ["Goofy Gorillas", "onlinefix", "Players must have the same steam region to see server list"],
+    ["Grain Rot", "onlinefix", ""],
+    ["Granblue Fantasy Versus: Rising", "patch_outdated", ""],
+    ["Granny Escape Together", "onlinefix", "Must be public lobby, must be in the same boot region"],
+    ["Grocery Store Simulator", "onlinefix", ""],
+    ["Grounded", "onlinefix", "Need to add friends to Xbox account friendlist"],
+    ["GTFO", "onlinefix", ""],
+    ["Guilty as sock!", "onlinefix", ""],
+    ["Gunfire Reborn", "onlinefix", ""],
+    ["Halo Wars: Definitive Edition", "onlinefix", ""],
+    ["Hammerwatch II", "onlinefix", ""],
+    ["Happy’s Humble Burger Cult", "onlinefix", ""],
+    ["Headbangers Rhythm Royale", "official", ""],
+    ["He is Coming", "official", ""],
+    ["HELLDIVERS Dive Harder Edition", "onlinefix", ""],
+    ["Heroes of Might and Magic: Olden Era", "official", ""],
+    ["Heroes of Hammerwatch II", "onlinefix", ""],
+    ["Hood Warfare 2", "onlinefix", ""],
+    ["How to Fish", "onlinefix", ""],
+    ["Imperator: Rome", "onlinefix", "To Access Online Features, Login to a Paradox Account"],
+    ["INAZUMA ELEVEN: Victory Road", "patch_outdated", ""],
+    ["In Silence", "official", ""],
+    ["Incursion Red River", "onlinefix", ""],
+    ["Inkbound", "official", ""],
+    ["Inside the Backrooms", "onlinefix", ""],
+    ["Into the Radius 2", "official", ""],
+    ["It Takes Two", "note", "Use parsec for online co-op"],
+    ["JoJo’s Bizarre Adventure: All-Star Battle R", "onlinefix", "Can see official servers, but not join them"],
+    ["Journey", "onlinefix", "Players must have same steam region to connect"],
+    ["Journey To The Savage Planet", "onlinefix", ""],
+    ["JUMP FORCE", "onlinefix", "OFME patch necessary from their site"],
+    ["Jump Space", "onlinefix", ""],
+    ["Kebab Chefs! Restaurant Simulator", "onlinefix", ""],
+    ["Keep Digging", "official", ""],
+    ["KEEP GAMBLING", "onlinefix", ""],
+    ["Killing Floor 2", "official", ""],
+    ["KILL la KILL -IF", "onlinefix", ""],
+    ["Knightfall: A Daring Journey", "unsure", ""],
+    ["LANESPLIT", "onlinefix", "need the same boot region on Steam to see your friends' server"],
+    ["Left 4 dead 2", "lan", ""],
+    ["Len's Island", "onlinefix", ""],
+    ["Lethal Company", "onlinefix", ""],
+    ["Lethal League Blaze", "onlinefix", ""],
+    ["Liar’s Bar", "onlinefix", ""],
+    ["LOCKDOWN Protocol", "onlinefix", ""],
+    ["LockYourDoor", "onlinefix", ""],
+    ["Longvinter", "official", ""],
+    ["LORT", "onlinefix", ""],
+    ["Lunch Lady", "onlinefix", ""],
+    ["Machine Party", "onlinefix", ""],
+    ["MECCHA CHAMELEON", "official", ""],
+    ["Mage Arena", "onlinefix", ""],
+    ["Mall Rivals", "onlinefix", ""],
+    ["Mars First Logistics", "onlinefix", ""],
+    ["Marvel: Ultimate Alliance", "onlinefix", ""],
+    ["Marvel: Ultimate Alliance 2", "onlinefix", ""],
+    ["MAZEBOUND: Hunt, Gather, Run!", "onlinefix", ""],
+    ["Minecraft Dungeons", "official", ""],
+    ["Minecraft Legends", "official", ""],
+    ["Moo Who?", "onlinefix", ""],
+    ["Monaco 2", "onlinefix", ""],
+    ["MONSTER HUNTER RISE", "onlinefix", ""],
+    ["Moros Protocol", "onlinefix", ""],
+    ["Motor Town: Behind The Wheel", "onlinefix", ""],
+    ["Murky Divers", "outdated", ""],
+    ["Mount & Blade II: Bannerlord", "official", ""],
+    ["MIMESIS", "onlinefix", ""],
+    ["Mimic Party", "onlinefix", ""],
+    ["MISERY", "onlinefix", ""],
+    ["NARUTO X BORUTO Ultimate Ninja STORM CONNECTIONS", "onlinefix", ""],
+    ["NASCAR 25", "onlinefix", ""],
+    ["Neighbors Suburban Warfare", "onlinefix", "Invites, purchases, matchmaking, exp and money do not work"],
+    ["Night Shippers", "onlinefix", ""],
+    ["Nioh 3", "onlinefix", "In case you don't see a friend's server, change steam download region to germany - berlin"],
+    ["Oh Deer", "onlinefix", ""],
+    ["Only Climb: Better Together", "onlinefix", ""],
+    ["OPERATOR", "onlinefix", "Use the same steam boot region to see each other's Lobby"],
+    ["Operation: Tango", "onlinefix", ""],
+    ["Orcs Must Die! 3", "onlinefix", ""],
+    ["Orcs Must Die! Deathtrap", "official", ""],
+    ["Ore Factory Squad", "onlinefix", ""],
+    ["Out of Space", "onlinefix", ""],
+    ["Outbound", "official", ""],
+    ["Overcooked! All You Can Eat", "onlinefix", ""],
+    ["Overcooked! 2", "onlinefix", "Recommended to use Russia - Moscow as steam download region"],
+    ["OverDrift Festival", "outdated", ""],
+    ["PANICORE", "onlinefix", ""],
+    ["PAYDAY 3", "official", "Enable crossplay for invites to work"],
+    ["Palworld", "official", ""],
+    ["PEAK", "onlinefix", ""],
+    ["Perfect Heist 2", "onlinefix", ""],
+    ["Permafrost", "official", ""],
+    ["Phasmophobia", "onlinefix", ""],
+    ["PICO PARK 2", "onlinefix", ""],
+    ["Pizza House Simulator", "onlinefix", ""],
+    ["Power Rangers: Battle for the Grid", "official", ""],
+    ["Project Winter", "onlinefix", "5 People needed to start normal mode, 6 for blackout mode"],
+    ["Project Zomboid", "onlinefix", ""],
+    ["Pummel Party", "onlinefix", ""],
+    ["R.E.P.O.", "onlinefix", ""],
+    ["Raft", "onlinefix", ""],
+    ["Ranch Simulator", "patch_outdated", ""],
+    ["Ready or Not", "official", ""],
+    ["Remnant II", "official", "Provided you use ingame matchmaking"],
+    ["Remnant: From the Ashes", "official", "Provided you use ingame matchmaking"],
+    ["Returnal", "official", ""],
+    ["Restaurats", "onlinefix", ""],
+    ["Revenge of the Savage Planet", "onlinefix", ""],
+    ["Risk of Rain Returns", "onlinefix", ""],
+    ["Risk of Rain 2", "onlinefix", ""],
+    ["Rivals of Aether", "onlinefix", ""],
+    ["Rivals of Aether II", "official", "only with ingame matchmaking"],
+    ["Roadside Research", "onlinefix", ""],
+    ["Romestead", "onlinefix", ""],
+    ["ROUNDS", "patch_outdated", ""],
+    ["RUMBLE VR", "official", ""],
+    ["RuneScape: Dragonwilds", "patch_outdated", ""],
+    ["Rust", "note", "Search for servers on gamepage and google"],
+    ["RV There Yet", "onlinefix", ""],
+    ["Saints Row: The Third Remastered", "lan", ""],
+    ["Satisfactory", "onlinefix", ""],
+    ["s&box", "onlinefix", ""],
+    ["Schedule I", "onlinefix", ""],
+    ["SCP: 5K", "onlinefix", ""],
+    ["Scam Line", "onlinefix", ""],
+    ["Scam With Your Friends", "onlinefix", ""],
+    ["Screamer", "official", ""],
+    ["Secret Neighbor", "note", "Servers are Temporarily Offline. It will not work for now"],
+    ["Serious Fun Football", "onlinefix", "Players must have same steam region to see server list"],
+    ["Serpent’s Gaze", "onlinefix", ""],
+    ["ShellShock Live", "onlinefix", ""],
+    ["Shift At Midnight", "onlinefix", ""],
+    ["Ship of Fools", "onlinefix", ""],
+    ["SimplePlanes 2", "onlinefix", ""],
+    ["SILENT BREATH", "onlinefix", ""],
+    ["Slay the Spire 2", "onlinefix", ""],
+    ["Sledding Game", "official", ""],
+    ["Slip & Skid", "onlinefix", ""],
+    ["Smack Talk", "onlinefix", ""],
+    ["Sniper Elite V2", "lan", ""],
+    ["Software Inc.", "onlinefix", ""],
+    ["Solarpunk", "onlinefix", ""],
+    ["Sonic and All-Stars Racing Transformed Collection", "onlinefix", ""],
+    ["Sons Of The Forest", "onlinefix", ""],
+    ["Spanky", "onlinefix", ""],
+    ["Species: Unknown", "official", ""],
+    ["Speedrunners", "lan", ""],
+    ["Split Fiction", "onlinefix", "Use friend pass and OFME patch"],
+    ["StarRupture", "onlinefix", ""],
+    ["Stationeers", "onlinefix", ""],
+    ["Stick Fight: The Game", "onlinefix", ""],
+    ["Stonewards", "onlinefix", ""],
+    ["Storebound", "onlinefix", ""],
+    ["Storm Chasers", "onlinefix", ""],
+    ["Stranger of Paradise Final Fantasy Origin", "official", ""],
+    ["Stronghold: Definitive Edition", "onlinefix", ""],
+    ["Subnautica 2", "onlinefix", ""],
+    ["Superfuse", "official", ""],
+    ["Super Battle Golf", "onlinefix", ""],
+    ["SWORN", "onlinefix", ""],
+    ["Terraria", "onlinefix", ""],
+    ["Tetris Effect: Connected", "outdated", ""],
+    ["The Binding of Isaac: Repentance", "onlinefix", ""],
+    ["The Break-In", "patch_outdated", ""],
+    ["the cabin game", "onlinefix", ""],
+    ["The Crew Motorfest", "onlinefix", ""],
+    ["The Devourer: Hunted Souls", "onlinefix", ""],
+    ["The Escapists 2", "onlinefix", ""],
+    ["The Headliners", "onlinefix", ""],
+    ["The Jackbox Party Pack 9", "onlinefix", ""],
+    ["The Jackbox Party Pack 6", "onlinefix", ""],
+    ["The Jackbox Party Pack 10", "onlinefix", ""],
+    ["The Jackbox Party Pack 5", "official", ""],
+    ["The Jackbox Party Pack 1", "official", ""],
+    ["The Lord of the Rings: War in the North", "official", "Use the server list to access Official servers"],
+    ["The Mound: Omen of Cthulhu", "official", ""],
+    ["The Other Side", "onlinefix", ""],
+    ["The Spell Brigade", "official", ""],
+    ["The Texas Chain Saw Massacre", "official", ""],
+    ["Total War: ROME II Emperor", "onlinefix", ""],
+    ["TowerFall Ascension", "lan", ""],
+    ["Totally Reliable Delivery Service", "outdated", ""],
+    ["Trail & Error", "onlinefix", ""],
+    ["Tribes of Midgard", "official", ""],
+    ["Turbo Golf Racing", "official", ""],
+    ["Ultimate Chicken Horse", "official", ""],
+    ["Unrailed 2: Back on Track", "patch_outdated", ""],
+    ["Unrailed!", "outdated", ""],
+    ["V Rising", "onlinefix", "Can have problems connecting through invite, use LAN MP in that case"],
+    ["Valheim", "official", ""],
+    ["Vampires: Bloodlord Rising", "onlinefix", ""],
+    ["VEIN", "onlinefix", ""],
+    ["VHOLUME", "onlinefix", ""],
+    ["Warhammer: Vermintide 2", "onlinefix", ""],
+    ["WARRIORS OROCHI 4", "lan", ""],
+    ["WE ARE SO DEAD", "onlinefix", ""],
+    ["We Were Here Forever", "official", ""],
+    ["We Were Here Together", "onlinefix", ""],
+    ["We Were Here Tomorrow", "onlinefix", ""],
+    ["WEBFISHING", "onlinefix", ""],
+    ["WheelMates", "official", ""],
+    ["Witch It", "onlinefix", ""],
+    ["Witchspire", "onlinefix", ""],
+    ["Wizard with a Gun", "onlinefix", ""],
+    ["Wizard of Legend 2", "onlinefix", ""],
+    ["Windrose", "official", ""],
+    ["Worms Armageddon", "official", ""],
+    ["Worms Clan Wars", "onlinefix", ""],
+    ["Worms Rumble", "official", ""],
+    ["Worms W.M.D", "onlinefix", ""],
+    ["Wrench", "onlinefix", ""],
+    ["YapYap", "onlinefix", ""],
+    ["Your Only Move Is HUSTLE", "onlinefix", ""],
+    ["Yu-Gi-Oh! EARLY DAYS COLLECTION", "onlinefix", ""],
+    ["Yu-Gi-Oh! Legacy of the Duelist", "lan", ""],
+    ["ZeroSpace", "onlinefix", ""]
+  ];
+
+  const mpKey = (s) => decode(String(s == null ? '' : s)).toLowerCase()
+    .replace(/free\s*download/g, ' ').replace(/[\(\[][^\)\]]*[\)\]]/g, ' ')
+    .replace(/\bv\d[\w.\-]*/g, ' ')
+    .replace(/\b(early access|deluxe|ultimate edition|definitive|complete|gold|goty|game of the year|premium|digital|collector'?s?|bundle|standard|edition)\b/g, ' ')
+    .replace(/^\s*the\s+/, '')
+    .replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '');
+
+  let mpMap = null;
+  function buildMP() {
+    mpMap = new Map();
+    MP_DATA.forEach(([t, type, note]) => { const k = mpKey(t); if (k) mpMap.set(k, { type, note: note || '' }); });
+  }
+  function mpCount() { if (!mpMap) buildMP(); return mpMap.size; }
+  function lookupMP(title, link) {
+    if (!mpMap) buildMP();
+    let r = mpMap.get(mpKey(title));
+    if (!r && link) {
+      try { r = mpMap.get(mpKey(new URL(link, ORIGIN).pathname.split('/').filter(Boolean).pop().replace(/-/g, ' '))); } catch {}
+    }
+    return r || null;
+  }
+  const mpText = (e) => (e.type === 'note' ? e.note : MP_TYPES[e.type] + (e.note ? ' — ' + e.note : ''));
+
+  function gameTitleEl() { return document.querySelector('h1.post-title, h1.entry-title, article h1, .entry-header h1, h1'); }
+  function gameTitleOnPage() {
+    const h = gameTitleEl();
+    if (h && h.textContent.trim()) return h.textContent.trim();
+    const og = document.querySelector('meta[property="og:title"]');
+    return og ? og.content : document.title;
+  }
+
+  const INFO_KEYS = /^\s*(genre|developer|publisher|original\s*size|size|release|released|languages?|version|platform|game\s*name|steam|requirements)\b/i;
+  function findInfoList() {
+    const root = document.querySelector('.entry-content, article, .post-content, main') || document.body;
+    const heads = qsa('h1,h2,h3,h4,h5,h6,p,strong,b,span,div', root).filter((h) => h.childElementCount <= 1 && /^\s*game\s*info(rmation)?\s*:?\s*$/i.test(h.textContent));
+    for (const h of heads) {
+      let n = h;
+      for (let up = 0; up < 4 && n && n !== root; up++) {
+        let s = n.nextElementSibling; let hops = 0;
+        while (s && hops < 4) {
+          const ul = s.matches('ul,ol') ? s : s.querySelector('ul,ol');
+          if (ul && ul.querySelector('li')) return ul;
+          s = s.nextElementSibling; hops++;
+        }
+        n = n.parentElement;
+      }
+    }
+    let best = null; let bestN = 0;
+    qsa('ul,ol', root).forEach((u) => {
+      const n = Array.from(u.children).filter((li) => li.tagName === 'LI' && INFO_KEYS.test(li.textContent)).length;
+      if (n >= 2 && n > bestN) { best = u; bestN = n; }
+    });
+    return best;
+  }
+
+  function addMPRow() {
+    if (profileActive || !/^\/[^\/]+\/?$/.test(location.pathname)) return;
+    const live = document.querySelector('[data-spp-mp]');
+    if (live && live.isConnected) return;
+    const e = lookupMP(gameTitleOnPage(), location.href);
+    if (!e) return;
+    const ul = findInfoList();
+    if (!ul) return;
+    const items = Array.from(ul.children).filter((c) => c.tagName === 'LI');
+    const tpl = items.find((li) => INFO_KEYS.test(li.textContent)) || items[items.length - 1];
+    if (!tpl) return;
+    const li = tpl.cloneNode(false);
+    li.setAttribute('data-spp-mp', '1');
+    const lab = tpl.querySelector('strong, b');
+    if (lab) { const l2 = lab.cloneNode(true); setText(l2, 'Multiplayer:'); li.appendChild(l2); li.appendChild(document.createTextNode(' ' + mpText(e))); }
+    else li.textContent = 'Multiplayer: ' + mpText(e);
+    const last = items[items.length - 1];
+    last.parentNode.insertBefore(li, last.nextSibling);
+  }
+
+  const slugFromHref = (href) => { const m = String(href).match(/\/author\/([^\/?#]+)/i); return m ? decodeURIComponent(m[1]) : null; };
+  function getUploaders() { return parse(store.get('spp_uploaders', '{}'), {}); }
+  function saveUploaders(map) { store.set('spp_uploaders', JSON.stringify(map)); }
+  function scanAuthors() {
+    const map = getUploaders();
+    let changed = false;
+    qsa('a[href*="/author/"]').forEach((a) => {
+      const slug = slugFromHref(a.getAttribute('href'));
+      const name = (a.textContent || '').trim();
+      if (slug && name && map[slug] !== name && !/^\d+$/.test(name)) { map[slug] = name; changed = true; }
+    });
+    if (changed) saveUploaders(map);
+  }
+
+  let profileSlug = null;
+
+  function goProfile(slug) {
+    const hash = '#' + ROUTE + encodeURIComponent(slug);
+    if (location.pathname === '/' || location.pathname === '') { location.hash = hash; if (!profileActive) routeCheck(); }
+    else location.assign(ORIGIN + '/' + hash);
+  }
+
+  // site bounces /author/ links to the homepage, so grab the click ourselves
+  document.addEventListener('click', (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+    const a = e.target && e.target.closest ? e.target.closest('a[href*="/author/"]') : null;
+    if (!a) return;
+    let u; try { u = new URL(a.href, location.href); } catch { return; }
+    if (u.hostname.replace(/^www\./, '') !== location.hostname.replace(/^www\./, '')) return;
+    const slug = slugFromHref(u.pathname);
+    if (!slug) return;
+    e.preventDefault(); e.stopPropagation();
+    goProfile(slug);
+  }, true);
+
+  function normRestPost(p) {
+    let img = '';
+    try {
+      const m = p._embedded['wp:featuredmedia'][0];
+      const sz = m.media_details && m.media_details.sizes;
+      img = (sz && ((sz.medium && sz.medium.source_url) || (sz.large && sz.large.source_url))) || m.source_url || '';
+    } catch {}
+    let aSlug = '', aName = '';
+    try { const au = p._embedded.author[0]; aSlug = au.slug; aName = au.name; } catch {}
+    return { id: p.author, author: p.author, title: decode(p.title && p.title.rendered != null ? p.title.rendered : p.title), link: p.link, date: p.date, img, aSlug, aName };
+  }
+
+  const POST_FIELDS = '&_fields=id,date,link,title,author,_links,_embedded';
+
+  async function pagedPosts(query, onPage) {
+    const base = '/wp-json/wp/v2/posts?per_page=100&orderby=date&order=desc' + query;
+    let first;
+    try { first = await getJSON(base + POST_FIELDS + '&page=1'); } catch { first = await getJSON(base + '&page=1'); }
+    const out = [];
+    const push = (arr) => { const n = arr.map(normRestPost); n.forEach((x) => out.push(x)); onPage(n, out); };
+    push(first.data);
+    for (let p = 2; p <= first.pages; p += 4) {
+      const batch = [];
+      for (let q = p; q < p + 4 && q <= first.pages; q++) {
+        batch.push(getJSON(base + POST_FIELDS + '&page=' + q).then((r) => r.data).catch(() => []));
+      }
+      (await Promise.all(batch)).forEach((arr) => push(arr));
+    }
+    return out;
+  }
+
+  function findMount() {
+    for (const s of ['#main-content-row .main-content', '.main-content', '#content', 'main', '#main-content', '#tie-container']) {
+      const e = document.querySelector(s);
+      if (e) return e;
+    }
+    return document.body;
+  }
+
+  const AUTH_KEY = 'spp_authors_v2';
+  const getAuthorsCached = () => { const c = parse(store.get(AUTH_KEY, 'null'), null); return c && c.list && c.list.length ? c : null; };
+
+  async function probeAuthor(id) {
+    try {
+      const r = await fetchJSONUrl(restCandidates('/wp-json/wp/v2/posts?author=' + id + '&per_page=1&_fields=id,link,author')[0]);
+      const d = r.data && r.data[0];
+      return d ? { id, link: d.link, total: r.total } : null;
+    } catch { return null; }
+  }
+
+  // user list is locked, so walk author ids 1, 2, 3... and read the name off one of their posts
+  async function discoverAuthors(force, onStatus) {
+    const c = getAuthorsCached();
+    if (!force && c && Date.now() - c.t < 6 * 3600 * 1000) return c.list;
+    const found = []; let lastFound = 0;
+    for (let start = 1; start <= 150; start += 10) {
+      if (onStatus) onStatus('Finding uploaders… (' + found.length + ' found)');
+      const res = await Promise.all(Array.from({ length: 10 }, (_, k) => probeAuthor(start + k)));
+      res.forEach((r) => { if (r) { found.push(r); lastFound = r.id; } });
+      if (found.length && start >= lastFound + 20) break;
+    }
+    const list = await Promise.all(found.map(async (f) => {
+      let slug = ''; let name = '';
+      try { const m = await fetchMeta(f.link); slug = m.slug; name = m.name; } catch {}
+      return { id: f.id, slug: slug || ('uploader-' + f.id), name: name || slug || ('Uploader ' + f.id), total: f.total };
+    }));
+    list.sort((x, y) => (y.total - x.total) || x.name.localeCompare(y.name));
+    if (list.length) {
+      store.set(AUTH_KEY, JSON.stringify({ t: Date.now(), list }));
+      const reg = getUploaders(); list.forEach((x) => { reg[x.slug] = x.name; }); saveUploaders(reg);
+    }
+    return list;
+  }
+
+  const fmtDate = (d) => { const x = new Date(d); return isNaN(x) ? '' : x.toLocaleDateString(); };
+  const monthKey = (d) => { const x = new Date(d); return isNaN(x) ? '' : x.getFullYear() + '-' + x.getMonth(); };
+  const monthLabel = (d) => { const x = new Date(d); return isNaN(x) ? 'Unknown date' : x.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }); };
+  const firstLetter = (t) => { const c = cleanTitle(t).replace(/^[^A-Za-z0-9]+/, '').charAt(0).toUpperCase(); return /[A-Z]/.test(c) ? c : '#'; };
+  function ago(d) {
+    const t = new Date(d).getTime(); if (!t) return '';
+    const days = Math.floor((Date.now() - t) / 86400000);
+    if (days < 1) return 'today';
+    if (days < 30) return days + 'd ago';
+    if (days < 365) return Math.floor(days / 30) + 'mo ago';
+    return Math.floor(days / 365) + 'y ago';
+  }
+  let profileGuard = null;
+
+  async function renderProfile(slug) {
+    profileActive = true; profileSlug = slug;
+    sampleTheme(); injectCss();
+    const mount = findMount();
+    const root = make('div');
+    root.id = 'spp-profile';
+    if (profileGuard) { profileGuard.disconnect(); profileGuard = null; }
+    if (mount === document.body) mount.insertBefore(root, mount.firstChild);
+    else {
+      mount.setAttribute('data-spp-mount', '1');
+      mount.replaceChildren(root);
+      // site keeps re-adding homepage blocks, strip them
+      profileGuard = new MutationObserver(() => { Array.from(mount.children).forEach((c) => { if (c !== root) c.remove(); }); });
+      profileGuard.observe(mount, { childList: true });
+    }
+    const alive = () => root.isConnected && profileSlug === slug;
+    const same = (a) => String(a.slug).toLowerCase() === String(slug).toLowerCase();
+    const pth = (u) => { try { return new URL(u, ORIGIN).pathname.replace(/\/$/, ''); } catch { return ''; } };
+
+    const known = getUploaders();
+    const title = make('h1', 'spp-pill-title', known[slug] || slug);
+    const stats = make('div', 'spp-stats');
+    const upRow = make('div', 'spp-uprow spp-uprow-x');
+    const sub = make('div', 'spp-sub', 'Loading uploader…');
+    const bar = make('div', 'spp-bar');
+    const input = make('input', 'spp-field'); input.style.minWidth = '220px';
+    input.type = 'search'; input.placeholder = "Search this uploader's games…";
+    const sort = make('select', 'spp-field');
+    [['new', 'Newest first'], ['old', 'Oldest first'], ['az', 'A → Z'], ['za', 'Z → A']].forEach(([v, t]) => { const o = make('option', '', t); o.value = v; sort.appendChild(o); });
+    const lastSort = String(store.get('spp_psort', 'new'));
+    if (['new', 'old', 'az', 'za'].indexOf(lastSort) !== -1) sort.value = lastSort;
+    const size = make('select', 'spp-field');
+    [['170px', 'Small cards'], ['210px', 'Medium cards'], ['280px', 'Large cards']].forEach(([v, t]) => { const o = make('option', '', t); o.value = v; size.appendChild(o); });
+    const savedSize = String(store.get('spp_cardsize', '210px'));
+    size.value = ['170px', '210px', '280px'].indexOf(savedSize) !== -1 ? savedSize : '210px';
+    const mkCheck = (label, on) => { const l = make('label', 'spp-check'); const c = make('input'); c.type = 'checkbox'; c.checked = on; l.append(c, document.createTextNode(label)); return { l, c }; };
+    const mpC = mkCheck('Multiplayer only', !!settings.mpOnlyDefault && mpCount() > 0);
+    if (!mpCount()) mpC.l.style.display = 'none';
+    const seenC = mkCheck('Hide opened', false);
+    const rnd = make('button', 'spp-field', '🎲 Random'); rnd.type = 'button';
+    const refresh = make('button', 'spp-field', '↻ Refresh'); refresh.type = 'button';
+    const when = make('select', 'spp-field');
+    [['all', 'Any time'], ['7', 'Last 7 days'], ['30', 'Last 30 days'], ['365', 'Last year']].forEach(([v, t]) => { const o = make('option', '', t); o.value = v; when.appendChild(o); });
+    const copyB = make('button', 'spp-field', '⧉ Copy list'); copyB.type = 'button';
+    const spark = make('div', 'spp-spark');
+    const letters = make('div', 'spp-letters');
+    bar.append(input, sort, when, size, mpC.l, seenC.l, rnd, copyB, refresh);
+    const grid = make('div', 'spp-grid');
+    grid.style.setProperty('--spp-card-min', size.value);
+    const more = make('button', 'spp-more', 'Load more'); more.type = 'button';
+    root.append(title, stats, spark, upRow, sub, bar, letters, grid, more);
+
+    const PAGE = Math.max(5, parseInt(settings.pageSize, 10) || 20);
+    const visited = getVisited();
+    let all = []; let filtered = []; let shown = PAGE; let me = null; let letter = '';
+    let loading = true; let loadingMsg = 'Loading…';
+    let crawlMode = false; let exhausted = false; let busy = false; let scanInfo = '';
+    const mpOf = (g) => { if (g._mp === undefined) g._mp = lookupMP(g.title, g.link) || null; return g._mp; };
+
+    function drawLetters() {
+      const on = sort.value === 'az' || sort.value === 'za';
+      letters.style.display = on ? 'flex' : 'none';
+      if (!on) return;
+      const have = new Set(all.map((g) => firstLetter(g.title)));
+      letters.replaceChildren();
+      ['#'].concat('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')).filter((L) => have.has(L)).forEach((L) => {
+        const b = make('button', 'spp-letter' + (letter === L ? ' on' : ''), L); b.type = 'button';
+        b.addEventListener('click', () => { letter = letter === L ? '' : L; shown = PAGE; render(); });
+        letters.appendChild(b);
+      });
+    }
+    function renderSpark() {
+      spark.replaceChildren();
+      if (!all.length) { spark.style.display = 'none'; return; }
+      const now = new Date(); const months = [];
+      for (let i = 11; i >= 0; i--) { const d = new Date(now.getFullYear(), now.getMonth() - i, 1); months.push({ k: d.getFullYear() + '-' + d.getMonth(), label: d.toLocaleDateString(undefined, { month: 'short', year: '2-digit' }), n: 0 }); }
+      const idx = {}; months.forEach((m, i) => { idx[m.k] = i; });
+      all.forEach((g) => { const k = monthKey(g.date); if (k in idx) months[idx[k]].n++; });
+      const max = Math.max(1, ...months.map((m) => m.n));
+      spark.style.display = 'flex';
+      spark.appendChild(make('span', 'spp-uplabel', 'Last 12 months'));
+      const bars = make('div', 'spp-bars');
+      months.forEach((m) => {
+        const c = make('div', 'spp-bcol'); const f = make('div', 'spp-bfill');
+        f.style.height = Math.max(m.n ? 10 : 3, Math.round((m.n / max) * 100)) + '%';
+        c.title = m.label + ': ' + m.n + ' game' + (m.n === 1 ? '' : 's');
+        c.appendChild(f); bars.appendChild(c);
+      });
+      spark.appendChild(bars);
+    }
+    function compute() {
+      const q = input.value.trim().toLowerCase();
+      const days = when.value === 'all' ? 0 : parseInt(when.value, 10);
+      const cutoff = days ? Date.now() - days * 86400000 : 0;
+      filtered = all.filter((g) => (!q || g.title.toLowerCase().includes(q)) && (!mpC.c.checked || mpOf(g)) && (!seenC.c.checked || !visited.has(pth(g.link))) &&
+        (!cutoff || (new Date(g.date).getTime() || 0) >= cutoff) && (!letter || firstLetter(g.title) === letter));
+      const mode = sort.value;
+      filtered.sort((a, b) => {
+        if (mode === 'az') return a.title.localeCompare(b.title);
+        if (mode === 'za') return b.title.localeCompare(a.title);
+        const da = new Date(a.date).getTime() || 0; const db = new Date(b.date).getTime() || 0;
+        return mode === 'old' ? da - db : db - da;
+      });
+    }
+    function renderStats() {
+      stats.replaceChildren();
+      const add = (t) => stats.appendChild(make('span', 'spp-stat', t));
+      add(all.length + ' game' + (all.length === 1 ? '' : 's') + (loading ? ' so far' : ''));
+      const ds = all.map((g) => new Date(g.date).getTime()).filter(Boolean);
+      if (ds.length) { add('Latest: ' + fmtDate(ds.reduce((m, x) => Math.max(m, x), 0))); add('Since: ' + fmtDate(ds.reduce((m, x) => Math.min(m, x), Infinity))); }
+      if (mpCount() && all.length) add(all.filter(mpOf).length + ' multiplayer');
+      renderSpark();
+    }
+    function near() { return more.style.display !== 'none' && more.getBoundingClientRect().top < window.innerHeight + 600; }
+    function grow() {
+      shown += PAGE; render();
+      if (crawlMode && !exhausted && all.length < shown) loadMore();
+    }
+    function render() {
+      if (sort.value !== 'az' && sort.value !== 'za') letter = '';
+      compute();
+      drawLetters();
+      grid.replaceChildren();
+      const byDate = sort.value === 'new' || sort.value === 'old';
+      const counts = {};
+      if (byDate) filtered.forEach((g) => { const k = monthKey(g.date); counts[k] = (counts[k] || 0) + 1; });
+      let lastMonth = null;
+      if (loading && !all.length) for (let i = 0; i < 8; i++) grid.appendChild(make('div', 'spp-skel'));
+      filtered.slice(0, shown).forEach((g) => {
+        if (byDate) {
+          const k = monthKey(g.date);
+          if (k !== lastMonth) { lastMonth = k; grid.appendChild(make('div', 'spp-month', monthLabel(g.date) + ' · ' + counts[k] + ' game' + (counts[k] === 1 ? '' : 's'))); }
+        }
+        const a = make('a', 'spp-card' + (settings.trackVisited && visited.has(pth(g.link)) ? ' spp-visited' : ''));
+        a.href = g.link;
+        if (settings.newTab) { a.target = '_blank'; a.rel = 'noopener'; }
+        if (g.img) { const im = make('img'); im.loading = 'lazy'; im.src = g.img; im.alt = ''; a.appendChild(im); }
+        const body = make('div', 'spp-ct');
+        body.appendChild(make('div', 'spp-card-title', cleanTitle(g.title)));
+        const meta = make('div', 'spp-card-meta');
+        const t = new Date(g.date).getTime();
+        if (t) { const d = make('span', '', ago(g.date)); d.title = fmtDate(g.date); meta.appendChild(d); }
+        if (t && Date.now() - t < 7 * 86400000) meta.appendChild(make('span', 'spp-new-badge', 'NEW'));
+        if (settings.mpBadge) { const mp = mpOf(g); if (mp) { const b = make('span', 'spp-mp-badge', 'MP'); b.title = mpText(mp); meta.appendChild(b); } }
+        body.appendChild(meta);
+        a.appendChild(body);
+        grid.appendChild(a);
+      });
+      if (all.length && !filtered.length) grid.appendChild(make('div', 'spp-none', 'No games match your filters.'));
+      more.style.display = (filtered.length > shown || (crawlMode && !exhausted)) ? 'block' : 'none';
+      let msg = '';
+      if (loading) msg = loadingMsg;
+      else if (all.length && (input.value.trim() || mpC.c.checked || seenC.c.checked)) msg = filtered.length + ' of ' + all.length + ' games match';
+      if (crawlMode && !exhausted) msg += (msg ? ' ' : '') + '· searching the site' + scanInfo;
+      sub.style.display = msg ? '' : 'none';
+      sub.textContent = msg;
+      if (!loading && !all.length && (!crawlMode || exhausted)) { sub.style.display = ''; sub.textContent = 'No uploads could be found for this uploader. '; sub.appendChild(debugButton()); }
+      renderStats();
+      if (alive() && near() && !busy) setTimeout(() => { if (alive() && near() && !busy) grow(); }, 30);
+    }
+    input.addEventListener('input', () => { shown = PAGE; render(); });
+    [sort, when, mpC.c, seenC.c].forEach((c) => c.addEventListener('change', () => { shown = PAGE; render(); }));
+    sort.addEventListener('change', () => store.set('spp_psort', sort.value));
+    size.addEventListener('change', () => { grid.style.setProperty('--spp-card-min', size.value); store.set('spp_cardsize', size.value); });
+    more.addEventListener('click', grow);
+    window.addEventListener('scroll', () => { if (alive() && !busy && near()) grow(); }, { passive: true });
+    copyB.addEventListener('click', () => {
+      const txt = filtered.map((g) => cleanTitle(g.title) + ' — ' + g.link).join('\n');
+      try { if (typeof GM_setClipboard === 'function') GM_setClipboard(txt); else navigator.clipboard.writeText(txt); toast('Copied ' + filtered.length + ' games'); } catch { toast('Could not copy'); }
+    });
+    rnd.addEventListener('click', () => { if (filtered.length) location.assign(filtered[Math.floor(Math.random() * filtered.length)].link); });
+    refresh.addEventListener('click', () => {
+      store.set(AUTH_KEY, 'null'); if (me) store.set('spp_posts2_' + me.id, 'null'); clearCaches(); location.reload();
+    });
+
+    function setName(n) {
+      if (!n) return;
+      title.textContent = n;
+      document.title = n + ' — Uploads — SteamRip++';
+      const m = getUploaders(); if (m[slug] !== n) { m[slug] = n; saveUploaders(m); }
+    }
+    document.title = (known[slug] || slug) + ' — Uploads — SteamRip++';
+    function drawUploaders(list) {
+      upRow.replaceChildren();
+      if (!list.length) return;
+      upRow.appendChild(make('span', 'spp-uplabel', 'Uploaders'));
+      list.forEach((a) => {
+        const c = make('a', 'spp-chip' + (same(a) ? ' on' : ''), a.name + (a.total ? ' · ' + a.total : ''));
+        c.href = '/author/' + encodeURIComponent(a.slug) + '/';
+        upRow.appendChild(c);
+      });
+    }
+
+    // no API -> read game pages a few at a time, cached
+    function fromIndex() {
+      const ix = loadIndex(); const out = [];
+      Object.keys(ix).forEach((u) => { const v = ix[u]; if (v[3] === slug) out.push({ title: v[0] || u, link: u, date: v[1], img: v[2] }); });
+      return out;
+    }
+    function onCrawl(ix, pos, total) {
+      all = fromIndex();
+      const names = getUploaders();
+      if (names[slug]) setName(names[slug]);
+      drawUploaders(Object.keys(names).sort((x, y) => names[x].localeCompare(names[y])).map((sl) => ({ slug: sl, name: names[sl], total: 0 })));
+      scanInfo = ' · scanned ' + pos + '/' + total;
+      render();
+    }
+    async function loadMore() {
+      if (busy) return;
+      busy = true; more.disabled = true; more.textContent = 'Loading…'; more.style.display = 'block';
+      try { exhausted = await crawlIndex(slug, shown, onCrawl, () => !alive()); }
+      finally { busy = false; more.disabled = false; more.textContent = 'Load more'; all = fromIndex(); render(); }
+    }
+
+    render();
+
+    // who is this uploader
+    const cachedA = getAuthorsCached();
+    let authors = cachedA ? cachedA.list : [];
+    me = authors.find(same) || null;
+    drawUploaders(authors);
+    const updating = discoverAuthors(false, (t) => { if (!me) { loadingMsg = t; render(); } })
+      .then((l) => { if (l.length) { authors = l; drawUploaders(l); if (!me) me = l.find(same) || null; } return l; })
+      .catch(() => authors);
+    if (!me) {
+      await updating;
+      if (!me && authors.length) {
+        try { authors = await discoverAuthors(true, (t) => { loadingMsg = t; render(); }); drawUploaders(authors); me = authors.find(same) || null; } catch {}
+      }
+    }
+    if (!alive()) return;
+
+    // only their games, filtered by author id server side
+    if (me) {
+      setName(me.name);
+      const ck = 'spp_posts2_' + me.id;
+      const cp = parse(store.get(ck, 'null'), null);
+      if (cp && Date.now() - cp.t < 20 * 60 * 1000 && cp.posts && cp.posts.length) {
+        all = cp.posts.map(([t, l, d, i]) => ({ title: t, link: l, date: d, img: i, author: me.id }));
+        loading = false; render(); return;
+      }
+      try {
+        loadingMsg = 'Loading ' + me.name + "'s games…";
+        await pagedPosts('&author=' + me.id + '&_embed=wp:featuredmedia', (n, out) => {
+          if (!alive()) return;
+          all = out.filter((g) => g.author === me.id);
+          loadingMsg = 'Loading ' + me.name + "'s games… " + all.length + (me.total ? ' / ' + me.total : '');
+          render();
+        });
+      } catch {}
+      const seen = new Set();
+      all = all.filter((g) => g.link && !seen.has(g.link) && seen.add(g.link));
+      if (all.length) {
+        loading = false; render();
+        store.set(ck, JSON.stringify({ t: Date.now(), posts: all.map((g) => [g.title, g.link, g.date, g.img]) }));
+        return;
+      }
+    }
+
+    // nothing worked
+    loading = false; crawlMode = true; all = fromIndex(); render();
+    await loadMore();
+  }
+
+  const INDEX_KEY = 'spp_index_v1';
+  function loadIndex() { return parse(store.get(INDEX_KEY, '{}'), {}); }
+  function saveIndex(ix) { store.set(INDEX_KEY, JSON.stringify(ix)); }
+  let crawlRunning = false;
+
+  async function discoverGameUrls() {
+    const urls = []; const seen = new Set();
+    const add = (u, lm) => {
+      try {
+        const x = new URL(u);
+        if (x.origin !== ORIGIN) return;
+        const p = x.pathname.replace(/\/?$/, '/');
+        if (!/^\/[^\/]+\/$/.test(p) || /^\/(page|category|tag|author|top-games|wp-)/.test(p)) return;
+        const k = ORIGIN + p;
+        if (seen.has(k)) return;
+        seen.add(k); urls.push([k, lm || '']);
+      } catch {}
+    };
+    async function readSitemap(path, depth) {
+      let txt = '';
+      try { const r = await fetch(path.startsWith('http') ? path : ORIGIN + path, { credentials: 'same-origin' }); if (!r.ok) return false; txt = await r.text(); } catch { return false; }
+      if (txt.indexOf('<loc') === -1) return false;
+      const doc = new DOMParser().parseFromString(txt, 'text/xml');
+      const subs = Array.from(doc.getElementsByTagName('sitemap'));
+      if (subs.length) {
+        let any = false;
+        if (depth < 2) {
+          for (const s of subs) {
+            const loc = ((s.getElementsByTagName('loc')[0] || {}).textContent || '').trim();
+            if (!/post/i.test(loc) || /category|tag|author|page-sitemap/i.test(loc)) continue;
+            if (await readSitemap(loc, depth + 1)) any = true;
+          }
+        }
+        return any;
+      }
+      Array.from(doc.getElementsByTagName('url')).forEach((u) => add(((u.getElementsByTagName('loc')[0] || {}).textContent || '').trim(), ((u.getElementsByTagName('lastmod')[0] || {}).textContent || '').trim()));
+      return true;
+    }
+    for (const p of ['/sitemap_index.xml', '/sitemap.xml', '/wp-sitemap.xml', '/post-sitemap.xml']) {
+      if (await readSitemap(p, 0) && urls.length > 20) break;
+    }
+    if (urls.length < 20) {
+      for (let p = 1; p <= 600; p += 4) {
+        const res = await Promise.all([0, 1, 2, 3].map((o) => fetch(ORIGIN + '/page/' + (p + o) + '/', { credentials: 'same-origin' })
+          .then((r) => (r.ok ? r.text() : '')).catch(() => '')));
+        let found = 0;
+        res.forEach((html) => {
+          if (!html) return;
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+          doc.querySelectorAll('h2.post-title a, h3.post-title a, .post-title a').forEach((a) => { add(a.href, ''); found++; });
+        });
+        if (!found) break;
+      }
+    }
+    urls.sort((a, b) => (b[1] > a[1] ? 1 : b[1] < a[1] ? -1 : 0));
+    return urls;
+  }
+
+  const AUTHOR_RE = /<a[^>]+href=["'](?:https?:\/\/[^"']*)?\/author\/([^\/"'?#]+)\/?["'][^>]*>([\s\S]*?)<\/a>/i;
+  async function fetchMeta(url) {
+    const ctrl = new AbortController();
+    let html = '';
+    try {
+      const r = await fetch(url, { credentials: 'same-origin', signal: ctrl.signal });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const reader = r.body.getReader(); const dec = new TextDecoder();
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        html += dec.decode(value, { stream: true });
+        if (html.length > 300000 || (AUTHOR_RE.test(html) && /og:image/.test(html) && /<\/head>/i.test(html))) break;
+      }
+    } finally { try { ctrl.abort(); } catch {} }
+    const am = html.match(AUTHOR_RE);
+    const tm = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+    const im = html.match(/property=["']og:image["'][^>]*content=["']([^"']+)["']/i) || html.match(/content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+    const dm = html.match(/article:published_time["'][^>]*content=["']([^"']+)["']/i);
+    const name = am ? decode(am[2].replace(/<[^>]*>/g, '')).replace(/\s+/g, ' ').trim() : '';
+    return {
+      title: tm ? cleanTitle(decode(tm[1]).replace(/\s*».*$/, '')) : '',
+      date: dm ? dm[1] : '',
+      img: im ? decode(im[1]) : '',
+      slug: am ? decodeURIComponent(am[1]) : '',
+      name
+    };
+  }
+
+  const crawlState = { urls: null, pos: 0 };
+  // newest first, stop once we have `want` games for wantSlug or hit SCAN_CAP pages
+  // returns true when the whole site has been scanned
+  async function crawlIndex(wantSlug, want, onUpdate, shouldStop) {
+    if (crawlRunning) return false;
+    crawlRunning = true;
+    const SCAN_CAP = 150;
+    try {
+      const ix = loadIndex(); const names = getUploaders();
+      if (!crawlState.urls) { crawlState.urls = (await discoverGameUrls()).map((x) => x[0]); crawlState.pos = 0; }
+      const urls = crawlState.urls;
+      let have = 0;
+      Object.keys(ix).forEach((u) => { if (ix[u][3] === wantSlug) have++; });
+      let fetched = 0; let sinceSave = 0;
+      onUpdate(ix, crawlState.pos, urls.length);
+      const worker = async () => {
+        while (crawlState.pos < urls.length && !shouldStop() && have < want && fetched < SCAN_CAP) {
+          const u = urls[crawlState.pos++];
+          if (ix[u]) continue;
+          fetched++;
+          try {
+            const m = await fetchMeta(u);
+            ix[u] = [m.title, m.date, m.img, m.slug];
+            if (m.slug === wantSlug) have++;
+            if (m.slug && m.name) names[m.slug] = m.name;
+          } catch {}
+          if (++sinceSave >= 6) { sinceSave = 0; onUpdate(ix, crawlState.pos, urls.length); }
+        }
+      };
+      await Promise.all([0, 1, 2, 3, 4, 5].map(worker));
+      saveIndex(ix); saveUploaders(names); onUpdate(ix, crawlState.pos, urls.length);
+      return crawlState.pos >= urls.length;
+    } finally { crawlRunning = false; }
+  }
+
+  function debugButton() {
+    const b = make('button', 'spp-dbg', 'Copy debug report');
+    b.style.cssText = 'margin-left:8px;padding:3px 10px;border-radius:6px;border:1px solid currentColor;background:transparent;color:inherit;cursor:pointer;font-size:12px;';
+    b.type = 'button';
+    b.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); debugReport(); });
+    return b;
+  }
+
+  function routeCheck() {
+    const m = location.hash.match(/^#spp-author=(.+)$/);
+    const pm = location.pathname.match(/^\/author\/([^\/]+)\/?(?:page\/\d+\/?)?$/i);
+    const slug = m ? decodeURIComponent(m[1]) : (pm ? decodeURIComponent(pm[1]) : null);
+    if (slug) { if (!profileActive || profileSlug !== slug) renderProfile(slug).catch((e) => console.warn('[SteamRip++] profile failed', e)); }
+    else if (profileActive) location.reload();
+  }
+  window.addEventListener('hashchange', routeCheck);
+
+  function setText(e, text) {
+    const w = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
+    let first = null; const rest = [];
+    while (w.nextNode()) { const n = w.currentNode; if (n.nodeValue.trim()) { if (!first) first = n; else rest.push(n); } }
+    if (!first) { e.textContent = text; return; }
+    first.nodeValue = text;
+    rest.forEach((n) => { n.nodeValue = ''; });
+  }
+
+  function rgbParts(c) {
+    const m = String(c).match(/rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)(?:[,\s/]+([\d.]+))?/);
+    return m ? [+m[1], +m[2], +m[3], m[4] == null ? 1 : +m[4]] : null;
+  }
+  function solid(c) { const p = rgbParts(c); return !!(p && p[3] > 0.05); }
+  function lum(c) { const p = rgbParts(c); if (!p) return 0.5; return (0.299 * p[0] + 0.587 * p[1] + 0.114 * p[2]) / 255; }
+
+  const ACCENTS = { purple: 'rgb(155,89,182)', blue: 'rgb(52,152,219)', teal: 'rgb(26,188,156)', green: 'rgb(46,204,113)', orange: 'rgb(230,126,34)', red: 'rgb(231,76,60)', pink: 'rgb(232,67,147)' };
+  function sampleTheme() {
+    try {
+      const cs = (e, p) => (e ? getComputedStyle(e)[p] : '');
+      const rootCS = getComputedStyle(document.documentElement);
+      const v = (n) => rootCS.getPropertyValue(n).trim();
+      const wrap = document.querySelector('.container-wrapper, .main-content, #content, .post-content');
+      let bg = cs(wrap, 'backgroundColor');
+      if (!solid(bg)) bg = cs(document.body, 'backgroundColor');
+      if (!solid(bg)) bg = '#fff';
+      const fg = cs(document.body, 'color') || '#333';
+      let pill = '';
+      try {
+        const cand = qsa('h1, h2, h3, .widget-title, .mag-box-title, .the-global-title, [class*="title"]').slice(0, 250);
+        for (const c of cand) {
+          if (c.closest('#spp-modal, #spp-profile, #spp-top-bar')) continue;
+          const hit = [c].concat(Array.from(c.querySelectorAll('span, a')).slice(0, 3)).find((n) => {
+            const st = getComputedStyle(n);
+            return n.getClientRects().length && solid(st.backgroundColor) && parseFloat(st.borderRadius) >= 10 && Math.abs(lum(st.backgroundColor) - lum(bg)) > 0.05 && lum(st.backgroundColor) < 0.85;
+          });
+          if (hit) { pill = getComputedStyle(hit).backgroundColor; break; }
+        }
+      } catch {}
+      let accent = pill || v('--brand-color') || v('--bright-color');
+      if (!accent) {
+        const b = document.querySelector('.button, .tie-btn, a.button, button.button, .more-link');
+        accent = b && solid(cs(b, 'backgroundColor')) ? cs(b, 'backgroundColor') : '';
+      }
+      if (!accent) { const a = document.querySelector('.entry-content a, .main-content a, a'); accent = a ? cs(a, 'color') : '#2271b1'; }
+      if (ACCENTS[settings.accent]) accent = ACCENTS[settings.accent];
+      const accentFg = lum(accent) > 0.62 ? '#111' : '#fff';
+      const heading = document.querySelector('h1, h2, .post-title');
+      const root = document.documentElement.style;
+      root.setProperty('--spp-bg', bg);
+      root.setProperty('--spp-fg', fg);
+      root.setProperty('--spp-accent', accent);
+      root.setProperty('--spp-accent-fg', accentFg);
+      root.setProperty('--spp-line', lum(bg) < 0.5 ? 'rgba(255,255,255,.14)' : 'rgba(0,0,0,.12)');
+      root.setProperty('--spp-radius', (wrap && cs(wrap, 'borderRadius') && cs(wrap, 'borderRadius') !== '0px') ? cs(wrap, 'borderRadius') : '4px');
+      root.setProperty('--spp-font', cs(document.body, 'fontFamily') || 'inherit');
+      root.setProperty('--spp-hfont', (heading && cs(heading, 'fontFamily')) || cs(document.body, 'fontFamily') || 'inherit');
+    } catch {}
+  }
+
+  function injectCss() {
+    let st = document.getElementById('spp-style');
+    if (!st) { st = document.createElement('style'); st.id = 'spp-style'; (document.head || document.documentElement).appendChild(st); }
+    let css = [
+      '#spp-modal{position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.68);display:flex;align-items:flex-start;justify-content:center;padding:5vh 12px;overflow:auto;font-family:var(--spp-font);}',
+      '#spp-modal *{box-sizing:border-box;}',
+      '#spp-modal .spp-panel{background:var(--spp-bg);color:var(--spp-fg);width:100%;max-width:600px;border-radius:var(--spp-radius);box-shadow:0 12px 48px rgba(0,0,0,.55);font-size:14px;line-height:1.5;}',
+      '#spp-modal .spp-head{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--spp-line);}',
+      '#spp-modal .spp-head h2{margin:0;padding:0 0 5px;font:700 15px/1.2 var(--spp-hfont);letter-spacing:.06em;text-transform:uppercase;color:inherit;border-bottom:2px solid var(--spp-accent);}',
+      '#spp-modal .spp-x{background:none;border:0;color:inherit;font-size:24px;line-height:1;cursor:pointer;opacity:.7;padding:0 4px;}',
+      '#spp-modal .spp-x:hover{opacity:1;color:var(--spp-accent);}',
+      '#spp-modal .spp-body{padding:6px 22px 18px;}',
+      '#spp-modal .spp-sec{margin:18px 0 4px;font:700 11px/1.2 var(--spp-hfont);letter-spacing:.1em;text-transform:uppercase;color:var(--spp-accent);}',
+      '#spp-modal .spp-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid var(--spp-line);}',
+      '#spp-modal .spp-row b{display:block;font-weight:600;}',
+      '#spp-modal .spp-row small{display:block;opacity:.65;font-size:12px;margin-top:1px;}',
+      '#spp-modal .spp-sw{flex:none;width:42px;height:22px;border-radius:11px;border:0;background:rgba(128,128,128,.45);position:relative;cursor:pointer;padding:0;transition:background .15s;}',
+      '#spp-modal .spp-sw::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s;}',
+      '#spp-modal .spp-sw[aria-checked="true"]{background:var(--spp-accent);}',
+      '#spp-modal .spp-sw[aria-checked="true"]::after{left:23px;}',
+      '#spp-modal select,#spp-modal textarea{background:transparent;color:inherit;border:1px solid var(--spp-line);border-radius:var(--spp-radius);padding:6px 8px;font:inherit;}',
+      '#spp-modal select option{color:#000;}',
+      '#spp-modal textarea{width:100%;min-height:120px;margin-top:8px;font:12px/1.4 monospace;resize:vertical;}',
+      '#spp-modal .spp-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}',
+      '#spp-modal .spp-btn{padding:7px 14px;border-radius:var(--spp-radius);border:1px solid var(--spp-line);background:transparent;color:inherit;cursor:pointer;font:600 13px/1.2 var(--spp-font);}',
+      '#spp-modal .spp-btn:hover{border-color:var(--spp-accent);color:var(--spp-accent);}',
+      '#spp-modal .spp-btn.pri{background:var(--spp-accent);color:var(--spp-accent-fg);border-color:transparent;}',
+      '#spp-modal .spp-btn.pri:hover{color:var(--spp-accent-fg);opacity:.9;}',
+      '#spp-modal .spp-reload{display:none;margin-top:14px;padding:10px 12px;border-left:3px solid var(--spp-accent);background:rgba(128,128,128,.12);align-items:center;justify-content:space-between;gap:12px;}',
+      '#spp-modal .spp-foot{padding:12px 22px;border-top:1px solid var(--spp-line);font-size:12px;opacity:.6;}',
+      '.spp-settings-li>a{display:flex!important;align-items:center;justify-content:center;cursor:pointer;}',
+      '.spp-settings-li svg{width:18px;height:18px;fill:currentColor;display:block;}',
+      '#spp-settings-fixed{position:fixed;top:10px;right:12px;z-index:99999;width:38px;height:38px;border-radius:50%;border:0;background:var(--spp-accent);color:var(--spp-accent-fg);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.4);}',
+      '#spp-settings-fixed svg{width:20px;height:20px;fill:currentColor;}',
+      '#spp-modal .spp-search{width:100%;margin:14px 0 0;padding:8px 10px;background:transparent;color:inherit;border:1px solid var(--spp-line);border-radius:var(--spp-radius);font:inherit;}',
+      '#spp-modal .spp-search:focus{outline:0;border-color:var(--spp-accent);}',
+      '#spp-modal .spp-empty{padding:20px 0;opacity:.65;text-align:center;}',
+      '#spp-toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:2147483100;max-width:92vw;padding:8px 16px;border-radius:var(--spp-radius);background:var(--spp-accent);color:var(--spp-accent-fg);font:600 13px/1.3 var(--spp-font);opacity:0;pointer-events:none;transition:opacity .2s;}',
+      '#spp-toast.spp-show{opacity:1;}',
+      '.spp-mp-badge{display:inline-block;margin-left:6px;padding:0 6px;border-radius:99px;border:1px solid currentColor;font:700 10px/16px sans-serif;letter-spacing:.04em;vertical-align:middle;opacity:.85;cursor:help;}',
+      '.spp-visited{opacity:.5;transition:opacity .15s;}.spp-visited:hover{opacity:1;}',
+      '.spp-hide{display:none!important;}',
+      '#spp-top-btn,#spp-jump-btn,#spp-search-btn{position:fixed;right:18px;z-index:99998;width:40px;height:40px;border-radius:50%;border:0;background:var(--spp-accent);color:var(--spp-accent-fg);cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.4);}',
+      '#spp-top-btn{bottom:18px;}#spp-jump-btn{bottom:66px;display:flex;}#spp-search-btn{bottom:114px;display:flex;}',
+      '#spp-top-btn.spp-show{display:flex;}#spp-top-btn svg,#spp-jump-btn svg,#spp-search-btn svg{width:18px;height:18px;fill:currentColor;}',
+      '#spp-fav-btn{position:fixed;right:18px;bottom:162px;z-index:99998;width:40px;height:40px;border-radius:50%;border:0;background:var(--spp-accent);color:var(--spp-accent-fg);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.4);opacity:.85;}',
+      '#spp-fav-btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;}',
+      '#spp-fav-btn.on{opacity:1;}#spp-fav-btn.on svg{fill:currentColor;}',
+      '.spp-fav-badge{margin-left:6px;color:#f1c40f;font-size:13px;vertical-align:middle;}',
+      '#spp-dock-btn{position:fixed;right:18px;bottom:18px;z-index:99999;width:40px;height:40px;border-radius:50%;border:0;background:var(--spp-accent);color:var(--spp-accent-fg);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.4);transition:transform .2s;}',
+      '#spp-dock-btn svg{width:18px;height:18px;fill:currentColor;}html.spp-open #spp-dock-btn{transform:rotate(45deg);}',
+      'html.spp-dock #spp-top-btn{bottom:66px;}html.spp-dock #spp-jump-btn{bottom:114px;}html.spp-dock #spp-search-btn{bottom:162px;}html.spp-dock #spp-fav-btn{bottom:210px;}html.spp-dock #spp-note-btn{bottom:258px;}',
+      'html.spp-dock:not(.spp-open) :is(#spp-top-btn,#spp-jump-btn,#spp-search-btn,#spp-fav-btn,#spp-note-btn){display:none!important;}',
+      'html.spp-dock.spp-open #spp-top-btn{display:flex;}',
+      'html.spp-dock.spp-open :is(#spp-top-btn,#spp-jump-btn,#spp-search-btn,#spp-fav-btn,#spp-note-btn){animation:spp-rise .16s ease-out both;}',
+      'html.spp-dock.spp-open :is(#spp-top-btn,#spp-jump-btn,#spp-search-btn,#spp-fav-btn,#spp-note-btn)::after{content:attr(data-label);position:absolute;right:48px;top:50%;transform:translateY(-50%);padding:3px 10px;border-radius:99px;background:var(--spp-bg);color:var(--spp-fg);border:1px solid var(--spp-line);box-shadow:0 2px 8px rgba(0,0,0,.35);font:600 12px/1.4 var(--spp-font);white-space:nowrap;pointer-events:none;}',
+      '@keyframes spp-rise{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}@keyframes spp-fade{from{opacity:0;}to{opacity:1;}}@keyframes spp-pop{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:none;}}',
+      '#spp-modal{animation:spp-fade .15s ease-out;padding:0 12px 5vh;}#spp-modal .spp-panel{animation:spp-pop .2s ease-out;margin-top:5vh;}',
+      '@media (prefers-reduced-motion:reduce){#spp-modal,#spp-modal .spp-panel,html.spp-open #spp-dock-btn,html.spp-dock.spp-open button{animation:none!important;transition:none!important;}}',
+      '#spp-modal .spp-tabs{position:sticky;top:0;z-index:2;display:flex;gap:6px;overflow-x:auto;margin:0 -22px;padding:10px 22px;background:var(--spp-bg);border-bottom:1px solid var(--spp-line);scrollbar-width:none;}',
+      '#spp-modal .spp-tabs .spp-pick{flex:none;}#spp-modal .spp-secwrap{scroll-margin-top:56px;}',
+      '#spp-modal kbd{display:inline-block;min-width:22px;text-align:center;padding:1px 7px;border:1px solid var(--spp-line);border-radius:5px;background:rgba(128,128,128,.12);font:600 12px/1.5 var(--spp-font);}',
+      '#spp-note-btn{position:fixed;right:18px;bottom:210px;z-index:99998;width:40px;height:40px;border-radius:50%;border:0;background:var(--spp-accent);color:var(--spp-accent-fg);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.4);opacity:.85;}',
+      '#spp-note-btn svg{width:18px;height:18px;fill:currentColor;}#spp-note-btn.on{opacity:1;}',
+      '.spp-status-badge{display:inline-block;margin-left:6px;padding:0 7px;border-radius:4px;background:var(--spp-accent);color:var(--spp-accent-fg);font:700 10px/16px sans-serif;letter-spacing:.03em;vertical-align:middle;white-space:nowrap;}',
+      '#spp-modal .spp-chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0;}',
+      '#spp-modal .spp-pick{padding:5px 14px;border-radius:99px;border:1px solid var(--spp-line);background:transparent;color:inherit;cursor:pointer;font:600 12px/1.4 var(--spp-font);}',
+      '#spp-modal .spp-pick:hover{border-color:var(--spp-accent);}',
+      '#spp-modal .spp-pick.on{background:var(--spp-accent);color:var(--spp-accent-fg);border-color:transparent;}',
+      '#spp-modal textarea.spp-note{font:13px/1.5 var(--spp-font);min-height:110px;}',
+      '.spp-flash{animation:spp-flash 1.6s ease-out;}',
+      '@keyframes spp-flash{0%,60%{box-shadow:0 0 0 4px var(--spp-accent);}100%{box-shadow:0 0 0 4px transparent;}}',
+      '#spp-profile{padding:6px 0;color:inherit;}',
+      '#spp-profile .spp-pill-title{display:inline-block;margin:0 0 6px;padding:8px 28px;border-radius:999px;background:var(--spp-accent);color:var(--spp-accent-fg);font:700 22px/1.25 var(--spp-hfont);}',
+      '#spp-profile .spp-sub{opacity:.75;margin:10px 0 16px;}',
+      '#spp-profile .spp-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px;}',
+      '#spp-profile .spp-field{padding:8px 16px;border-radius:999px;border:1px solid var(--spp-line);background:transparent;color:inherit;font:inherit;font-size:13px;}',
+      '#spp-profile .spp-field:focus{outline:0;border-color:var(--spp-accent);}',
+      '#spp-profile .spp-field option{color:#000;}',
+      '#spp-profile .spp-check{display:inline-flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;accent-color:var(--spp-accent);}',
+      '#spp-profile .spp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--spp-card-min,210px),1fr));gap:16px;}',
+      '#spp-profile .spp-card{display:block;color:inherit;text-decoration:none;border:1px solid var(--spp-line);border-radius:var(--spp-radius);overflow:hidden;background:rgba(128,128,128,.07);transition:transform .15s,border-color .15s;}',
+      '#spp-profile .spp-card:hover{transform:translateY(-2px);border-color:var(--spp-accent);}',
+      '#spp-profile .spp-card img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;}',
+      '#spp-profile .spp-ct{padding:10px 12px 12px;}',
+      '#spp-profile .spp-card-title{font-size:14px;font-weight:600;line-height:1.35;}',
+      '#spp-profile .spp-card-meta{font-size:12px;opacity:.65;margin-top:5px;display:flex;gap:6px;align-items:center;}',
+      '#spp-profile .spp-more{display:none;margin:22px auto 0;padding:9px 28px;border-radius:999px;border:1px solid currentColor;background:transparent;color:inherit;cursor:pointer;font:600 13px/1.2 var(--spp-font);}',
+      '#spp-profile .spp-more:hover{background:var(--spp-accent);color:var(--spp-accent-fg);border-color:transparent;}',
+      '#spp-profile .spp-uptitle{display:inline-block;margin:34px 0 12px;padding:5px 20px;border-radius:999px;background:var(--spp-accent);color:var(--spp-accent-fg);font:700 13px/1.4 var(--spp-hfont);letter-spacing:.05em;text-transform:uppercase;}',
+      '#spp-profile .spp-uprow{display:flex;flex-wrap:wrap;gap:8px;}',
+      '#spp-profile .spp-chip{padding:5px 15px;border-radius:999px;border:1px solid var(--spp-line);color:inherit;text-decoration:none;font-size:13px;transition:border-color .15s,color .15s;}',
+      '#spp-profile .spp-chip:hover{border-color:var(--spp-accent);color:var(--spp-accent);}',
+      '#spp-profile .spp-chip.on{background:var(--spp-accent);color:var(--spp-accent-fg);border-color:transparent;font-weight:600;}',
+      '#spp-profile .spp-stats{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px;}',
+      '#spp-profile .spp-stat{padding:3px 12px;border-radius:999px;border:1px solid var(--spp-line);font-size:12px;opacity:.85;}',
+      '#spp-profile .spp-uprow{margin:14px 0 4px;align-items:center;}',
+      '#spp-profile .spp-uplabel{font:700 11px/1 var(--spp-hfont);letter-spacing:.1em;text-transform:uppercase;opacity:.6;margin-right:4px;}',
+      '#spp-profile button.spp-field{cursor:pointer;}',
+      '#spp-profile button.spp-field:hover{border-color:var(--spp-accent);color:var(--spp-accent);}',
+      '#spp-profile .spp-card{position:relative;}',
+      '#spp-profile .spp-card.spp-visited{opacity:.55;}',
+      '#spp-profile .spp-card.spp-visited:hover{opacity:1;}',
+      '#spp-profile .spp-new-badge{padding:0 6px;border-radius:99px;background:var(--spp-accent);color:var(--spp-accent-fg);font:700 10px/16px sans-serif;letter-spacing:.04em;}',
+      '#spp-profile .spp-none{padding:30px 0;text-align:center;opacity:.65;}',
+      '[data-spp-mount]>:not(#spp-profile){display:none!important;}',
+      '.spp-social-hide{display:none!important;}',
+      '#spp-profile .spp-spark{display:flex;align-items:flex-end;gap:12px;margin:12px 0 4px;}',
+      '#spp-profile .spp-bars{display:flex;align-items:flex-end;gap:4px;height:34px;}',
+      '#spp-profile .spp-bcol{width:12px;height:100%;display:flex;align-items:flex-end;}',
+      '#spp-profile .spp-bfill{width:100%;border-radius:3px 3px 0 0;background:var(--spp-accent);opacity:.8;}',
+      '#spp-profile .spp-bcol:hover .spp-bfill{opacity:1;}',
+      '#spp-profile .spp-month{grid-column:1/-1;margin:14px 0 0;padding-bottom:6px;border-bottom:1px solid var(--spp-line);font:700 13px/1.3 var(--spp-hfont);letter-spacing:.06em;text-transform:uppercase;}',
+      '#spp-profile .spp-month:first-child{margin-top:0;}',
+      '#spp-profile .spp-letters{display:none;flex-wrap:wrap;gap:4px;margin:-6px 0 16px;}',
+      '#spp-profile .spp-letter{min-width:28px;padding:3px 6px;border-radius:6px;border:1px solid var(--spp-line);background:transparent;color:inherit;cursor:pointer;font:600 12px/1.4 var(--spp-font);}',
+      '#spp-profile .spp-letter:hover{border-color:var(--spp-accent);color:var(--spp-accent);}',
+      '#spp-profile .spp-letter.on{background:var(--spp-accent);color:var(--spp-accent-fg);border-color:transparent;}',
+      '#spp-profile .spp-skel{aspect-ratio:16/12;border-radius:var(--spp-radius);background:linear-gradient(90deg,rgba(128,128,128,.10),rgba(128,128,128,.22),rgba(128,128,128,.10));background-size:200% 100%;animation:spp-shim 1.2s linear infinite;}',
+      '@keyframes spp-shim{0%{background-position:200% 0}100%{background-position:-200% 0}}',
+      '#spp-credit{padding:16px 12px 22px;text-align:center;font:600 13px/1.4 var(--spp-font);color:var(--spp-fg);border-top:1px solid var(--spp-line);background:var(--spp-bg);}',
+      '#spp-credit b{color:var(--spp-accent);}',
+      '#spp-credit .spp-heart{display:inline-block;color:#e25555;animation:spp-beat 1.4s ease-in-out infinite;}',
+      '@keyframes spp-beat{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}',
+      '#spp-progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--spp-accent);z-index:2147482000;pointer-events:none;transition:width .1s;}',
+      '#spp-credit a{color:var(--spp-accent);text-decoration:none;font-weight:700;}',
+      '#spp-credit a:hover{text-decoration:underline;}',
+      '#spp-palette{position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.6);display:flex;align-items:flex-start;justify-content:center;padding:10vh 12px;}',
+      '#spp-palette *{box-sizing:border-box;}',
+      '.spp-pal{width:100%;max-width:660px;background:var(--spp-bg);color:var(--spp-fg);border-radius:var(--spp-radius);box-shadow:0 12px 48px rgba(0,0,0,.6);overflow:hidden;font-family:var(--spp-font);}',
+      '.spp-pal-top{display:flex;align-items:center;border-bottom:1px solid var(--spp-line);}',
+      '.spp-pal-in{flex:1;min-width:0;padding:16px 18px;border:0;background:transparent;color:inherit;font:600 16px/1.3 var(--spp-font);outline:0;}',
+      '.spp-pal-mp{display:flex;align-items:center;gap:6px;padding:0 16px;font-size:12px;white-space:nowrap;cursor:pointer;accent-color:var(--spp-accent);}',
+      '.spp-pal-list{max-height:58vh;overflow:auto;}',
+      '.spp-pal-head{padding:10px 18px 4px;font:700 11px/1.2 var(--spp-hfont);letter-spacing:.1em;text-transform:uppercase;color:var(--spp-accent);}',
+      '.spp-pal-item{display:flex;align-items:center;gap:12px;padding:8px 18px;color:inherit;text-decoration:none;}',
+      '.spp-pal-item img{width:64px;height:36px;object-fit:cover;border-radius:4px;flex:none;background:rgba(128,128,128,.2);}',
+      '.spp-pal-item.on{background:rgba(128,128,128,.2);}',
+      '.spp-pal-item .t{flex:1;font-weight:600;font-size:14px;line-height:1.3;}',
+      '.spp-pal-item small{opacity:.6;font-size:12px;white-space:nowrap;}',
+      '.spp-pal-empty{padding:24px 18px;opacity:.65;text-align:center;}',
+      '.spp-pal-hint{padding:8px 18px;border-top:1px solid var(--spp-line);font-size:11px;opacity:.55;}',
+      '#spp-lightbox{position:fixed;inset:0;z-index:2147483200;background:rgba(0,0,0,.93);display:flex;align-items:center;justify-content:center;}',
+      '#spp-lightbox img{max-width:96vw;max-height:92vh;object-fit:contain;cursor:pointer;box-shadow:0 8px 40px rgba(0,0,0,.6);}',
+      '.spp-lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:64px;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:36px;line-height:1;cursor:pointer;border-radius:8px;}',
+      '.spp-lb-nav.prev{left:14px;}.spp-lb-nav.next{right:14px;}',
+      '.spp-lb-nav:hover,.spp-lb-x:hover{background:var(--spp-accent);color:var(--spp-accent-fg);}',
+      '.spp-lb-x{position:absolute;top:14px;right:18px;width:40px;height:40px;border:0;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;font-size:26px;line-height:1;cursor:pointer;}',
+      '.spp-lb-count{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);color:#fff;font:600 13px/1 var(--spp-font);background:rgba(0,0,0,.5);padding:6px 12px;border-radius:99px;}',
+      '#spp-newbar{position:fixed;left:16px;bottom:64px;z-index:99997;display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--spp-radius);background:var(--spp-bg);color:var(--spp-fg);border:1px solid var(--spp-accent);box-shadow:0 4px 18px rgba(0,0,0,.45);font:600 13px/1.3 var(--spp-font);}',
+      '#spp-newbar button{padding:4px 12px;border-radius:999px;border:1px solid var(--spp-line);background:transparent;color:inherit;cursor:pointer;font:600 12px/1.4 var(--spp-font);}',
+      '#spp-newbar button.pri{background:var(--spp-accent);color:var(--spp-accent-fg);border-color:transparent;}',
+      '#spp-newbar button.x{border:0;font-size:18px;padding:0 4px;opacity:.6;}',
+    ].join('\n');
+    if (settings.hideComments) css += '\n' + COMMENT_SELECTORS.join(',') + '{display:none!important;}';
+    if (settings.hideCounts) css += '\n' + COUNT_SELECTORS.join(',') + '{display:none!important;}';
+    if (settings.hideSocial) css += '\niframe[src*="discord"],iframe[src*="widgetbot"]{display:none!important;}';
+    if (settings.hideAds) css += '\n' + AD_SELECTORS.join(',') + '{display:none!important;}';
+    if (settings.polish) css += '\nhtml{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--spp-accent) rgba(128,128,128,.15);}\n::selection{background:var(--spp-accent);color:var(--spp-accent-fg);}\na:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--spp-accent);outline-offset:2px;}';
+    if (settings.hideShare) css += '\n' + SHARE_SELECTORS.join(',') + '{display:none!important;}';
+    if (settings.hideRelated) css += '\n' + RELATED_SELECTORS.join(',') + '{display:none!important;}';
+    if (settings.wideLayout) css += '\n.sidebar{display:none!important;}\n.main-content{width:100%!important;max-width:100%!important;flex:0 0 100%!important;}';
+    if (!settings.mpRow) css += '\n[data-spp-mp]{display:none!important;}';
+    if (st.textContent !== css) st.textContent = css;
+  }
+
+  const GEAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54A.49.49 0 0 0 13.92 2h-3.84a.49.49 0 0 0-.49.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.61.22L2.69 8.48a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.07.63-.07.94s.03.63.07.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.12.22.37.29.61.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.25.42.49.42h3.84c.24 0 .44-.18.49-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.49 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z"/></svg>';
+
+  function putSettingsButton() {
+    const have = document.getElementById('spp-settings-btn') || document.getElementById('spp-settings-fixed');
+    if (have && have.isConnected) return;
+    sampleTheme();
+    const comps = qsa('ul.components').filter((u) => u.getClientRects().length > 0);
+    comps.sort((a, b) => { const ra = a.getBoundingClientRect(); const rb = b.getBoundingClientRect(); return (ra.top - rb.top) || (rb.right - ra.right); });
+    const ul = comps[0];
+    if (ul) {
+      const sampleLi = ul.querySelector(':scope > li');
+      const sampleA = sampleLi && sampleLi.querySelector(':scope > a');
+      const li = document.createElement('li');
+      li.id = 'spp-settings-btn';
+      li.className = 'menu-item custom-menu-link spp-settings-li';
+      const a = document.createElement('a');
+      a.href = '#';
+      a.title = 'SteamRip++ Settings';
+      a.setAttribute('aria-label', 'SteamRip++ Settings');
+      if (sampleA) a.className = sampleA.className.split(/\s+/).filter((c) => c && !/search|login|popup|toggle|cart|random|skin|side-aside|lightbox/i.test(c)).join(' ');
+      a.innerHTML = GEAR;
+      a.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); openSettings(); });
+      li.appendChild(a);
+      ul.appendChild(li);
+      return;
+    }
+    const b = document.createElement('button');
+    b.id = 'spp-settings-fixed'; b.type = 'button'; b.title = 'SteamRip++ Settings';
+    b.innerHTML = GEAR;
+    b.addEventListener('click', (e) => { e.preventDefault(); openSettings(); });
+    document.body.appendChild(b);
+  }
+
+  function clearCaches() {
+    store.set(INDEX_KEY, '{}');
+    try { if (typeof GM_listValues === 'function' && typeof GM_deleteValue === 'function') GM_listValues().filter((k) => /^spp_posts_/.test(k)).forEach((k) => GM_deleteValue(k)); } catch {}
+    crawlState.urls = null; crawlState.pos = 0;
+  }
+
+  function toast(msg, ms) {
+    let t = document.getElementById('spp-toast');
+    if (!t) { t = make('div'); t.id = 'spp-toast'; document.body.appendChild(t); }
+    t.textContent = msg; t.classList.add('spp-show');
+    clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('spp-show'), ms || 1500);
+  }
+
+  function makeModal(titleText) {
+    sampleTheme(); injectCss();
+    const overlay = make('div'); overlay.id = 'spp-modal';
+    const panel = make('div', 'spp-panel');
+    overlay.appendChild(panel);
+    const head = make('div', 'spp-head');
+    head.appendChild(make('h2', '', titleText));
+    const x = make('button', 'spp-x', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Close');
+    head.appendChild(x);
+    const body = make('div', 'spp-body');
+    panel.append(head, body);
+    const onKey = (e) => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
+    const close = () => { overlay.remove(); document.removeEventListener('keydown', onKey, true); };
+    document.addEventListener('keydown', onKey, true);
+    x.addEventListener('click', close);
+    overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) close(); });
+    return { overlay, panel, body, close };
+  }
+
+  const SELECTS = {
+    pageSize: [['10', '10'], ['20', '20'], ['30', '30'], ['40', '40'], ['60', '60']],
+    accent: [['auto', 'Match the site'], ['purple', 'Purple'], ['blue', 'Blue'], ['teal', 'Teal'], ['green', 'Green'], ['orange', 'Orange'], ['red', 'Red'], ['pink', 'Pink']]
+  };
+  const SCHEMA = [
+    ['Cleanup', [
+      ['hideComments', 'Hide comments', 'Removes the comment section from game pages.'],
+      ['hideCounts', 'Hide comment counts', 'Removes the “7 comments” counters from posts, lists and below the game.'],
+      ['hideAds', 'Hide ad banners', 'Hides Google ads and common ad iframes.'],
+      ['hideSocial', 'Hide Discord & Reddit buttons', 'Removes the Discord and Reddit links and buttons from the menu and the page.'],
+      ['hideShare', 'Hide share buttons', 'Removes the social share buttons from game pages.'],
+      ['hideRelated', 'Hide related games', 'Removes the related games block under a game.'],
+      ['hideTopRanges', 'Hide Top Games time ranges', 'Removes the Today / Weekly / Monthly / All-time switcher from the Top Games page.']]],
+    ['Titles', [
+      ['cleanTitles', 'Clean titles', 'Strips “Free Download” and version numbers from game titles.', true]]],
+    ['Game page', [
+      ['mpRow', 'Multiplayer row', 'Adds a Multiplayer line to GAME INFO for games that have online or co-op.'],
+      ['jumpBtn', 'Jump-to-downloads button', 'Floating button that scrolls straight to the download links.'],
+      ['notes', 'Notes & status button', 'A pencil button on game pages. Mark a game Want to play, Playing, Finished or Dropped and keep a private note. Stays in your browser.']]],
+    ['Lists & browsing', [
+      ['mpBadge', 'Multiplayer badges', 'Shows a small MP tag on game cards in lists and on uploader pages.'],
+      ['mpOnlyLists', 'Only show multiplayer games in lists', 'Hides non-multiplayer game cards on listing pages.'],
+      ['statusBadge', 'Show my status on game cards', 'A small label on cards for games you marked Want to play, Playing, Finished or Dropped.'],
+      ['hideDone', 'Hide finished and dropped games', 'Removes games you marked Finished or Dropped from lists.'],
+      ['trackVisited', 'Dim games you already opened', 'Fades cards for games you have visited so new ones stand out.'],
+      ['hideVisited', 'Hide games you already opened', 'Removes visited games from lists completely.'],
+      ['infiniteScroll', 'Infinite scroll (beta)', 'Loads the next page of games automatically when you reach the bottom of a list.'],
+      ['newTab', 'Open games in a new tab', 'Game links in lists open in a new tab.', true]]],
+    ['Uploader pages', [
+      ['@pageSize', 'Games per page', 'How many games show before you press Load more.'],
+      ['mpOnlyDefault', 'Multiplayer only by default', 'Start uploader pages with the Multiplayer filter on.']]],
+    ['Layout & look', [
+      ['dock', 'Group the floating buttons', 'Puts search, favorites, notes, jump and back-to-top behind one button in the corner. Turn it off to show them all at once.'],
+      ['wideLayout', 'Wide layout', 'Hides the sidebar so game lists and pages use the full width.'],
+      ['@accent', 'Accent colour', 'Colour for SteamRip++ buttons, bars and badges.']]],
+    ['Quality of life', [
+      ['quickSearch', 'Quick search button', 'A search button in the corner that looks through every game instantly, with thumbnails and your recently viewed games.'],
+      ['lightbox', 'Screenshot viewer', 'Click a screenshot on a game page to see it full size. Arrow keys browse, Esc closes.'],
+      ['newSince', 'New games banner', 'On the homepage, tells you how many games were added since you last dismissed it.'],
+      ['keepHistory', 'Remember recently viewed games', 'Feeds the “Recently viewed” list in quick search. Stored only in your browser.'],
+      ['progressBar', 'Reading progress bar', 'A thin line at the top of the page showing how far you have scrolled.'],
+      ['polish', 'Visual polish', 'Smooth scrolling, themed scrollbar and text selection, clearer keyboard focus.'],
+      ['prefetch', 'Faster game pages', 'Starts loading a game page when you hover its link so it opens faster.'],
+      ['backToTop', 'Back-to-top button', 'Shows a button in the corner once you scroll down.'],
+      ['favBtn', 'Favorites (star button)', 'A star button on game pages to save games. Saved games show a star in lists and appear first in quick search.'],
+      ['shortcuts', 'Keyboard shortcuts', '/ or Ctrl+K opens search, F toggles favorite, N opens your notes, D jumps to downloads (on game pages), ? lists them all.'],
+      ['showCredit', 'Show credit footer', 'The “Made by Axiom” line at the bottom of every page.']]]
+  ];
+
+  function openSettings() {
+    if (document.getElementById('spp-modal')) return;
+    const m = makeModal('SteamRip++ Settings');
+    const { overlay, panel, body } = m;
+    const search = make('input', 'spp-search'); search.type = 'search'; search.placeholder = 'Search settings…';
+    body.appendChild(search);
+
+    const reload = make('div', 'spp-reload');
+    reload.appendChild(make('span', '', 'Reload the page to apply this change.'));
+    const rb = make('button', 'spp-btn pri', 'Reload'); rb.type = 'button';
+    rb.addEventListener('click', () => location.reload());
+    reload.appendChild(rb);
+
+    const wraps = [];
+    SCHEMA.forEach(([secTitle, rows]) => {
+      const wrap = make('div', 'spp-secwrap');
+      wrap.appendChild(make('div', 'spp-sec', secTitle));
+      rows.forEach(([key, label, desc, needsReload]) => {
+        const r = make('div', 'spp-row');
+        r.dataset.q = (label + ' ' + desc + ' ' + secTitle).toLowerCase();
+        const txt = make('div');
+        txt.appendChild(make('b', '', label));
+        txt.appendChild(make('small', '', desc));
+        let ctl;
+        if (key.charAt(0) === '@') {
+          const k = key.slice(1);
+          ctl = make('select');
+          SELECTS[k].forEach(([val, t]) => { const o = make('option', '', t); o.value = val; if (String(settings[k]) === val) o.selected = true; ctl.appendChild(o); });
+          ctl.addEventListener('change', () => {
+            settings[k] = typeof DEFAULTS[k] === 'number' ? parseInt(ctl.value, 10) : ctl.value;
+            saveSettings(); if (k === 'pageSize') reload.style.display = 'flex';
+            if (k === 'accent') sampleTheme();
+            refreshPage(); toast('Saved');
+          });
+        } else {
+          ctl = make('button', 'spp-sw'); ctl.type = 'button'; ctl.setAttribute('role', 'switch');
+          ctl.setAttribute('aria-label', label);
+          ctl.setAttribute('aria-checked', settings[key] ? 'true' : 'false');
+          ctl.addEventListener('click', () => {
+            settings[key] = !settings[key];
+            ctl.setAttribute('aria-checked', settings[key] ? 'true' : 'false');
+            saveSettings(); injectCss();
+            if (needsReload) reload.style.display = 'flex';
+            if (key === 'hideSocial' && !settings.hideSocial) qsa('.spp-social-hide').forEach((e) => e.classList.remove('spp-social-hide'));
+            if (key === 'hideCounts' && !settings.hideCounts) qsa('.spp-nocount').forEach((e) => e.classList.remove('spp-nocount'));
+            if (key === 'hideTopRanges' && !settings.hideTopRanges) qsa('.spp-hide').forEach((e) => { if (!e.closest('article, li.post-item, .post-element')) e.classList.remove('spp-hide'); });
+            refreshPage(); toast('Saved');
+          });
+        }
+        r.append(txt, ctl);
+        wrap.appendChild(r);
+      });
+      body.appendChild(wrap);
+      wraps.push(wrap);
+    });
+    const empty = make('div', 'spp-empty', 'No settings match your search.'); empty.style.display = 'none';
+    body.appendChild(empty);
+    search.addEventListener('input', () => {
+      const q = search.value.trim().toLowerCase(); let any = false;
+      wraps.forEach((w) => {
+        let vis = 0;
+        Array.from(w.querySelectorAll('.spp-row')).forEach((r) => { const ok = !q || r.dataset.q.indexOf(q) !== -1; r.style.display = ok ? '' : 'none'; if (ok) vis++; });
+        w.style.display = vis ? '' : 'none'; if (vis) any = true;
+      });
+      empty.style.display = any ? 'none' : 'block';
+    });
+
+    const dataWrap = make('div', 'spp-secwrap');
+    dataWrap.appendChild(make('div', 'spp-sec', 'Data & help'));
+    const info = make('small', '', mpCount() + ' multiplayer games built in.');
+    info.style.cssText = 'display:block;opacity:.65;margin:8px 0 0;';
+    dataWrap.appendChild(info);
+    const db = make('div', 'spp-btns');
+    const btn = (label, fn, cls) => { const b = make('button', 'spp-btn' + (cls ? ' ' + cls : ''), label); b.type = 'button'; b.addEventListener('click', fn); db.appendChild(b); return b; };
+    btn('Open favorites', () => { m.close(); openFavs(); });
+    btn('My games', () => { m.close(); openLibrary(); });
+    btn('Keyboard shortcuts', () => { m.close(); openKeys(); });
+    btn('Export favorites & notes', () => {
+      const txt = JSON.stringify({ favs: getFavs(), notes: getNotes() });
+      try { if (typeof GM_setClipboard === 'function') GM_setClipboard(txt); else navigator.clipboard.writeText(txt); toast('Copied'); } catch { prompt('Copy this:', txt); }
+    });
+    btn('Import favorites & notes', () => {
+      const raw = prompt('Paste what you exported:');
+      if (!raw) return;
+      const obj = parse(raw, null);
+      if (!obj || typeof obj !== 'object') { toast('Not valid data'); return; }
+      if (Array.isArray(obj.favs)) {
+        const have = favPaths();
+        setFavs(getFavs().concat(obj.favs.filter((x) => Array.isArray(x) && x[0] && !have.has(x[0]))));
+      }
+      if (obj.notes && typeof obj.notes === 'object') saveNotes(Object.assign({}, obj.notes, getNotes()));
+      toast('Imported'); decorateCards(); putFavButton(); putNoteButton();
+    });
+    btn('Clear uploader cache', () => { clearCaches(); toast('Uploader cache cleared'); });
+    btn('Clear visited history', () => { store.set('spp_visited', '[]'); store.set('spp_history', '[]'); visitedCache = null; qsa('.spp-visited').forEach((e) => e.classList.remove('spp-visited')); toast('History cleared'); });
+    btn('Export settings', () => {
+      const txt = JSON.stringify(settings);
+      try { if (typeof GM_setClipboard === 'function') GM_setClipboard(txt); else navigator.clipboard.writeText(txt); toast('Settings copied'); } catch { prompt('Copy your settings:', txt); }
+    });
+    btn('Import settings', () => {
+      const txt = prompt('Paste exported settings:');
+      if (!txt) return;
+      const obj = parse(txt, null);
+      if (!obj || typeof obj !== 'object') { toast('Not valid settings'); return; }
+      Object.keys(DEFAULTS).forEach((k) => { if (k in obj && typeof obj[k] === typeof DEFAULTS[k]) settings[k] = obj[k]; });
+      saveSettings(); location.reload();
+    });
+    btn('Reset settings', () => { Object.assign(settings, DEFAULTS); saveSettings(); location.reload(); });
+    btn('Copy debug report', () => debugReport());
+    dataWrap.appendChild(db);
+    body.appendChild(dataWrap);
+    body.appendChild(reload);
+    const tabs = make('div', 'spp-tabs');
+    const allWraps = wraps.concat([dataWrap]);
+    allWraps.forEach((w) => {
+      const label = (w.querySelector('.spp-sec') || {}).textContent || '';
+      const t = make('button', 'spp-pick', label); t.type = 'button';
+      t.addEventListener('click', () => w.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      tabs.appendChild(t);
+    });
+    body.insertBefore(tabs, wraps[0]);
+    const spy = () => {
+      let at = 0;
+      allWraps.forEach((w, i) => { if (w.style.display !== 'none' && w.getBoundingClientRect().top < 110) at = i; });
+      Array.from(tabs.children).forEach((t, i) => t.classList.toggle('on', i === at));
+    };
+    overlay.addEventListener('scroll', spy, { passive: true });
+    spy();
+    panel.appendChild(make('div', 'spp-foot', 'SteamRip++ v' + VERSION));
+    document.body.appendChild(overlay);
+    search.focus();
+  }
+  if (typeof GM_registerMenuCommand === 'function') GM_registerMenuCommand('SteamRip++: settings', openSettings);
+
+  const getVisited = () => visitedCache || (visitedCache = new Set(parse(store.get('spp_visited', '[]'), [])));
+  const isGamePath = (p) => /^\/[^\/]+\/?$/.test(p) && !/^\/(page|category|tag|author|top-games|wp-|feed)/.test(p);
+
+  function trackVisit() {
+    if (!(settings.trackVisited || settings.hideVisited) || profileActive || !isGamePath(location.pathname) || !document.querySelector('.entry-content')) return;
+    const p = location.pathname.replace(/\/$/, '');
+    const v = getVisited();
+    if (v.has(p)) return;
+    v.add(p);
+    store.set('spp_visited', JSON.stringify(Array.from(v).slice(-4000)));
+  }
+
+  const CARD_LINK = 'h2.post-title a, h3.post-title a, .post-title a';
+  const CARD_SEL = 'article, li.post-item, .post-element';
+  function decorateCards() {
+    if (profileActive) return;
+    const visited = (settings.trackVisited || settings.hideVisited) ? getVisited() : null;
+    const haveMP = mpCount() > 0;
+    const favs = favPaths();
+    const notes = getNotes();
+    qsa(CARD_LINK).forEach((a) => {
+      if (a.closest('#spp-modal, #spp-profile')) return;
+      let path; try { path = new URL(a.href).pathname.replace(/\/$/, ''); } catch { return; }
+      const card = a.closest(CARD_SEL);
+      const seen = !!(visited && visited.has(path));
+      if (card) card.classList.toggle('spp-visited', !!(settings.trackVisited && seen));
+      const mp = haveMP ? lookupMP(a.textContent, a.href) : null;
+      const par = a.parentElement;
+      const badge = par ? par.querySelector(':scope > .spp-mp-badge') : null;
+      if (mp && settings.mpBadge) {
+        if (!badge) { const b = make('span', 'spp-mp-badge', 'MP'); b.title = mpText(mp); a.after(b); }
+      } else if (badge) badge.remove();
+      const star = par ? par.querySelector(':scope > .spp-fav-badge') : null;
+      if (settings.favBtn && favs.has(path)) { if (!star) a.after(make('span', 'spp-fav-badge', '★')); } else if (star) star.remove();
+      const mine = notes[path] && notes[path].s;
+      const tag = par ? par.querySelector(':scope > .spp-status-badge') : null;
+      if (mine && settings.statusBadge) {
+        if (!tag) a.after(make('span', 'spp-status-badge', STATUS[mine]));
+        else if (tag.textContent !== STATUS[mine]) tag.textContent = STATUS[mine];
+      } else if (tag) tag.remove();
+      const done = settings.hideDone && (mine === 'done' || mine === 'dropped');
+      if (card) card.classList.toggle('spp-hide', !!((settings.mpOnlyLists && haveMP && !mp) || (settings.hideVisited && seen) || done));
+      if (settings.newTab && isGamePath(path + '/')) { a.target = '_blank'; a.rel = 'noopener'; }
+    });
+  }
+
+  let topBtnBound = false;
+  function putTopButton() {
+    let b = document.getElementById('spp-top-btn');
+    if (!settings.backToTop) { if (b) b.remove(); return; }
+    if (!b) {
+      sampleTheme();
+      b = make('button'); b.id = 'spp-top-btn'; b.type = 'button'; b.title = 'Back to top'; b.setAttribute('aria-label', 'Back to top');
+      b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7.4l7 7-1.8 1.8L12 11l-5.2 5.2L5 14.4z"/></svg>';
+      b.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+      document.body.appendChild(b);
+    }
+    if (!topBtnBound) {
+      topBtnBound = true;
+      window.addEventListener('scroll', () => {
+        const t = document.getElementById('spp-top-btn');
+        if (t) t.classList.toggle('spp-show', window.scrollY > 700);
+      }, { passive: true });
+    }
+  }
+
+  const onGamePage = () => !profileActive && isGamePath(location.pathname) && !!document.querySelector('.entry-content');
+
+  function jumpToDownloads() {
+    const list = dlLinks();
+    let t = list.length ? list[0].a : null;
+    if (!t) t = qsa('.entry-content h1, .entry-content h2, .entry-content h3, .entry-content h4, .entry-content p, .entry-content strong').find((h) => /download/i.test(h.textContent) && h.textContent.length < 60);
+    if (!t) { toast('No download section found'); return; }
+    t.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    t.classList.add('spp-flash'); setTimeout(() => t.classList.remove('spp-flash'), 1800);
+  }
+
+  function putJumpButton() {
+    let b = document.getElementById('spp-jump-btn');
+    if (!settings.jumpBtn || !onGamePage()) { if (b) b.remove(); return; }
+    if (b) return;
+    sampleTheme();
+    b = make('button'); b.id = 'spp-jump-btn'; b.type = 'button'; b.title = 'Jump to downloads'; b.setAttribute('aria-label', 'Jump to downloads');
+    b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16.6l-7-7 1.8-1.8L12 13l5.2-5.2L19 9.6z"/></svg>';
+    b.addEventListener('click', jumpToDownloads);
+    document.body.appendChild(b);
+  }
+
+  // infinite scroll (listing pages)
+  let infBusy = false; let infDone = false; let infNext = null; let infBound = false;
+  const NEXT_SEL = 'link[rel="next"], a.next.page-numbers, .pagination a.next, #tie-next-page a, a[rel="next"]';
+  function relHref(sel, doc) {
+    const n = (doc || document).querySelector(sel);
+    const h = n && (n.href || n.getAttribute('href'));
+    try { return h ? new URL(h, location.href).href : ''; } catch { return ''; }
+  }
+  function listingPage() {
+    return !profileActive && !document.querySelector('.entry-content') && !/^\/top-games/i.test(location.pathname) && qsa(CARD_LINK).filter((a) => !a.closest('#spp-modal, #spp-profile')).length >= 4;
+  }
+  async function loadNextPage() {
+    if (infBusy || infDone || !settings.infiniteScroll || !listingPage()) return;
+    const first = qsa(CARD_LINK).filter((a) => !a.closest('#spp-modal, #spp-profile'))[0];
+    const card0 = first && first.closest(CARD_SEL);
+    if (!card0 || !card0.parentElement) { infDone = true; return; }
+    const container = card0.parentElement;
+    if (infNext === null) infNext = relHref(NEXT_SEL);
+    if (!infNext) { infDone = true; return; }
+    infBusy = true;
+    try {
+      const r = await fetch(infNext, { credentials: 'same-origin' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+      const cards = [];
+      doc.querySelectorAll(CARD_LINK).forEach((a) => { const c = a.closest(CARD_SEL); if (c && cards.indexOf(c) < 0) cards.push(c); });
+      if (!cards.length) infDone = true;
+      const have = new Set(qsa(CARD_LINK).map((a) => a.href));
+      cards.forEach((c) => {
+        const a = c.querySelector(CARD_LINK);
+        if (a && have.has(a.href)) return;
+        const n = document.importNode(c, true);
+        n.querySelectorAll('img').forEach((i) => {
+          const s = i.getAttribute('data-src') || i.getAttribute('data-lazy-src'); if (s) i.src = s;
+          const ss = i.getAttribute('data-srcset'); if (ss) i.srcset = ss;
+          i.loading = 'lazy';
+        });
+        container.appendChild(n);
+      });
+      infNext = relHref(NEXT_SEL, doc);
+      if (!infNext) infDone = true;
+    } catch { infDone = true; } finally { infBusy = false; }
+    setTimeout(checkInfinite, 400);
+  }
+  function checkInfinite() {
+    if (settings.infiniteScroll && !infBusy && !infDone && window.innerHeight + window.scrollY > document.documentElement.scrollHeight - 900) loadNextPage();
+  }
+  function watchInfinite() {
+    if (!settings.infiniteScroll || infBound) return;
+    infBound = true;
+    window.addEventListener('scroll', checkInfinite, { passive: true });
+  }
+
+  const HIST_KEY = 'spp_history';
+  const getHist = () => parse(store.get(HIST_KEY, '[]'), []);
+  let histPath = '';
+  function trackHistory() {
+    if (!settings.keepHistory || !onGamePage()) return;
+    const path = location.pathname.replace(/\/$/, '');
+    if (histPath === path) return;
+    const t = cleanTitle(gameTitleOnPage());
+    if (!t) return;
+    histPath = path;
+    const h = getHist().filter((x) => x[0] !== path);
+    h.unshift([path, t, Date.now()]);
+    store.set(HIST_KEY, JSON.stringify(h.slice(0, 60)));
+  }
+
+  function putSearchButton() {
+    let b = document.getElementById('spp-search-btn');
+    if (!settings.quickSearch) { if (b) b.remove(); return; }
+    if (b) return;
+    sampleTheme();
+    b = make('button'); b.id = 'spp-search-btn'; b.type = 'button';
+    b.title = 'Search all games'; b.setAttribute('aria-label', 'Search all games');
+    b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>';
+    b.addEventListener('click', openPalette);
+    document.body.appendChild(b);
+  }
+
+  function openPalette() {
+    if (document.getElementById('spp-palette')) return;
+    sampleTheme(); injectCss();
+    const ov = make('div'); ov.id = 'spp-palette';
+    const box = make('div', 'spp-pal');
+    const input = make('input', 'spp-pal-in'); input.type = 'text'; input.placeholder = 'Search all games…';
+    input.setAttribute('autocomplete', 'off'); input.setAttribute('spellcheck', 'false');
+    const list = make('div', 'spp-pal-list');
+    const hint = make('div', 'spp-pal-hint', '↑ ↓ to move · Enter to open · Ctrl+Enter new tab · Esc to close');
+    const top = make('div', 'spp-pal-top');
+    const mpWrap = make('label', 'spp-pal-mp');
+    const mpBox = make('input'); mpBox.type = 'checkbox';
+    mpWrap.append(mpBox, document.createTextNode('MP only'));
+    mpBox.addEventListener('change', () => { input.dispatchEvent(new Event('input')); input.focus(); });
+    top.append(input, mpWrap);
+    box.append(top, list, hint); ov.appendChild(box);
+    let rows = []; let sel = 0; let timer = null; let seq = 0;
+    const close = () => { clearTimeout(timer); ov.remove(); document.removeEventListener('keydown', onKey, true); };
+    const mark = () => {
+      const nodes = list.querySelectorAll('.spp-pal-item');
+      nodes.forEach((n, k) => n.classList.toggle('on', k === sel));
+      if (nodes[sel] && nodes[sel].scrollIntoView) nodes[sel].scrollIntoView({ block: 'nearest' });
+    };
+    function draw(items, heading, emptyMsg) {
+      rows = items; sel = 0; list.replaceChildren();
+      if (!items.length) { list.appendChild(make('div', 'spp-pal-empty', emptyMsg || 'Nothing found.')); return; }
+      if (heading) list.appendChild(make('div', 'spp-pal-head', heading));
+      let group = null;
+      items.forEach((g, k) => {
+        if (g._group && g._group !== group) { group = g._group; list.appendChild(make('div', 'spp-pal-head', group)); }
+        const a = make('a', 'spp-pal-item'); a.href = g.link;
+        if (g.img) { const im = make('img'); im.loading = 'lazy'; im.src = g.img; im.alt = ''; a.appendChild(im); }
+        a.appendChild(make('span', 't', cleanTitle(g.title)));
+        const mp = lookupMP(g.title, g.link);
+        if (mp) { const b = make('span', 'spp-mp-badge', 'MP'); b.title = mpText(mp); a.appendChild(b); }
+        const w = g.date ? ago(g.date) : '';
+        if (w) a.appendChild(make('small', '', w));
+        a.addEventListener('mouseenter', () => { sel = k; mark(); });
+        list.appendChild(a);
+      });
+      mark();
+    }
+    const showHistory = () => {
+      const keep = (g) => !mpBox.checked || lookupMP(g.title, g.link);
+      const favs = getFavs().map((x) => ({ title: x[1], link: x[0] + '/', date: x[2], _group: '★ Favorites' })).filter(keep);
+      const fp = new Set(favs.map((g) => g.link));
+      const h = getHist().map((x) => ({ title: x[1], link: x[0] + '/', date: x[2], _group: 'Recently viewed' })).filter((g) => keep(g) && !fp.has(g.link));
+      draw(favs.concat(h), '', 'Type to search every game.');
+    };
+    async function run(q) {
+      const my = ++seq;
+      list.replaceChildren(make('div', 'spp-pal-empty', 'Searching…'));
+      try {
+        const r = await getJSON('/wp-json/wp/v2/posts?search=' + encodeURIComponent(q) + '&per_page=' + (mpBox.checked ? 40 : 10) + '&_fields=id,date,link,title,_links,_embedded&_embed=wp:featuredmedia');
+        if (my !== seq) return;
+        let found = r.data.map(normRestPost);
+        if (mpBox.checked) found = found.filter((g) => lookupMP(g.title, g.link));
+        draw(found.slice(0, 12), 'Games', 'No games found. Press Enter to use the site search.');
+      } catch { if (my === seq) draw([], '', 'Search is unavailable here. Press Enter to use the site search.'); }
+    }
+    input.addEventListener('input', () => {
+      clearTimeout(timer);
+      const q = input.value.trim();
+      if (q.length < 2) { seq++; showHistory(); return; }
+      timer = setTimeout(() => run(q), 220);
+    });
+    const onKey = (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); if (rows.length) { sel = (sel + 1) % rows.length; mark(); } }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); if (rows.length) { sel = (sel - 1 + rows.length) % rows.length; mark(); } }
+      else if (e.key === 'Enter') {
+        e.preventDefault();
+        const q = input.value.trim(); const g = rows[sel];
+        const url = g ? g.link : (q ? ORIGIN + '/?s=' + encodeURIComponent(q) : '');
+        if (!url) return;
+        if (e.ctrlKey || e.metaKey) window.open(url, '_blank', 'noopener'); else location.assign(url);
+      }
+    };
+    ov.addEventListener('mousedown', (e) => { if (e.target === ov) close(); });
+    document.addEventListener('keydown', onKey, true);
+    document.body.appendChild(ov);
+    showHistory();
+    input.focus();
+  }
+  if (typeof GM_registerMenuCommand === 'function') GM_registerMenuCommand('SteamRip++: quick search', openPalette);
+
+  const IMG_HREF = /\.(?:jpe?g|png|webp|gif|avif)(?:[?#].*)?$/i;
+  function lbEligible(img) {
+    const a = img.closest('a[href]');
+    if (a && !IMG_HREF.test(a.getAttribute('href') || '')) return false;
+    return (img.naturalWidth || 0) >= 200 || (img.width || 0) >= 200;
+  }
+  function lbSource(img) {
+    const a = img.closest('a[href]');
+    try { if (a && IMG_HREF.test(a.getAttribute('href') || '')) return new URL(a.getAttribute('href'), location.href).href; } catch {}
+    let src = img.currentSrc || img.src || '';
+    if (/^data:/.test(src)) src = img.getAttribute('data-src') || img.getAttribute('data-lazy-src') || '';
+    return src;
+  }
+  function openLightbox(urls, start) {
+    if (document.getElementById('spp-lightbox')) return;
+    sampleTheme(); injectCss();
+    let i = start;
+    const ov = make('div'); ov.id = 'spp-lightbox';
+    const im = make('img'); const cnt = make('div', 'spp-lb-count');
+    const prev = make('button', 'spp-lb-nav prev', '‹'); const next = make('button', 'spp-lb-nav next', '›'); const x = make('button', 'spp-lb-x', '×');
+    [prev, next, x].forEach((b) => { b.type = 'button'; });
+    ov.append(im, prev, next, x, cnt);
+    const show = (n) => {
+      i = (n + urls.length) % urls.length; im.src = urls[i]; cnt.textContent = (i + 1) + ' / ' + urls.length;
+      prev.style.display = urls.length > 1 ? '' : 'none'; next.style.display = urls.length > 1 ? '' : 'none';
+    };
+    const close = () => { ov.remove(); document.removeEventListener('keydown', onKey, true); };
+    const onKey = (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); show(i + 1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); show(i - 1); }
+    };
+    prev.addEventListener('click', (e) => { e.stopPropagation(); show(i - 1); });
+    next.addEventListener('click', (e) => { e.stopPropagation(); show(i + 1); });
+    x.addEventListener('click', close);
+    im.addEventListener('click', (e) => { e.stopPropagation(); show(i + 1); });
+    ov.addEventListener('click', (e) => { if (e.target === ov) close(); });
+    document.addEventListener('keydown', onKey, true);
+    show(i);
+    document.body.appendChild(ov);
+  }
+  let lbBound = false;
+  function watchLightbox() {
+    if (lbBound) return;
+    lbBound = true;
+    document.addEventListener('click', (e) => {
+      if (!settings.lightbox || e.defaultPrevented || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+      const img = e.target && e.target.closest ? e.target.closest('.entry-content img') : null;
+      if (!img || !lbEligible(img)) return;
+      const urls = []; let start = 0;
+      qsa('.entry-content img').filter(lbEligible).forEach((m) => {
+        const u = lbSource(m); if (!u) return;
+        if (urls.indexOf(u) === -1) urls.push(u);
+        if (m === img) start = urls.indexOf(u);
+      });
+      if (!urls.length) return;
+      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+      openLightbox(urls, start);
+    }, true);
+  }
+
+  let newChecked = false;
+  function openNewList(n, posts) {
+    if (document.getElementById('spp-modal')) return;
+    const m = makeModal(n + ' new game' + (n === 1 ? '' : 's'));
+    posts.forEach((g) => {
+      const row = make('div', 'spp-row');
+      const a = make('a', '', cleanTitle(g.title)); a.href = g.link;
+      a.style.cssText = 'color:inherit;font-weight:600;text-decoration:none;flex:1;';
+      const mp = lookupMP(g.title, g.link);
+      if (mp) { const b = make('span', 'spp-mp-badge', 'MP'); b.title = mpText(mp); a.appendChild(b); }
+      row.append(a, make('small', '', ago(g.date)));
+      m.body.appendChild(row);
+    });
+    if (n > posts.length) m.body.appendChild(make('div', 'spp-empty', '…and ' + (n - posts.length) + ' more on the homepage.'));
+    document.body.appendChild(m.overlay);
+  }
+  async function checkNew() {
+    if (newChecked || !settings.newSince || profileActive || location.pathname !== '/' || location.hash) return;
+    newChecked = true;
+    const seen = String(store.get('spp_seen', '') || '');
+    if (!seen) { store.set('spp_seen', new Date().toISOString()); return; }
+    try {
+      const r = await getJSON('/wp-json/wp/v2/posts?after=' + encodeURIComponent(seen) + '&per_page=30&orderby=date&order=desc&_fields=id,date,link,title,_links,_embedded&_embed=wp:featuredmedia');
+      const n = r.total || r.data.length;
+      if (!n || document.getElementById('spp-newbar')) return;
+      sampleTheme();
+      const posts = r.data.map(normRestPost);
+      const bar = make('div'); bar.id = 'spp-newbar';
+      const dismiss = () => { store.set('spp_seen', new Date().toISOString()); bar.remove(); };
+      const view = make('button', 'pri', 'View'); view.type = 'button';
+      view.addEventListener('click', () => { openNewList(n, posts); dismiss(); });
+      const x = make('button', 'x', '×'); x.type = 'button'; x.title = 'Dismiss'; x.addEventListener('click', dismiss);
+      bar.append(make('span', '', '✨ ' + n + ' new game' + (n === 1 ? '' : 's') + ' since you last checked'), view, x);
+      document.body.appendChild(bar);
+    } catch {}
+  }
+
+
+
+  function putCredit() {
+    const c = document.getElementById('spp-credit');
+    if (!settings.showCredit) { if (c) c.remove(); return; }
+    if (c && c.isConnected) return;
+    sampleTheme();
+    const d = make('div'); d.id = 'spp-credit';
+    d.innerHTML = 'Made by <a href="https://discord.com/users/1338747411065208882" target="_blank" rel="noopener noreferrer" title="Message Axiom on Discord">Axiom</a> · Made with love <span class="spp-heart">♥</span>';
+    document.body.appendChild(d);
+  }
+
+  let progressBound = false;
+  function putProgress() {
+    let b = document.getElementById('spp-progress');
+    if (!settings.progressBar) { if (b) b.remove(); return; }
+    if (!b) { sampleTheme(); b = make('div'); b.id = 'spp-progress'; document.body.appendChild(b); }
+    if (!progressBound) {
+      progressBound = true;
+      const upd = () => {
+        const bar = document.getElementById('spp-progress'); if (!bar) return;
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        bar.style.width = (max > 0 ? Math.min(100, (window.scrollY / max) * 100) : 0) + '%';
+      };
+      window.addEventListener('scroll', upd, { passive: true });
+      window.addEventListener('resize', upd, { passive: true });
+      upd();
+    }
+  }
+
+  const prefetched = new Set();
+  document.addEventListener('mouseover', (e) => {
+    if (!settings.prefetch || prefetched.size > 40) return;
+    const a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+    if (!a) return;
+    let u; try { u = new URL(a.href, location.href); } catch { return; }
+    if (u.origin !== ORIGIN || !isGamePath(u.pathname) || prefetched.has(u.pathname)) return;
+    prefetched.add(u.pathname);
+    const l = document.createElement('link'); l.rel = 'prefetch'; l.href = u.href;
+    (document.head || document.documentElement).appendChild(l);
+  }, { passive: true });
+
+
+
+  // favorites
+  const FAV_KEY = 'spp_favs';
+  const getFavs = () => parse(store.get(FAV_KEY, '[]'), []);
+  const pathOf = (u) => { try { return new URL(u, ORIGIN).pathname.replace(/\/$/, ''); } catch { return ''; } };
+  const favPaths = () => new Set(getFavs().map((x) => x[0]));
+  function setFavs(list) { store.set(FAV_KEY, JSON.stringify(list.slice(0, 500))); }
+  function toggleFav() {
+    if (!onGamePage()) return;
+    const path = location.pathname.replace(/\/$/, '');
+    const f = getFavs(); const i = f.findIndex((x) => x[0] === path);
+    if (i >= 0) { f.splice(i, 1); toast('Removed from favorites'); }
+    else { f.unshift([path, cleanTitle(gameTitleOnPage()), Date.now()]); toast('Added to favorites ★'); }
+    setFavs(f); putFavButton();
+  }
+  function putFavButton() {
+    let b = document.getElementById('spp-fav-btn');
+    if (!settings.favBtn || !onGamePage()) { if (b) b.remove(); return; }
+    if (!b) {
+      sampleTheme();
+      b = make('button'); b.id = 'spp-fav-btn'; b.type = 'button';
+      b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17.3l-5.4 3.2 1.4-6.1L3.3 10l6.2-.5L12 3.7l2.5 5.8 6.2.5-4.7 4.4 1.4 6.1z"/></svg>';
+      b.addEventListener('click', toggleFav);
+      document.body.appendChild(b);
+    }
+    const on = favPaths().has(location.pathname.replace(/\/$/, ''));
+    b.classList.toggle('on', on);
+    b.title = on ? 'Remove from favorites (F)' : 'Add to favorites (F)';
+    b.setAttribute('aria-label', b.title);
+  }
+  function openFavs() {
+    if (document.getElementById('spp-modal')) return;
+    const m = makeModal('Favorites');
+    const draw = () => {
+      m.body.replaceChildren();
+      const f = getFavs();
+      if (!f.length) { m.body.appendChild(make('div', 'spp-empty', 'No favorites yet. Press the star on a game page, or F.')); return; }
+      f.forEach((x, i) => {
+        const row = make('div', 'spp-row');
+        const a = make('a', '', x[1]); a.href = x[0] + '/';
+        a.style.cssText = 'color:inherit;font-weight:600;text-decoration:none;flex:1;';
+        const mp = lookupMP(x[1], x[0]);
+        if (mp) { const bd = make('span', 'spp-mp-badge', 'MP'); bd.title = mpText(mp); a.appendChild(bd); }
+        const rm = make('button', 'spp-x', '×'); rm.type = 'button'; rm.title = 'Remove';
+        rm.addEventListener('click', () => { const l = getFavs(); l.splice(i, 1); setFavs(l); draw(); putFavButton(); });
+        row.append(a, rm);
+        m.body.appendChild(row);
+      });
+    };
+    draw();
+    document.body.appendChild(m.overlay);
+  }
+  if (typeof GM_registerMenuCommand === 'function') GM_registerMenuCommand('SteamRip++: favorites', openFavs);
+
+
+  // floating buttons -> one dock
+  const DOCK_LABELS = { 'spp-top-btn': 'Top', 'spp-jump-btn': 'Downloads', 'spp-search-btn': 'Search', 'spp-fav-btn': 'Favorite', 'spp-note-btn': 'Notes' };
+  let dockBound = false;
+  function setDock(open) {
+    document.documentElement.classList.toggle('spp-open', !!open);
+    const h = document.getElementById('spp-dock-btn');
+    if (h) h.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  function putDock() {
+    const root = document.documentElement;
+    let h = document.getElementById('spp-dock-btn');
+    if (!settings.dock) { if (h) h.remove(); root.classList.remove('spp-dock', 'spp-open'); return; }
+    root.classList.add('spp-dock');
+    if (!h) {
+      sampleTheme();
+      h = make('button'); h.id = 'spp-dock-btn'; h.type = 'button'; h.title = 'Tools'; h.setAttribute('aria-label', 'Tools'); h.setAttribute('aria-expanded', 'false');
+      h.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>';
+      h.addEventListener('click', () => setDock(!root.classList.contains('spp-open')));
+      document.body.appendChild(h);
+    }
+    if (!dockBound) {
+      dockBound = true;
+      document.addEventListener('click', (e) => {
+        if (root.classList.contains('spp-open') && !e.target.closest('#spp-dock-btn, #spp-top-btn, #spp-jump-btn, #spp-search-btn, #spp-fav-btn, #spp-note-btn')) setDock(false);
+      });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && root.classList.contains('spp-open') && !document.getElementById('spp-modal')) setDock(false); });
+    }
+    Object.keys(DOCK_LABELS).forEach((id) => { const b = document.getElementById(id); if (b) b.dataset.label = DOCK_LABELS[id]; });
+  }
+
+  function openKeys() {
+    if (document.getElementById('spp-modal')) return;
+    const m = makeModal('Keyboard shortcuts');
+    [
+      [['/', 'Ctrl K'], 'Search all games'],
+      [['F'], 'Add or remove favorite (game page)'],
+      [['N'], 'Notes & status (game page)'],
+      [['D'], 'Jump to the download links (game page)'],
+      [['?'], 'This list'],
+      [['Esc'], 'Close whatever is open']
+    ].forEach(([keys, label]) => {
+      const row = make('div', 'spp-row');
+      row.appendChild(make('span', '', label));
+      const k = make('span');
+      keys.forEach((x, i) => { if (i) k.appendChild(document.createTextNode(' or ')); k.appendChild(make('kbd', '', x)); });
+      row.appendChild(k);
+      m.body.appendChild(row);
+    });
+    document.body.appendChild(m.overlay);
+  }
+
+  // status + notes
+  const NOTES_KEY = 'spp_notes';
+  const STATUS = { want: 'Want to play', playing: 'Playing', done: 'Finished', dropped: 'Dropped' };
+  const getNotes = () => parse(store.get(NOTES_KEY, '{}'), {});
+  const saveNotes = (o) => store.set(NOTES_KEY, JSON.stringify(o));
+  const hereKey = () => location.pathname.replace(/\/$/, '');
+
+  function putNoteButton() {
+    let b = document.getElementById('spp-note-btn');
+    if (!settings.notes || !onGamePage()) { if (b) b.remove(); return; }
+    if (!b) {
+      sampleTheme();
+      b = make('button'); b.id = 'spp-note-btn'; b.type = 'button';
+      b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25zM20.7 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
+      b.addEventListener('click', openNote);
+      document.body.appendChild(b);
+    }
+    const mine = getNotes()[hereKey()];
+    b.classList.toggle('on', !!mine);
+    b.title = mine && mine.s ? 'Notes: ' + STATUS[mine.s] + ' (N)' : 'Notes & status (N)';
+    b.setAttribute('aria-label', b.title);
+  }
+
+  function openNote() {
+    if (!onGamePage() || document.getElementById('spp-modal')) return;
+    const key = hereKey();
+    const title = cleanTitle(gameTitleOnPage());
+    const old = getNotes()[key] || {};
+    let status = old.s || '';
+    const m = makeModal('Notes');
+    m.body.appendChild(make('div', 'spp-sec', title));
+    const chips = make('div', 'spp-chips');
+    const keys = Object.keys(STATUS);
+    keys.forEach((k) => {
+      const c = make('button', 'spp-pick' + (k === status ? ' on' : ''), STATUS[k]);
+      c.type = 'button';
+      c.addEventListener('click', () => {
+        status = status === k ? '' : k;
+        Array.from(chips.children).forEach((x, i) => x.classList.toggle('on', keys[i] === status));
+      });
+      chips.appendChild(c);
+    });
+    const ta = make('textarea', 'spp-note');
+    ta.value = old.n || ''; ta.maxLength = 2000;
+    ta.placeholder = 'Anything worth remembering: settings, co-op steps, which part you got stuck on…';
+    const save = () => {
+      const all = getNotes();
+      const text = ta.value.trim();
+      if (!status && !text) delete all[key];
+      else all[key] = { t: title, s: status, n: text, d: Date.now() };
+      saveNotes(all);
+      m.close(); putNoteButton(); decorateCards(); toast('Saved');
+    };
+    ta.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) save(); });
+    const row = make('div', 'spp-btns');
+    const mk = (label, fn, cls) => { const b = make('button', 'spp-btn' + (cls ? ' ' + cls : ''), label); b.type = 'button'; b.addEventListener('click', fn); row.appendChild(b); };
+    mk('Save', save, 'pri');
+    mk('All my games', () => { m.close(); openLibrary(); });
+    m.body.append(chips, ta, row);
+    document.body.appendChild(m.overlay);
+    ta.focus();
+  }
+
+  function openLibrary() {
+    if (document.getElementById('spp-modal')) return;
+    const m = makeModal('My games');
+    const bar = make('div', 'spp-chips');
+    const list = make('div');
+    m.body.append(bar, list);
+    let filter = '';
+    const draw = () => {
+      const notes = getNotes();
+      const rows = Object.keys(notes).map((p) => Object.assign({ p }, notes[p])).sort((a, b) => (b.d || 0) - (a.d || 0));
+      bar.replaceChildren();
+      [['', 'All']].concat(Object.entries(STATUS)).forEach(([k, label]) => {
+        const n = k ? rows.filter((r) => r.s === k).length : rows.length;
+        const c = make('button', 'spp-pick' + (k === filter ? ' on' : ''), label + ' ' + n);
+        c.type = 'button';
+        c.addEventListener('click', () => { filter = k; draw(); });
+        bar.appendChild(c);
+      });
+      list.replaceChildren();
+      const shown = rows.filter((r) => !filter || r.s === filter);
+      if (!shown.length) {
+        list.appendChild(make('div', 'spp-empty', rows.length ? 'Nothing with that status.' : 'Nothing here yet. Press N on a game page to add a status or a note.'));
+        return;
+      }
+      shown.forEach((r) => {
+        const row = make('div', 'spp-row');
+        const box = make('div'); box.style.cssText = 'flex:1;min-width:0;';
+        const a = make('a', '', r.t || r.p); a.href = r.p + '/';
+        a.style.cssText = 'color:inherit;font-weight:600;text-decoration:none;';
+        box.appendChild(a);
+        const bits = [r.s ? STATUS[r.s] : '', (r.n || '').replace(/\s+/g, ' ').slice(0, 90)].filter(Boolean).join(' · ');
+        if (bits) box.appendChild(make('small', '', bits));
+        const rm = make('button', 'spp-x', '×'); rm.type = 'button'; rm.title = 'Remove';
+        rm.addEventListener('click', () => { const all = getNotes(); delete all[r.p]; saveNotes(all); draw(); decorateCards(); putNoteButton(); });
+        row.append(box, rm);
+        list.appendChild(row);
+      });
+    };
+    draw();
+    document.body.appendChild(m.overlay);
+  }
+  if (typeof GM_registerMenuCommand === 'function') GM_registerMenuCommand('SteamRip++: my games', openLibrary);
+
+  // shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (!settings.shortcuts || e.defaultPrevented) return;
+    const t = e.target;
+    if (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
+    if (document.getElementById('spp-modal') || document.getElementById('spp-palette') || document.getElementById('spp-lightbox')) return;
+    const mod = e.ctrlKey || e.metaKey; const k = e.key.toLowerCase();
+    if (e.key === '?' && !mod) { e.preventDefault(); openKeys(); return; }
+    if (settings.quickSearch && ((e.key === '/' && !mod && !e.altKey) || (mod && k === 'k'))) { e.preventDefault(); openPalette(); }
+    else if (!mod && !e.altKey && !e.shiftKey && k === 'f' && settings.favBtn && onGamePage()) { e.preventDefault(); toggleFav(); }
+    else if (!mod && !e.altKey && !e.shiftKey && k === 'n' && settings.notes && onGamePage()) { e.preventDefault(); openNote(); }
+    else if (!mod && !e.altKey && !e.shiftKey && k === 'd' && settings.jumpBtn && onGamePage()) { e.preventDefault(); jumpToDownloads(); }
+  });
+
+  function dlLinks() {
+    return qsa('.entry-content a[href]').filter((a) => /buzz|bzzhr|fuckingfast|pixeldrain|mediafire|megadb|datanodes?|viking|qiwi|gofile|1fichier/i.test(a.href + ' ' + a.textContent)).map((a) => ({ a }));
+  }
+
+  async function debugReport() {
+    const out = [];
+    out.push('SteamRip++ v' + VERSION + ' | URL: ' + location.href);
+    out.push('settings: ' + JSON.stringify(settings));
+    const probeUrl = async (label, url, opts) => {
+      try {
+        const r = await fetch(url, Object.assign({ credentials: 'same-origin' }, opts || {}));
+        const txt = (await r.text()).slice(0, 120).replace(/\s+/g, ' ');
+        out.push(label + ': ' + r.status + (r.redirected ? ' redirected->' + r.url : '') + ' | ' + txt);
+      } catch (e) { out.push(label + ': ERROR ' + e.message); }
+    };
+    const t = gameTitleOnPage();
+    const ml = lookupMP(t, location.href);
+    out.push('page title: ' + t + ' | key: ' + mpKey(t) + ' | mp list size: ' + mpCount() + ' | mp match: ' + (ml ? JSON.stringify(ml) : 'none'));
+    const il = findInfoList();
+    out.push('game info list: ' + (il ? il.tagName + '.' + il.className + ' items=' + il.children.length + ' html: ' + il.outerHTML.slice(0, 900).replace(/\s+/g, ' ') : 'NOT FOUND'));
+    out.push('download links: ' + qsa('.entry-content a[href]').map((a) => a.textContent.trim().slice(0, 24) + '=' + a.getAttribute('href')).filter((x) => !/steamrip\.com/i.test(x)).slice(0, 24).join(' | '));
+    out.push('comment-ish nodes: ' + qsa('a[href*="#comment"], a[href*="#respond"], .meta-comment, .comments-link').slice(0, 4).map((e) => e.outerHTML.slice(0, 200).replace(/\s+/g, ' ')).join(' || '));
+    const comp = qsa('ul.components')[0];
+    out.push('header components: ' + (comp ? comp.outerHTML.slice(0, 700).replace(/\s+/g, ' ') : 'none'));
+    await probeUrl('users', '/wp-json/wp/v2/users?per_page=2&_fields=id,name,slug');
+    await probeUrl('posts', '/wp-json/wp/v2/posts?per_page=1&_fields=id,author,link');
+    await probeUrl('rest index', '/wp-json/');
+    out.push('rest root link: ' + restRoot());
+    await probeUrl('sitemap_index', '/sitemap_index.xml');
+    await probeUrl('wp-sitemap', '/wp-sitemap.xml');
+    await probeUrl('sitemap', '/sitemap.xml');
+    out.push('menu links: ' + qsa('nav a, #main-nav a').map((a) => a.textContent.trim() + '=' + a.getAttribute('href')).slice(0, 25).join(' | '));
+    out.push('post cards sample: ' + (qsa('h2.post-title, h3.post-title')[0] ? (qsa('h2.post-title, h3.post-title')[0].closest('article, li, div') || document.body).outerHTML.slice(0, 900).replace(/\s+/g, ' ') : 'none'));
+    if (/top-games/i.test(location.pathname)) out.push('top page content: ' + (document.querySelector('.entry-content, .main-content') || document.body).outerHTML.slice(0, 2500).replace(/\s+/g, ' '));
+    out.push('authors cache: ' + JSON.stringify(getAuthorsCached()));
+    const au = qsa('a[href*="/author/"]')[0];
+    const slug = au ? slugFromHref(au.getAttribute('href')) : 'steamripadmin';
+    await probeUrl('author page', '/author/' + slug + '/');
+    await probeUrl('author feed', '/author/' + slug + '/feed/');
+    out.push('author link html: ' + (au ? au.outerHTML.slice(0, 300) : 'none on this page'));
+    const text = out.join('\n');
+    console.log('[SteamRip++ debug]\n' + text);
+    try { if (typeof GM_setClipboard === 'function') GM_setClipboard(text); else await navigator.clipboard.writeText(text); alert('Debug report copied to clipboard. Paste it into the chat.'); } catch { prompt('Copy this debug report:', text); }
+  }
+  if (typeof GM_registerMenuCommand === 'function') GM_registerMenuCommand('SteamRip++: debug report', debugReport);
+
+  function refreshPage() {
+    injectCss();
+    markCounts();
+    if (settings.cleanTitles) { cleanTexts(); cleanDocTitle(); }
+    hideTopRanges();
+    hideSocial();
+    scanAuthors();
+    putSettingsButton();
+    addMPRow();
+    trackVisit();
+    decorateCards();
+    putTopButton();
+    putJumpButton();
+    putFavButton();
+    putNoteButton();
+    putSearchButton();
+    putDock();
+    watchInfinite();
+    putCredit();
+    putProgress();
+    trackHistory();
+    watchLightbox();
+    checkNew();
+    if (!profileActive && /^#spp-author=/.test(location.hash)) routeCheck();
+  }
+
+  injectCss();
+  routeCheck();
+  refreshPage();
+  setTimeout(refreshPage, 1500);
+  setTimeout(refreshPage, 4000);
+
+  let timer = null;
+  const ours = (n) => n.nodeType !== 1 || (n.id && n.id.indexOf('spp-') === 0) || (n.classList && (n.classList.contains('spp-mp-badge') || n.classList.contains('spp-fav-badge') || n.classList.contains('spp-status-badge')));
+  new MutationObserver((muts) => {
+    if (!muts.some((m) => Array.from(m.addedNodes).some((n) => !ours(n)))) return;
+    clearTimeout(timer);
+    timer = setTimeout(refreshPage, 200);
+  }).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+
+<script>
+const ID="1338747411065208882",USER="axiom423";
+const $=i=>document.getElementById(i);
+document.querySelectorAll(".yr").forEach(e=>e.textContent=new Date().getFullYear());
+
+const MPN=(()=>{const m=($("srcode").textContent||"").match(/const MP_DATA = \[([\s\S]*?)\n  \];/);return m?(m[1].match(/^\s*\["/gm)||[]).length:0})();
+const VER=(($("srcode").textContent||"").match(/@version\s+(\S+)/)||[])[1];
+if(VER)$("ver").textContent="v"+VER;
+const FIXES=[
+ ["Messy titles","Strips “Free Download” and version numbers from game titles, tabs and links."],
+ ["Comments","Removes the comment section and every “N comments” counter."],
+ ["Ads","Hides ad banners and common ad iframes."],
+ ["Discord / Reddit buttons","Removes the Discord and Reddit buttons from the menu and pages."],
+ ["Hidden uploader pages","Opens a real profile for each uploader, even though the site redirects author links."],
+ ["Hard-to-read pages","Optional wide layout, smooth scrolling, clearer focus and a theme-matched look."]
+];
+const ADDS=[
+ ["Multiplayer info",(MPN?MPN+" games":"Hundreds of games")+" with an MP badge and a Multiplayer row in GAME INFO (OnlineFix, official servers, LAN and more)."],
+ ["Uploader profiles","Each uploader’s games with search, sort, date filters, stats and a 12-month activity chart."],
+ ["Favorites, notes & status","Star games, mark them Want to play, Playing, Finished or Dropped, and keep a private note. Stays in your browser."],
+ ["Settings panel","Gear icon in the header with a toggle for every feature, plus export and import."],
+ ["Smarter lists","Dims games you already opened, shows what’s new since your last visit, optional infinite scroll and prefetch."],
+ ["Screenshot viewer","Click a screenshot to see it full size, arrow keys to browse."],
+ ["Shortcuts","/ or Ctrl+K to search, F to favorite, D or the jump button to reach the download links."],
+ ["Small extras","Reading progress bar, back-to-top button, random game and copy-list on uploader pages."]
+];
+const STEPS=[
+ ["Install <b>Tampermonkey</b>","Get it from your browser’s extension store."],
+ ["Turn on user scripts","Open Tampermonkey’s extension details and switch on <b>Allow User Scripts</b>.","chrome"],
+ ["Add the script","Press <b>Copy code</b> above, open Tampermonkey → <b>Create a new script</b>, paste over everything, and save with Ctrl+S."],
+ ["Open SteamRip","Go to <b>steamrip.com</b>. It only runs there. Click the new <b>gear icon</b> in the header for settings."],
+ ["Something off?","Reload once. Gear → Data &amp; help → <b>Copy debug report</b>, then send it to me."]
+];
+function cards(id,arr,cls){const el=$(id);arr.forEach(x=>{const d=document.createElement("div");d.className="item c "+(cls||"");const b=document.createElement("b");b.textContent=x[0];const s=document.createElement("span");s.textContent=x[1];d.append(b,s);el.appendChild(d)})}
+cards("fixes",FIXES,"fix");cards("adds",ADDS);
+function drawSteps(br){const el=$("steps");el.replaceChildren();STEPS.filter(x=>!x[2]||x[2]===br).forEach(x=>{const d=document.createElement("div");d.className="step c";d.innerHTML=`<div><p><b style="font-weight:600">${x[0].replace(/<\/?b>/g,"")}</b></p><small style="font-size:13px;color:var(--mute);margin-top:2px;display:block">${x[1]}</small></div>`;el.appendChild(d)});el.querySelectorAll("small b").forEach(b=>{b.style.color="var(--fg)"})}
+(function(){const ff=/firefox/i.test(navigator.userAgent);const br=ff?"firefox":"chrome";document.querySelectorAll("#seg button").forEach(b=>{b.classList.toggle("on",b.dataset.b===br);b.onclick=()=>{document.querySelectorAll("#seg button").forEach(x=>x.classList.toggle("on",x===b));drawSteps(b.dataset.b)}});drawSteps(br)})();
+
+/* faq */
+[["Does it send my data anywhere?","No. It only talks to steamrip.com, the same site you are already on. Favorites, notes and settings are saved in your own browser."],
+ ["Will it break when SteamRip changes?","It can, because it works with the site’s layout. Open the gear, go to Data &amp; help and press Copy debug report, then send it to me so I can fix it."],
+ ["How do I update?","Press Copy code on this page, open the script in Tampermonkey, paste over everything and save. Your settings, favorites and notes stay."],
+ ["Can I move my favorites and notes to another browser?","Yes. Gear → Data &amp; help → Export favorites &amp; notes, then Import on the other browser."],
+ ["Can I turn features off?","Every feature has its own switch in Settings, and there is a search box on top if you cannot find one."]
+].forEach(([q,a])=>{const d=document.createElement("details");const s=document.createElement("summary");s.textContent=q;const p=document.createElement("p");p.innerHTML=a;d.append(s,p);$("faq").appendChild(d)});
+
+/* spotlight on cards */
+document.addEventListener("pointermove",e=>{const c=e.target.closest&&e.target.closest(".c");if(!c)return;const r=c.getBoundingClientRect();c.style.setProperty("--x",(e.clientX-r.left)+"px");c.style.setProperty("--y",(e.clientY-r.top)+"px")});
+
+/* routing */
+function route(){
+  const sr=location.hash==="#steamrip"||location.hash==="#install";
+  $("home").classList.toggle("on",!sr);$("sr").classList.toggle("on",sr);
+  $("main").classList.toggle("wide",sr);
+  document.title=sr?"SteamRip (But Better) — Axiom":"Axiom";
+  if(sr)loadCode();
+  if(location.hash!=="#install")scrollTo(0,0);
+  onScroll();
+}
+addEventListener("hashchange",route);
+
+/* code: read straight from the page, no file needed */
+let codeText="";
+function loadCode(){
+  const t=($("srcode").textContent||"").trim();
+  if(t){codeText=t;$("code").textContent=t;$("codeInfo").textContent="steamrip.user.js · "+t.split("\n").length.toLocaleString()+" lines · "+Math.round(t.length/1024)+" KB"}
+  else $("code").textContent="No code found in this page.";
+}
+function legacyCopy(t){const a=document.createElement("textarea");a.value=t;a.setAttribute("readonly","");a.style.cssText="position:fixed;top:-100px;opacity:0";document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand("copy")}catch(e){}a.remove();return ok}
+function flash(){["srCopy","srCopy2","srCopy3"].forEach(id=>{const b=$(id);const o=b.dataset.l||(b.dataset.l=b.textContent);b.textContent="Copied ✓";clearTimeout(b._t);b._t=setTimeout(()=>b.textContent=o,1600)})}
+$("srCopy").onclick=async()=>{if(!codeText)return toast("No code in the page yet");let ok=true;try{await navigator.clipboard.writeText(codeText)}catch(e){ok=legacyCopy(codeText)}ok?flash():toast("Could not copy")};
+$("codeToggle").onclick=()=>{const w=$("code").parentElement,o=w.classList.toggle("open");$("codeToggle").textContent=o?"Collapse":"Show full code"};
+$("srDl").onclick=()=>{if(!codeText)return toast("No code in the page yet");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([codeText],{type:"text/javascript"}));a.download="steamrip.user.js";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)};
+
+/* extras: reveal on scroll, sticky bar, progress, jump chips, Esc */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.08});
+document.querySelectorAll("#sr .sec .c, #sr .win").forEach((el,i)=>{el.classList.add("rv");el.style.transitionDelay=(i%2)*60+"ms";io.observe(el)});
+if(matchMedia("(prefers-reduced-motion:reduce)").matches)document.querySelectorAll(".rv").forEach(e=>e.classList.add("in"));
+function onScroll(){
+  const sr=$("sr").classList.contains("on"),y=scrollY,max=document.documentElement.scrollHeight-innerHeight;
+  $("sticky").classList.toggle("on",sr&&y>340);
+  $("prog").classList.toggle("on",sr&&y>20);
+  $("prog").style.width=(max>0?y/max*100:0)+"%";
+}
+addEventListener("scroll",onScroll,{passive:true});
+document.querySelectorAll(".jump button").forEach(b=>b.onclick=()=>$(b.dataset.go).scrollIntoView({behavior:"smooth",block:"start"}));
+addEventListener("keydown",e=>{if(e.key==="Escape"&&$("sr").classList.contains("on"))location.hash=""});
+["srCopy2","srCopy3"].forEach(i=>$(i).onclick=()=>$("srCopy").click());
+
+let tt;function toast(m){const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),1700)}
+async function copyUser(){try{await navigator.clipboard.writeText(USER);toast("Copied "+USER)}catch(e){toast(legacyCopy(USER)?"Copied "+USER:USER)}}
+$("copy").onclick=copyUser;
+addEventListener("keydown",e=>{if(e.key.toLowerCase()==="c"&&!e.metaKey&&!e.ctrlKey&&$("home").classList.contains("on"))copyUser()});
+
+/* live Discord (Lanyard) */
+const labels={online:"Online",idle:"Idle",dnd:"Do not disturb",offline:"Offline"};
+const colors={online:"#3ba55d",idle:"#faa81a",dnd:"#ed4245",offline:"#5a5a5f"};
+let spot=null;
+function render(d){
+  if(!d)return;
+  const s=d.discord_status||"offline",u=d.discord_user;
+  document.documentElement.style.setProperty("--st",colors[s]);
+  if(u&&u.avatar){const url=`https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.${u.avatar.startsWith("a_")?"gif":"png"}?size=256`;const im=new Image();im.onload=()=>{$("pfp").style.backgroundImage=`url(${url})`;$("pfp").textContent=""};im.src=url}
+  $("dn").textContent=(u&&u.global_name)||USER;$("un").textContent="@"+((u&&u.username)||USER);
+  const acts=d.activities||[],c=acts.find(a=>a.type===4);
+  $("st").textContent=c&&c.state?`${labels[s]} · ${c.state}`:labels[s];
+  spot=null;const act=$("act"),bar=$("bar");
+  if(d.listening_to_spotify&&d.spotify){const p=d.spotify;spot=p.timestamps;$("actName").textContent=p.song;$("actD1").textContent=p.artist;$("art").style.backgroundImage=`url(${p.album_art_url})`;bar.style.display="block";act.classList.add("on")}
+  else{const g=acts.find(a=>a.type===0);
+    if(g){$("actName").textContent=g.name;$("actD1").textContent=g.details||g.state||"Playing";let img="";const li=g.assets&&g.assets.large_image;
+      if(li)img=li.startsWith("mp:external/")?"https://media.discordapp.net/external/"+li.slice(12):`https://cdn.discordapp.com/app-assets/${g.application_id}/${li}.png`;
+      $("art").style.backgroundImage=img?`url(${img})`:"";bar.style.display="none";act.classList.add("on")}
+    else act.classList.remove("on")}
+  tick();
+}
+function tick(){
+  if(spot)$("barI").style.width=Math.min(100,Math.max(0,(Date.now()-spot.start)/(spot.end-spot.start)*100))+"%";
+  $("clock").textContent=new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit",timeZone:"America/New_York"})+" · Florida, USA";
+}
+setInterval(tick,1000);tick();
+let retry=4000;
+function connect(){
+  let ws;try{ws=new WebSocket("wss://api.lanyard.rest/socket")}catch(e){return setTimeout(connect,retry)}
+  let hb;
+  ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}
+    if(m.op===1){retry=4000;ws.send(JSON.stringify({op:2,d:{subscribe_to_id:ID}}));clearInterval(hb);hb=setInterval(()=>{if(ws.readyState===1)ws.send(JSON.stringify({op:3}))},m.d.heartbeat_interval)}
+    if(m.op===0)render(m.d)};
+  ws.onerror=()=>{try{ws.close()}catch(e){}};
+  ws.onclose=()=>{clearInterval(hb);setTimeout(connect,retry);retry=Math.min(retry*2,60000)};
+}
+fetch("https://api.lanyard.rest/v1/users/"+ID).then(r=>r.json()).then(j=>{if(j.success)render(j.data);else $("st").textContent="Join discord.gg/lanyard for live status"}).catch(()=>{$("st").textContent="Live status loads once hosted"});
+connect();
+loadCode();
+route();
+</script>
+</body>
+</html>
