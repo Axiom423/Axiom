@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Axiom</title>
-<meta name="description" content="Axiom — SteamRip (But Better), a free userscript that cleans up SteamRip and adds multiplayer info, uploader profiles, favorites, notes and more.">
+<meta name="description" content="Axiom — SteamRip (But Better), a free userscript that cleans up SteamRip and adds multiplayer info, uploader profiles, quick search and more.">
 <meta name="theme-color" content="#060607">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><rect width=%27100%27 height=%27100%27 rx=%2750%27 fill=%27black%27/><text x=%2750%27 y=%2768%27 font-size=%2760%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27Georgia%27>A</text></svg>">
 <style>
-:root{--bg:#060607;--fg:#f4f4f5;--mute:#8d8d93;--dim:#4f4f55;--line:rgba(255,255,255,.08);--card:rgba(255,255,255,.03);--st:#5a5a5f;color-scheme:dark}
+:root{--bg:#060607;--fg:#f4f4f5;--mute:#8d8d93;--dim:#76767d;--line:rgba(255,255,255,.08);--card:rgba(255,255,255,.03);--st:#5a5a5f;color-scheme:dark}
 *{box-sizing:border-box;margin:0}
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--fg);min-height:100vh;font:15px/1.6 -apple-system,BlinkMacSystemFont,"Inter","Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
@@ -72,13 +72,12 @@ h2.t{font:400 clamp(34px,7vw,50px)/1.05 "Iowan Old Style","Palatino Linotype",Ge
 .sec{margin-top:46px}
 .sec h3{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);font-weight:500;margin-bottom:14px;display:flex;align-items:center;gap:12px}
 .sec h3::after{content:"";flex:1;height:1px;background:var(--line)}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .item{padding:16px 18px}
 .item b{display:block;font-weight:600;font-size:14px}
 .item span{display:block;color:var(--mute);font-size:13px;margin-top:4px;line-height:1.5}
-.item i{font-style:normal;float:right;color:var(--dim);font-size:12px}
 .fix b::before{content:"✓";color:#3ba55d;margin-right:8px}
-.steps{display:grid;gap:10px;counter-reset:s}
+.steps{display:grid;gap:12px;counter-reset:s}
 .step{display:flex;gap:16px;align-items:flex-start;padding:16px 18px;counter-increment:s}
 .step::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--fg);color:#000;font-weight:600;font-size:13px}
 .step p{color:var(--mute);font-size:14px}.step b{color:var(--fg);font-weight:600}
@@ -123,7 +122,7 @@ pre{margin:0;padding:16px;max-height:400px;overflow:auto;font:12px/1.6 ui-monosp
 .seg button{font:inherit;font-size:13px;color:var(--mute);background:transparent;border:0;border-radius:99px;padding:6px 16px;cursor:pointer;transition:.2s}
 .seg button.on{background:var(--fg);color:#000;font-weight:600}
 .seg button:focus-visible{outline:2px solid rgba(255,255,255,.7);outline-offset:2px}
-.faq{display:grid;gap:10px}
+.faq{display:grid;gap:12px}
 .faq details{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:0 18px;transition:border-color .25s}
 .faq details[open]{border-color:rgba(255,255,255,.18)}
 .faq summary{list-style:none;cursor:pointer;padding:15px 0;font-weight:600;font-size:14px;display:flex;justify-content:space-between;gap:12px}
@@ -136,6 +135,40 @@ pre::-webkit-scrollbar{width:8px;height:8px}pre::-webkit-scrollbar-thumb{backgro
 main{z-index:1}
 @media(max-width:600px){.grid{grid-template-columns:1fr}.hero{padding:26px 20px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* v1.3.3 polish: same look, calmer and easier to read */
+:root{--mute:#9b9ba3;--dim:#82828a;--line:rgba(255,255,255,.07)}
+body{line-height:1.65}
+body::after{opacity:.03}
+.aurora i{opacity:.7}
+main{padding-top:calc(84px + env(safe-area-inset-top,0px))}
+main.wide{max-width:720px}
+.c{border-radius:14px}
+.c:hover{border-color:rgba(255,255,255,.14)}
+.link{padding:16px 20px}.link:hover{transform:translateY(-1px)}
+.links{gap:12px}
+.hero{padding:40px 32px;border:1px solid var(--line);box-shadow:0 24px 60px -30px rgba(0,0,0,.8)}
+.lead{line-height:1.7;max-width:480px}
+.meta{gap:6px;margin-top:20px}.chip{padding:3px 12px}
+.row{margin-top:28px;gap:10px}
+.btn{transition:border-color .2s,background .2s,box-shadow .2s,transform .2s}
+.btn:active{transform:scale(.98)}
+.btn.main:hover{box-shadow:0 0 22px rgba(255,255,255,.14)}
+.sec{margin-top:60px}
+.sec h3{letter-spacing:.16em;margin-bottom:18px}
+.grid,.steps,.faq{gap:14px}
+.item,.step{padding:18px 20px}
+.item span{line-height:1.55}
+.step{gap:18px}
+.step p{line-height:1.6}
+.seg{margin-bottom:18px}
+.faq details{padding:0 20px}
+.faq summary{padding:16px 0}
+.win{border-radius:14px;box-shadow:0 18px 50px -28px rgba(0,0,0,.9)}
+pre{font-size:12.5px;line-height:1.65;padding:18px}
+footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line)}
+html{scrollbar-width:thin;scrollbar-color:#2a2a2f transparent}
+::selection{background:rgba(255,255,255,.2)}
+@media(max-width:600px){.hero{padding:28px 20px}.sec{margin-top:48px}}
 </style>
 </head>
 <body>
@@ -164,8 +197,8 @@ main{z-index:1}
   </section>
 
   <nav class="links">
-    <a class="link c" href="https://github.com/Axiom423" target="_blank" rel="noopener"><div><em>01</em>GitHub<span class="tag">New permanent GitHub</span></div><span class="a">↗</span></a>
-    <a class="link c" href="#steamrip"><div><em>02</em>SteamRip (But Better)</div><span class="a">→</span></a>
+    <a class="link c" href="https://github.com/Axiom423" target="_blank" rel="noopener"><div><em>01</em>GitHub<span class="tag">New permanent GitHub</span></div></a>
+    <a class="link c" href="#steamrip"><div><em>02</em>SteamRip (But Better)</div></a>
     <div class="link c dead"><div><em>03</em>No more</div></div>
     <div class="link c dead"><div><em>04</em>things</div></div>
   </nav>
@@ -179,7 +212,7 @@ main{z-index:1}
     <div class="eyebrow">Userscript · by Axiom</div>
     <h2 class="t">SteamRip (But Better)</h2>
     <p class="lead">Cleans up SteamRip and adds the tools the site should have had. Free, runs only in your browser.</p>
-    <div class="meta"><span class="chip" id="ver">v1.3.0</span><span class="chip">steamrip.com</span><span class="chip">Tampermonkey</span><span class="chip">Desktop</span></div>
+    <div class="meta"><span class="chip" id="ver">v1.3.6</span><span class="chip">steamrip.com</span><span class="chip">Tampermonkey</span><span class="chip">Desktop</span></div>
     <div class="row">
       <button class="btn main" id="srCopy">Copy code</button>
       <button class="btn" id="srDl">Download .user.js</button>
@@ -208,8 +241,9 @@ main{z-index:1}
 // ==UserScript==
 // @name         SteamRip++
 // @namespace    https://steamrip.com/
-// @version      1.3.0
-// @description  Cleaner titles, comments off, Multiplayer info, uploader profiles, favorites, game notes & status, quick search, shortcuts and a Settings panel.
+// @version      1.3.6
+// @updated      2026-11-22
+// @description  Cleaner titles, comments off, Multiplayer info, uploader profiles, quick search, shortcuts and a Settings panel.
 // @author       Axiom
 // @match        https://steamrip.com/*
 // @match        https://www.steamrip.com/*
@@ -231,7 +265,7 @@ main{z-index:1}
   const SHARE_SELECTORS = ['.share-links', '.post-share', '.share-buttons', '#share-buttons-top', '#share-buttons-bottom'];
   const RELATED_SELECTORS = ['#related-posts', '.related-posts', '.related-posts-list'];
   const ROUTE = 'spp-author=';
-  const VERSION = '1.3.0';
+  const VERSION = '1.3.6';
 
   const store = {
     get(k, d) { try { return typeof GM_getValue === 'function' ? GM_getValue(k, d) : d; } catch { return d; } },
@@ -265,6 +299,7 @@ main{z-index:1}
     keepHistory: true,
     hideTopRanges: true,
     cleanTitles: true,
+    cleanUpdates: true,
     mpRow: true,
     mpBadge: true,
     jumpBtn: true,
@@ -276,17 +311,20 @@ main{z-index:1}
     newTab: false,
     infiniteScroll: false,
     backToTop: true,
-    favBtn: true,
-    notes: true,
-    dock: true,
-    statusBadge: true,
-    hideDone: false,
     shortcuts: true,
     showCredit: true,
   };
   const settings = Object.assign({}, DEFAULTS, parse(store.get('spp_settings', '{}'), {}));
   Object.keys(settings).forEach((k) => { if (!(k in DEFAULTS)) delete settings[k]; });
   function saveSettings() { store.set('spp_settings', JSON.stringify(settings)); }
+  // One-time fix: some installs ended up with showCredit stuck at false (from an
+  // older bug / stray write) even though the real default is true. This forces it
+  // back on exactly once; after that the Settings toggle works normally either way.
+  if (!store.get('spp_credit_fix_v2', false)) {
+    settings.showCredit = true;
+    saveSettings();
+    store.set('spp_credit_fix_v2', true);
+  }
 
   function restRoot() {
     const l = document.querySelector('link[rel="https://api.w.org/"]');
@@ -368,6 +406,49 @@ main{z-index:1}
     });
   }
 
+  // Recently Updated Games page: plain titles, no build/version pills
+  const BADGE_RE = /^(?:build\s*[\w.\-]+|v(?:er\.?|ersion)?\s*\d[\w.\-+]*|\d+(?:\.\d+){1,}[\w.\-+]*)$/i;
+  function onUpdatesPage() {
+    if (profileActive) return false;
+    return qsa('h1, .entry-title, .post-title, .page-title').some((h) => /recently\s+updated/i.test(h.textContent));
+  }
+  function hideBadge(el, text, root) {
+    if (el.textContent.trim() !== text) return;
+    let t = el;
+    for (let i = 0; i < 2; i++) {
+      const par = t.parentElement;
+      if (!par || par === root || par.querySelector('a[href]') || par.textContent.trim() !== text) break;
+      t = par;
+    }
+    t.classList.add('spp-upd-hide');
+  }
+  function cleanUpdatesPage() {
+    if (!settings.cleanUpdates || !onUpdatesPage()) return;
+    const root = document.querySelector('.entry-content, .post-content, main, #content') || document.body;
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (w.nextNode()) nodes.push(w.currentNode);
+    nodes.forEach((n) => {
+      const p = n.parentElement;
+      if (!p || SKIP_TAGS.test(p.tagName) || p.closest('[id^="spp-"], .spp-upd-hide, .spp-mp-badge')) return;
+      const v = n.nodeValue; const t = v.trim();
+      if (!t) return;
+      if (BADGE_RE.test(t)) { hideBadge(p, t, root); return; }
+      const a = p.closest('a[href]');
+      let game = false;
+      if (a) { try { const u = new URL(a.href, location.href); game = u.origin === ORIGIN && isGamePath(u.pathname); } catch {} }
+      let title = t;
+      if (NEEDS_CLEAN.test(t) && (game || t.length > 8)) {
+        title = cleanTitle(t);
+        if (title && title !== t) n.nodeValue = v.replace(t, () => title); else title = t;
+      }
+      if (game && settings.mpBadge && mpCount() && !(n.nextSibling && n.nextSibling.classList && n.nextSibling.classList.contains('spp-mp-badge'))) {
+        const mp = lookupMP(title, a.href);
+        if (mp) { const b = make('span', 'spp-mp-badge', 'MP'); b.title = mpText(mp); n.after(b); }
+      }
+    });
+  }
+
   const COMMENT_SELECTORS = [
     '#hyvor-talk-view', '.hyvor-talk-iframe', '[id*="hyvor"]', '[class*="hyvor"]',
     'iframe[src*="talk.hyvor"]', 'iframe[src*="discuss"]', 'iframe[src*="comment"]',
@@ -375,7 +456,12 @@ main{z-index:1}
     '.comment-form', '.commentlist', '#commentlist', '.post-comments', '.article-comments',
     'section.comments', '.tie-comments'
   ];
-  const COUNT_SELECTORS = ['.meta-comment', '.comments-link', '.post-comments-link', '.spp-nocount'];
+  // .tolstoycomments-cc is Tolstoy Comments' own live counter span (confirmed from
+  // the live page: <span class="tolstoycomments-cc" data-raw="1" data-identity="...">).
+  // It's hidden by a direct CSS selector rather than relying on the text-matching
+  // walker/observer to catch it in time, since the widget can re-render this node
+  // (or just its count) on its own refresh cycle at any point after page load.
+  const COUNT_SELECTORS = ['.meta-comment', '.comments-link', '.post-comments-link', '.tolstoycomments-cc', '.spp-nocount'];
   const AD_SELECTORS = [
     'ins.adsbygoogle', '.adsbygoogle', '[id^="google_ads_iframe"]', '[id^="div-gpt-ad"]',
     'iframe[src*="googlesyndication"]', 'iframe[src*="doubleclick"]', 'iframe[src*="adsterra"]',
@@ -1493,14 +1579,15 @@ main{z-index:1}
     let css = [
       '#spp-modal{position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.68);display:flex;align-items:flex-start;justify-content:center;padding:5vh 12px;overflow:auto;font-family:var(--spp-font);}',
       '#spp-modal *{box-sizing:border-box;}',
-      '#spp-modal .spp-panel{background:var(--spp-bg);color:var(--spp-fg);width:100%;max-width:600px;border-radius:var(--spp-radius);box-shadow:0 12px 48px rgba(0,0,0,.55);font-size:14px;line-height:1.5;}',
+      '#spp-modal .spp-panel{background:var(--spp-bg);color:var(--spp-fg);width:100%;max-width:600px;border-radius:max(var(--spp-radius),10px);border:1px solid var(--spp-line);box-shadow:0 12px 48px rgba(0,0,0,.5);font-size:14px;line-height:1.5;}',
       '#spp-modal .spp-head{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--spp-line);}',
       '#spp-modal .spp-head h2{margin:0;padding:0 0 5px;font:700 15px/1.2 var(--spp-hfont);letter-spacing:.06em;text-transform:uppercase;color:inherit;border-bottom:2px solid var(--spp-accent);}',
       '#spp-modal .spp-x{background:none;border:0;color:inherit;font-size:24px;line-height:1;cursor:pointer;opacity:.7;padding:0 4px;}',
       '#spp-modal .spp-x:hover{opacity:1;color:var(--spp-accent);}',
       '#spp-modal .spp-body{padding:6px 22px 18px;}',
-      '#spp-modal .spp-sec{margin:18px 0 4px;font:700 11px/1.2 var(--spp-hfont);letter-spacing:.1em;text-transform:uppercase;color:var(--spp-accent);}',
-      '#spp-modal .spp-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid var(--spp-line);}',
+      '#spp-modal .spp-sec{margin:22px 0 4px;font:700 11px/1.2 var(--spp-hfont);letter-spacing:.1em;text-transform:uppercase;color:var(--spp-accent);}',
+      '#spp-modal .spp-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--spp-line);}',
+      '#spp-modal .spp-secwrap>.spp-row:last-of-type{border-bottom:0;}',
       '#spp-modal .spp-row b{display:block;font-weight:600;}',
       '#spp-modal .spp-row small{display:block;opacity:.65;font-size:12px;margin-top:1px;}',
       '#spp-modal .spp-sw{flex:none;width:42px;height:22px;border-radius:11px;border:0;background:rgba(128,128,128,.45);position:relative;cursor:pointer;padding:0;transition:background .15s;}',
@@ -1528,30 +1615,19 @@ main{z-index:1}
       '#spp-toast.spp-show{opacity:1;}',
       '.spp-mp-badge{display:inline-block;margin-left:6px;padding:0 6px;border-radius:99px;border:1px solid currentColor;font:700 10px/16px sans-serif;letter-spacing:.04em;vertical-align:middle;opacity:.85;cursor:help;}',
       '.spp-visited{opacity:.5;transition:opacity .15s;}.spp-visited:hover{opacity:1;}',
-      '.spp-hide{display:none!important;}',
-      '#spp-top-btn,#spp-jump-btn,#spp-search-btn{position:fixed;right:18px;z-index:99998;width:40px;height:40px;border-radius:50%;border:0;background:var(--spp-accent);color:var(--spp-accent-fg);cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.4);}',
-      '#spp-top-btn{bottom:18px;}#spp-jump-btn{bottom:66px;display:flex;}#spp-search-btn{bottom:114px;display:flex;}',
-      '#spp-top-btn.spp-show{display:flex;}#spp-top-btn svg,#spp-jump-btn svg,#spp-search-btn svg{width:18px;height:18px;fill:currentColor;}',
-      '#spp-fav-btn{position:fixed;right:18px;bottom:162px;z-index:99998;width:40px;height:40px;border-radius:50%;border:0;background:var(--spp-accent);color:var(--spp-accent-fg);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.4);opacity:.85;}',
-      '#spp-fav-btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;}',
-      '#spp-fav-btn.on{opacity:1;}#spp-fav-btn.on svg{fill:currentColor;}',
-      '.spp-fav-badge{margin-left:6px;color:#f1c40f;font-size:13px;vertical-align:middle;}',
-      '#spp-dock-btn{position:fixed;right:18px;bottom:18px;z-index:99999;width:40px;height:40px;border-radius:50%;border:0;background:var(--spp-accent);color:var(--spp-accent-fg);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.4);transition:transform .2s;}',
-      '#spp-dock-btn svg{width:18px;height:18px;fill:currentColor;}html.spp-open #spp-dock-btn{transform:rotate(45deg);}',
-      'html.spp-dock #spp-top-btn{bottom:66px;}html.spp-dock #spp-jump-btn{bottom:114px;}html.spp-dock #spp-search-btn{bottom:162px;}html.spp-dock #spp-fav-btn{bottom:210px;}html.spp-dock #spp-note-btn{bottom:258px;}',
-      'html.spp-dock:not(.spp-open) :is(#spp-top-btn,#spp-jump-btn,#spp-search-btn,#spp-fav-btn,#spp-note-btn){display:none!important;}',
-      'html.spp-dock.spp-open #spp-top-btn{display:flex;}',
-      'html.spp-dock.spp-open :is(#spp-top-btn,#spp-jump-btn,#spp-search-btn,#spp-fav-btn,#spp-note-btn){animation:spp-rise .16s ease-out both;}',
-      'html.spp-dock.spp-open :is(#spp-top-btn,#spp-jump-btn,#spp-search-btn,#spp-fav-btn,#spp-note-btn)::after{content:attr(data-label);position:absolute;right:48px;top:50%;transform:translateY(-50%);padding:3px 10px;border-radius:99px;background:var(--spp-bg);color:var(--spp-fg);border:1px solid var(--spp-line);box-shadow:0 2px 8px rgba(0,0,0,.35);font:600 12px/1.4 var(--spp-font);white-space:nowrap;pointer-events:none;}',
-      '@keyframes spp-rise{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}@keyframes spp-fade{from{opacity:0;}to{opacity:1;}}@keyframes spp-pop{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:none;}}',
+      '.spp-hide{display:none!important;}.spp-upd-hide{display:none!important;}',
+      '#spp-top-btn,#spp-jump-btn{position:fixed;right:16px;z-index:99998;width:36px;height:36px;padding:0;border-radius:50%;border:0;background:var(--spp-accent);color:var(--spp-accent-fg);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,.28);opacity:.72;transition:opacity .15s,transform .15s;}',
+      '#spp-top-btn{bottom:16px;display:none;}#spp-jump-btn{bottom:60px;}#spp-top-btn.spp-show{display:flex;}',
+      ':is(#spp-top-btn,#spp-jump-btn):hover{opacity:1;}',
+      ':is(#spp-top-btn,#spp-jump-btn):hover{transform:translateY(-1px);}',
+      ':is(#spp-top-btn,#spp-jump-btn) svg{width:17px;height:17px;fill:currentColor;}',
+      ':is(#spp-top-btn,#spp-jump-btn):hover::after{content:attr(data-label);position:absolute;right:44px;top:50%;transform:translateY(-50%);padding:3px 10px;border-radius:99px;background:var(--spp-bg);color:var(--spp-fg);border:1px solid var(--spp-line);box-shadow:0 2px 8px rgba(0,0,0,.3);font:600 12px/1.4 var(--spp-font);white-space:nowrap;pointer-events:none;}',
+      '@keyframes spp-fade{from{opacity:0;}to{opacity:1;}}@keyframes spp-pop{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:none;}}',
       '#spp-modal{animation:spp-fade .15s ease-out;padding:0 12px 5vh;}#spp-modal .spp-panel{animation:spp-pop .2s ease-out;margin-top:5vh;}',
-      '@media (prefers-reduced-motion:reduce){#spp-modal,#spp-modal .spp-panel,html.spp-open #spp-dock-btn,html.spp-dock.spp-open button{animation:none!important;transition:none!important;}}',
+      '@media (prefers-reduced-motion:reduce){#spp-modal,#spp-modal .spp-panel{animation:none!important;}:is(#spp-top-btn,#spp-jump-btn){transition:none!important;}}',
       '#spp-modal .spp-tabs{position:sticky;top:0;z-index:2;display:flex;gap:6px;overflow-x:auto;margin:0 -22px;padding:10px 22px;background:var(--spp-bg);border-bottom:1px solid var(--spp-line);scrollbar-width:none;}',
       '#spp-modal .spp-tabs .spp-pick{flex:none;}#spp-modal .spp-secwrap{scroll-margin-top:56px;}',
       '#spp-modal kbd{display:inline-block;min-width:22px;text-align:center;padding:1px 7px;border:1px solid var(--spp-line);border-radius:5px;background:rgba(128,128,128,.12);font:600 12px/1.5 var(--spp-font);}',
-      '#spp-note-btn{position:fixed;right:18px;bottom:210px;z-index:99998;width:40px;height:40px;border-radius:50%;border:0;background:var(--spp-accent);color:var(--spp-accent-fg);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.4);opacity:.85;}',
-      '#spp-note-btn svg{width:18px;height:18px;fill:currentColor;}#spp-note-btn.on{opacity:1;}',
-      '.spp-status-badge{display:inline-block;margin-left:6px;padding:0 7px;border-radius:4px;background:var(--spp-accent);color:var(--spp-accent-fg);font:700 10px/16px sans-serif;letter-spacing:.03em;vertical-align:middle;white-space:nowrap;}',
       '#spp-modal .spp-chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0;}',
       '#spp-modal .spp-pick{padding:5px 14px;border-radius:99px;border:1px solid var(--spp-line);background:transparent;color:inherit;cursor:pointer;font:600 12px/1.4 var(--spp-font);}',
       '#spp-modal .spp-pick:hover{border-color:var(--spp-accent);}',
@@ -1568,8 +1644,8 @@ main{z-index:1}
       '#spp-profile .spp-field option{color:#000;}',
       '#spp-profile .spp-check{display:inline-flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;accent-color:var(--spp-accent);}',
       '#spp-profile .spp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--spp-card-min,210px),1fr));gap:16px;}',
-      '#spp-profile .spp-card{display:block;color:inherit;text-decoration:none;border:1px solid var(--spp-line);border-radius:var(--spp-radius);overflow:hidden;background:rgba(128,128,128,.07);transition:transform .15s,border-color .15s;}',
-      '#spp-profile .spp-card:hover{transform:translateY(-2px);border-color:var(--spp-accent);}',
+      '#spp-profile .spp-card{display:block;color:inherit;text-decoration:none;border:1px solid var(--spp-line);border-radius:var(--spp-radius);overflow:hidden;background:rgba(128,128,128,.05);transition:transform .15s,border-color .15s,box-shadow .15s;}',
+      '#spp-profile .spp-card:hover{transform:translateY(-2px);border-color:var(--spp-accent);box-shadow:0 6px 18px rgba(0,0,0,.22);}',
       '#spp-profile .spp-card img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;}',
       '#spp-profile .spp-ct{padding:10px 12px 12px;}',
       '#spp-profile .spp-card-title{font-size:14px;font-weight:600;line-height:1.35;}',
@@ -1607,13 +1683,14 @@ main{z-index:1}
       '#spp-profile .spp-letter.on{background:var(--spp-accent);color:var(--spp-accent-fg);border-color:transparent;}',
       '#spp-profile .spp-skel{aspect-ratio:16/12;border-radius:var(--spp-radius);background:linear-gradient(90deg,rgba(128,128,128,.10),rgba(128,128,128,.22),rgba(128,128,128,.10));background-size:200% 100%;animation:spp-shim 1.2s linear infinite;}',
       '@keyframes spp-shim{0%{background-position:200% 0}100%{background-position:-200% 0}}',
-      '#spp-credit{padding:16px 12px 22px;text-align:center;font:600 13px/1.4 var(--spp-font);color:var(--spp-fg);border-top:1px solid var(--spp-line);background:var(--spp-bg);}',
+      '#spp-credit{display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;width:100%!important;box-sizing:border-box;padding:12px 12px 18px;text-align:center;font:500 12px/1.4 var(--spp-font);color:var(--spp-fg)!important;border-top:1px solid var(--spp-line);background:var(--spp-bg)!important;z-index:1;}',
       '#spp-credit b{color:var(--spp-accent);}',
       '#spp-credit .spp-heart{display:inline-block;color:#e25555;animation:spp-beat 1.4s ease-in-out infinite;}',
       '@keyframes spp-beat{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}',
-      '#spp-progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--spp-accent);z-index:2147482000;pointer-events:none;transition:width .1s;}',
-      '#spp-credit a{color:var(--spp-accent);text-decoration:none;font-weight:700;}',
+      '#spp-progress{position:fixed;top:0;left:0;height:2px;width:0;background:var(--spp-accent);z-index:2147482000;pointer-events:none;transition:width .1s;}',
+      '#spp-credit a{color:var(--spp-accent)!important;text-decoration:none;font-weight:700;}',
       '#spp-credit a:hover{text-decoration:underline;}',
+      '#spp-credit.spp-credit-float{position:fixed!important;left:12px!important;bottom:12px!important;top:auto!important;width:auto!important;padding:6px 14px!important;border:1px solid var(--spp-line)!important;border-radius:999px!important;box-shadow:0 2px 8px rgba(0,0,0,.4);font-size:12px!important;z-index:99990!important;}',
       '#spp-palette{position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.6);display:flex;align-items:flex-start;justify-content:center;padding:10vh 12px;}',
       '#spp-palette *{box-sizing:border-box;}',
       '.spp-pal{width:100%;max-width:660px;background:var(--spp-bg);color:var(--spp-fg);border-radius:var(--spp-radius);box-shadow:0 12px 48px rgba(0,0,0,.6);overflow:hidden;font-family:var(--spp-font);}',
@@ -1725,23 +1802,21 @@ main{z-index:1}
   const SCHEMA = [
     ['Cleanup', [
       ['hideComments', 'Hide comments', 'Removes the comment section from game pages.'],
-      ['hideCounts', 'Hide comment counts', 'Removes the “7 comments” counters from posts, lists and below the game.'],
+      ['hideCounts', 'Hide comment counts', 'Removes the comment counters (e.g. “3 comments”) from posts, lists and below the game.'],
       ['hideAds', 'Hide ad banners', 'Hides Google ads and common ad iframes.'],
       ['hideSocial', 'Hide Discord & Reddit buttons', 'Removes the Discord and Reddit links and buttons from the menu and the page.'],
       ['hideShare', 'Hide share buttons', 'Removes the social share buttons from game pages.'],
       ['hideRelated', 'Hide related games', 'Removes the related games block under a game.'],
       ['hideTopRanges', 'Hide Top Games time ranges', 'Removes the Today / Weekly / Monthly / All-time switcher from the Top Games page.']]],
     ['Titles', [
-      ['cleanTitles', 'Clean titles', 'Strips “Free Download” and version numbers from game titles.', true]]],
+      ['cleanTitles', 'Clean titles', 'Strips “Free Download” and version numbers from game titles.', true],
+      ['cleanUpdates', 'Clean Recently Updated page', 'Removes the build and version tags and the extra info in brackets from the Recently Updated Games list.', true]]],
     ['Game page', [
       ['mpRow', 'Multiplayer row', 'Adds a Multiplayer line to GAME INFO for games that have online or co-op.'],
-      ['jumpBtn', 'Jump-to-downloads button', 'Floating button that scrolls straight to the download links.'],
-      ['notes', 'Notes & status button', 'A pencil button on game pages. Mark a game Want to play, Playing, Finished or Dropped and keep a private note. Stays in your browser.']]],
+      ['jumpBtn', 'Jump-to-downloads button', 'Floating button that scrolls straight to the download links.']]],
     ['Lists & browsing', [
       ['mpBadge', 'Multiplayer badges', 'Shows a small MP tag on game cards in lists and on uploader pages.'],
       ['mpOnlyLists', 'Only show multiplayer games in lists', 'Hides non-multiplayer game cards on listing pages.'],
-      ['statusBadge', 'Show my status on game cards', 'A small label on cards for games you marked Want to play, Playing, Finished or Dropped.'],
-      ['hideDone', 'Hide finished and dropped games', 'Removes games you marked Finished or Dropped from lists.'],
       ['trackVisited', 'Dim games you already opened', 'Fades cards for games you have visited so new ones stand out.'],
       ['hideVisited', 'Hide games you already opened', 'Removes visited games from lists completely.'],
       ['infiniteScroll', 'Infinite scroll (beta)', 'Loads the next page of games automatically when you reach the bottom of a list.'],
@@ -1750,11 +1825,10 @@ main{z-index:1}
       ['@pageSize', 'Games per page', 'How many games show before you press Load more.'],
       ['mpOnlyDefault', 'Multiplayer only by default', 'Start uploader pages with the Multiplayer filter on.']]],
     ['Layout & look', [
-      ['dock', 'Group the floating buttons', 'Puts search, favorites, notes, jump and back-to-top behind one button in the corner. Turn it off to show them all at once.'],
       ['wideLayout', 'Wide layout', 'Hides the sidebar so game lists and pages use the full width.'],
       ['@accent', 'Accent colour', 'Colour for SteamRip++ buttons, bars and badges.']]],
     ['Quality of life', [
-      ['quickSearch', 'Quick search button', 'A search button in the corner that looks through every game instantly, with thumbnails and your recently viewed games.'],
+      ['quickSearch', 'Quick search', 'Search every game instantly with / or Ctrl+K, with thumbnails and your recently viewed games.'],
       ['lightbox', 'Screenshot viewer', 'Click a screenshot on a game page to see it full size. Arrow keys browse, Esc closes.'],
       ['newSince', 'New games banner', 'On the homepage, tells you how many games were added since you last dismissed it.'],
       ['keepHistory', 'Remember recently viewed games', 'Feeds the “Recently viewed” list in quick search. Stored only in your browser.'],
@@ -1762,8 +1836,7 @@ main{z-index:1}
       ['polish', 'Visual polish', 'Smooth scrolling, themed scrollbar and text selection, clearer keyboard focus.'],
       ['prefetch', 'Faster game pages', 'Starts loading a game page when you hover its link so it opens faster.'],
       ['backToTop', 'Back-to-top button', 'Shows a button in the corner once you scroll down.'],
-      ['favBtn', 'Favorites (star button)', 'A star button on game pages to save games. Saved games show a star in lists and appear first in quick search.'],
-      ['shortcuts', 'Keyboard shortcuts', '/ or Ctrl+K opens search, F toggles favorite, N opens your notes, D jumps to downloads (on game pages), ? lists them all.'],
+      ['shortcuts', 'Keyboard shortcuts', '/ or Ctrl+K opens search, D jumps to downloads (on game pages), ? lists them all.'],
       ['showCredit', 'Show credit footer', 'The “Made by Axiom” line at the bottom of every page.']]]
   ];
 
@@ -1841,25 +1914,8 @@ main{z-index:1}
     dataWrap.appendChild(info);
     const db = make('div', 'spp-btns');
     const btn = (label, fn, cls) => { const b = make('button', 'spp-btn' + (cls ? ' ' + cls : ''), label); b.type = 'button'; b.addEventListener('click', fn); db.appendChild(b); return b; };
-    btn('Open favorites', () => { m.close(); openFavs(); });
-    btn('My games', () => { m.close(); openLibrary(); });
+    btn('Search games', () => { m.close(); openPalette(); });
     btn('Keyboard shortcuts', () => { m.close(); openKeys(); });
-    btn('Export favorites & notes', () => {
-      const txt = JSON.stringify({ favs: getFavs(), notes: getNotes() });
-      try { if (typeof GM_setClipboard === 'function') GM_setClipboard(txt); else navigator.clipboard.writeText(txt); toast('Copied'); } catch { prompt('Copy this:', txt); }
-    });
-    btn('Import favorites & notes', () => {
-      const raw = prompt('Paste what you exported:');
-      if (!raw) return;
-      const obj = parse(raw, null);
-      if (!obj || typeof obj !== 'object') { toast('Not valid data'); return; }
-      if (Array.isArray(obj.favs)) {
-        const have = favPaths();
-        setFavs(getFavs().concat(obj.favs.filter((x) => Array.isArray(x) && x[0] && !have.has(x[0]))));
-      }
-      if (obj.notes && typeof obj.notes === 'object') saveNotes(Object.assign({}, obj.notes, getNotes()));
-      toast('Imported'); decorateCards(); putFavButton(); putNoteButton();
-    });
     btn('Clear uploader cache', () => { clearCaches(); toast('Uploader cache cleared'); });
     btn('Clear visited history', () => { store.set('spp_visited', '[]'); store.set('spp_history', '[]'); visitedCache = null; qsa('.spp-visited').forEach((e) => e.classList.remove('spp-visited')); toast('History cleared'); });
     btn('Export settings', () => {
@@ -1919,8 +1975,6 @@ main{z-index:1}
     if (profileActive) return;
     const visited = (settings.trackVisited || settings.hideVisited) ? getVisited() : null;
     const haveMP = mpCount() > 0;
-    const favs = favPaths();
-    const notes = getNotes();
     qsa(CARD_LINK).forEach((a) => {
       if (a.closest('#spp-modal, #spp-profile')) return;
       let path; try { path = new URL(a.href).pathname.replace(/\/$/, ''); } catch { return; }
@@ -1933,16 +1987,7 @@ main{z-index:1}
       if (mp && settings.mpBadge) {
         if (!badge) { const b = make('span', 'spp-mp-badge', 'MP'); b.title = mpText(mp); a.after(b); }
       } else if (badge) badge.remove();
-      const star = par ? par.querySelector(':scope > .spp-fav-badge') : null;
-      if (settings.favBtn && favs.has(path)) { if (!star) a.after(make('span', 'spp-fav-badge', '★')); } else if (star) star.remove();
-      const mine = notes[path] && notes[path].s;
-      const tag = par ? par.querySelector(':scope > .spp-status-badge') : null;
-      if (mine && settings.statusBadge) {
-        if (!tag) a.after(make('span', 'spp-status-badge', STATUS[mine]));
-        else if (tag.textContent !== STATUS[mine]) tag.textContent = STATUS[mine];
-      } else if (tag) tag.remove();
-      const done = settings.hideDone && (mine === 'done' || mine === 'dropped');
-      if (card) card.classList.toggle('spp-hide', !!((settings.mpOnlyLists && haveMP && !mp) || (settings.hideVisited && seen) || done));
+      if (card) card.classList.toggle('spp-hide', !!((settings.mpOnlyLists && haveMP && !mp) || (settings.hideVisited && seen)));
       if (settings.newTab && isGamePath(path + '/')) { a.target = '_blank'; a.rel = 'noopener'; }
     });
   }
@@ -2057,18 +2102,6 @@ main{z-index:1}
     store.set(HIST_KEY, JSON.stringify(h.slice(0, 60)));
   }
 
-  function putSearchButton() {
-    let b = document.getElementById('spp-search-btn');
-    if (!settings.quickSearch) { if (b) b.remove(); return; }
-    if (b) return;
-    sampleTheme();
-    b = make('button'); b.id = 'spp-search-btn'; b.type = 'button';
-    b.title = 'Search all games'; b.setAttribute('aria-label', 'Search all games');
-    b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>';
-    b.addEventListener('click', openPalette);
-    document.body.appendChild(b);
-  }
-
   function openPalette() {
     if (document.getElementById('spp-palette')) return;
     sampleTheme(); injectCss();
@@ -2113,10 +2146,8 @@ main{z-index:1}
     }
     const showHistory = () => {
       const keep = (g) => !mpBox.checked || lookupMP(g.title, g.link);
-      const favs = getFavs().map((x) => ({ title: x[1], link: x[0] + '/', date: x[2], _group: '★ Favorites' })).filter(keep);
-      const fp = new Set(favs.map((g) => g.link));
-      const h = getHist().map((x) => ({ title: x[1], link: x[0] + '/', date: x[2], _group: 'Recently viewed' })).filter((g) => keep(g) && !fp.has(g.link));
-      draw(favs.concat(h), '', 'Type to search every game.');
+      const h = getHist().map((x) => ({ title: x[1], link: x[0] + '/', date: x[2], _group: 'Recently viewed' })).filter(keep);
+      draw(h, '', 'Type to search every game.');
     };
     async function run(q) {
       const my = ++seq;
@@ -2256,13 +2287,33 @@ main{z-index:1}
 
 
   function putCredit() {
-    const c = document.getElementById('spp-credit');
+    let c = document.getElementById('spp-credit');
     if (!settings.showCredit) { if (c) c.remove(); return; }
-    if (c && c.isConnected) return;
     sampleTheme();
-    const d = make('div'); d.id = 'spp-credit';
-    d.innerHTML = 'Made by <a href="https://discord.com/users/1338747411065208882" target="_blank" rel="noopener noreferrer" title="Message Axiom on Discord">Axiom</a> · Made with love <span class="spp-heart">♥</span>';
-    document.body.appendChild(d);
+    if (!c) {
+      c = document.createElement('div');
+      c.id = 'spp-credit';
+      c.appendChild(document.createTextNode('Made by '));
+      const a = document.createElement('a');
+      a.href = 'https://discord.com/users/1338747411065208882';
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.title = 'Message Axiom on Discord';
+      a.textContent = 'Axiom';
+      c.appendChild(a);
+      c.appendChild(document.createTextNode(' \u00b7 Made with love '));
+      c.appendChild(make('span', 'spp-heart', '\u2665'));
+    }
+    if (!c.isConnected) (document.body || document.documentElement).appendChild(c);
+    // if the site's layout hides or clips the footer, fall back to a floating pill
+    c.classList.remove('spp-credit-float');
+    const cs = getComputedStyle(c);
+    const r = c.getBoundingClientRect();
+    const docH = Math.max(document.documentElement.scrollHeight, document.body ? document.body.scrollHeight : 0);
+    const unreachable = r.top + window.scrollY > docH + 2;
+    if (cs.display === 'none' || cs.visibility === 'hidden' || r.height < 5 || r.width < 5 || unreachable) {
+      c.classList.add('spp-credit-float');
+    }
   }
 
   let progressBound = false;
@@ -2297,88 +2348,10 @@ main{z-index:1}
 
 
 
-  // favorites
-  const FAV_KEY = 'spp_favs';
-  const getFavs = () => parse(store.get(FAV_KEY, '[]'), []);
-  const pathOf = (u) => { try { return new URL(u, ORIGIN).pathname.replace(/\/$/, ''); } catch { return ''; } };
-  const favPaths = () => new Set(getFavs().map((x) => x[0]));
-  function setFavs(list) { store.set(FAV_KEY, JSON.stringify(list.slice(0, 500))); }
-  function toggleFav() {
-    if (!onGamePage()) return;
-    const path = location.pathname.replace(/\/$/, '');
-    const f = getFavs(); const i = f.findIndex((x) => x[0] === path);
-    if (i >= 0) { f.splice(i, 1); toast('Removed from favorites'); }
-    else { f.unshift([path, cleanTitle(gameTitleOnPage()), Date.now()]); toast('Added to favorites ★'); }
-    setFavs(f); putFavButton();
-  }
-  function putFavButton() {
-    let b = document.getElementById('spp-fav-btn');
-    if (!settings.favBtn || !onGamePage()) { if (b) b.remove(); return; }
-    if (!b) {
-      sampleTheme();
-      b = make('button'); b.id = 'spp-fav-btn'; b.type = 'button';
-      b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17.3l-5.4 3.2 1.4-6.1L3.3 10l6.2-.5L12 3.7l2.5 5.8 6.2.5-4.7 4.4 1.4 6.1z"/></svg>';
-      b.addEventListener('click', toggleFav);
-      document.body.appendChild(b);
-    }
-    const on = favPaths().has(location.pathname.replace(/\/$/, ''));
-    b.classList.toggle('on', on);
-    b.title = on ? 'Remove from favorites (F)' : 'Add to favorites (F)';
-    b.setAttribute('aria-label', b.title);
-  }
-  function openFavs() {
-    if (document.getElementById('spp-modal')) return;
-    const m = makeModal('Favorites');
-    const draw = () => {
-      m.body.replaceChildren();
-      const f = getFavs();
-      if (!f.length) { m.body.appendChild(make('div', 'spp-empty', 'No favorites yet. Press the star on a game page, or F.')); return; }
-      f.forEach((x, i) => {
-        const row = make('div', 'spp-row');
-        const a = make('a', '', x[1]); a.href = x[0] + '/';
-        a.style.cssText = 'color:inherit;font-weight:600;text-decoration:none;flex:1;';
-        const mp = lookupMP(x[1], x[0]);
-        if (mp) { const bd = make('span', 'spp-mp-badge', 'MP'); bd.title = mpText(mp); a.appendChild(bd); }
-        const rm = make('button', 'spp-x', '×'); rm.type = 'button'; rm.title = 'Remove';
-        rm.addEventListener('click', () => { const l = getFavs(); l.splice(i, 1); setFavs(l); draw(); putFavButton(); });
-        row.append(a, rm);
-        m.body.appendChild(row);
-      });
-    };
-    draw();
-    document.body.appendChild(m.overlay);
-  }
-  if (typeof GM_registerMenuCommand === 'function') GM_registerMenuCommand('SteamRip++: favorites', openFavs);
-
-
-  // floating buttons -> one dock
-  const DOCK_LABELS = { 'spp-top-btn': 'Top', 'spp-jump-btn': 'Downloads', 'spp-search-btn': 'Search', 'spp-fav-btn': 'Favorite', 'spp-note-btn': 'Notes' };
-  let dockBound = false;
-  function setDock(open) {
-    document.documentElement.classList.toggle('spp-open', !!open);
-    const h = document.getElementById('spp-dock-btn');
-    if (h) h.setAttribute('aria-expanded', open ? 'true' : 'false');
-  }
-  function putDock() {
-    const root = document.documentElement;
-    let h = document.getElementById('spp-dock-btn');
-    if (!settings.dock) { if (h) h.remove(); root.classList.remove('spp-dock', 'spp-open'); return; }
-    root.classList.add('spp-dock');
-    if (!h) {
-      sampleTheme();
-      h = make('button'); h.id = 'spp-dock-btn'; h.type = 'button'; h.title = 'Tools'; h.setAttribute('aria-label', 'Tools'); h.setAttribute('aria-expanded', 'false');
-      h.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>';
-      h.addEventListener('click', () => setDock(!root.classList.contains('spp-open')));
-      document.body.appendChild(h);
-    }
-    if (!dockBound) {
-      dockBound = true;
-      document.addEventListener('click', (e) => {
-        if (root.classList.contains('spp-open') && !e.target.closest('#spp-dock-btn, #spp-top-btn, #spp-jump-btn, #spp-search-btn, #spp-fav-btn, #spp-note-btn')) setDock(false);
-      });
-      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && root.classList.contains('spp-open') && !document.getElementById('spp-modal')) setDock(false); });
-    }
-    Object.keys(DOCK_LABELS).forEach((id) => { const b = document.getElementById(id); if (b) b.dataset.label = DOCK_LABELS[id]; });
+  // hover labels for the floating buttons
+  const BTN_LABELS = { 'spp-top-btn': 'Top', 'spp-jump-btn': 'Downloads' };
+  function labelButtons() {
+    Object.keys(BTN_LABELS).forEach((id) => { const b = document.getElementById(id); if (b && !b.dataset.label) b.dataset.label = BTN_LABELS[id]; });
   }
 
   function openKeys() {
@@ -2386,8 +2359,6 @@ main{z-index:1}
     const m = makeModal('Keyboard shortcuts');
     [
       [['/', 'Ctrl K'], 'Search all games'],
-      [['F'], 'Add or remove favorite (game page)'],
-      [['N'], 'Notes & status (game page)'],
       [['D'], 'Jump to the download links (game page)'],
       [['?'], 'This list'],
       [['Esc'], 'Close whatever is open']
@@ -2402,112 +2373,6 @@ main{z-index:1}
     document.body.appendChild(m.overlay);
   }
 
-  // status + notes
-  const NOTES_KEY = 'spp_notes';
-  const STATUS = { want: 'Want to play', playing: 'Playing', done: 'Finished', dropped: 'Dropped' };
-  const getNotes = () => parse(store.get(NOTES_KEY, '{}'), {});
-  const saveNotes = (o) => store.set(NOTES_KEY, JSON.stringify(o));
-  const hereKey = () => location.pathname.replace(/\/$/, '');
-
-  function putNoteButton() {
-    let b = document.getElementById('spp-note-btn');
-    if (!settings.notes || !onGamePage()) { if (b) b.remove(); return; }
-    if (!b) {
-      sampleTheme();
-      b = make('button'); b.id = 'spp-note-btn'; b.type = 'button';
-      b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25zM20.7 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
-      b.addEventListener('click', openNote);
-      document.body.appendChild(b);
-    }
-    const mine = getNotes()[hereKey()];
-    b.classList.toggle('on', !!mine);
-    b.title = mine && mine.s ? 'Notes: ' + STATUS[mine.s] + ' (N)' : 'Notes & status (N)';
-    b.setAttribute('aria-label', b.title);
-  }
-
-  function openNote() {
-    if (!onGamePage() || document.getElementById('spp-modal')) return;
-    const key = hereKey();
-    const title = cleanTitle(gameTitleOnPage());
-    const old = getNotes()[key] || {};
-    let status = old.s || '';
-    const m = makeModal('Notes');
-    m.body.appendChild(make('div', 'spp-sec', title));
-    const chips = make('div', 'spp-chips');
-    const keys = Object.keys(STATUS);
-    keys.forEach((k) => {
-      const c = make('button', 'spp-pick' + (k === status ? ' on' : ''), STATUS[k]);
-      c.type = 'button';
-      c.addEventListener('click', () => {
-        status = status === k ? '' : k;
-        Array.from(chips.children).forEach((x, i) => x.classList.toggle('on', keys[i] === status));
-      });
-      chips.appendChild(c);
-    });
-    const ta = make('textarea', 'spp-note');
-    ta.value = old.n || ''; ta.maxLength = 2000;
-    ta.placeholder = 'Anything worth remembering: settings, co-op steps, which part you got stuck on…';
-    const save = () => {
-      const all = getNotes();
-      const text = ta.value.trim();
-      if (!status && !text) delete all[key];
-      else all[key] = { t: title, s: status, n: text, d: Date.now() };
-      saveNotes(all);
-      m.close(); putNoteButton(); decorateCards(); toast('Saved');
-    };
-    ta.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) save(); });
-    const row = make('div', 'spp-btns');
-    const mk = (label, fn, cls) => { const b = make('button', 'spp-btn' + (cls ? ' ' + cls : ''), label); b.type = 'button'; b.addEventListener('click', fn); row.appendChild(b); };
-    mk('Save', save, 'pri');
-    mk('All my games', () => { m.close(); openLibrary(); });
-    m.body.append(chips, ta, row);
-    document.body.appendChild(m.overlay);
-    ta.focus();
-  }
-
-  function openLibrary() {
-    if (document.getElementById('spp-modal')) return;
-    const m = makeModal('My games');
-    const bar = make('div', 'spp-chips');
-    const list = make('div');
-    m.body.append(bar, list);
-    let filter = '';
-    const draw = () => {
-      const notes = getNotes();
-      const rows = Object.keys(notes).map((p) => Object.assign({ p }, notes[p])).sort((a, b) => (b.d || 0) - (a.d || 0));
-      bar.replaceChildren();
-      [['', 'All']].concat(Object.entries(STATUS)).forEach(([k, label]) => {
-        const n = k ? rows.filter((r) => r.s === k).length : rows.length;
-        const c = make('button', 'spp-pick' + (k === filter ? ' on' : ''), label + ' ' + n);
-        c.type = 'button';
-        c.addEventListener('click', () => { filter = k; draw(); });
-        bar.appendChild(c);
-      });
-      list.replaceChildren();
-      const shown = rows.filter((r) => !filter || r.s === filter);
-      if (!shown.length) {
-        list.appendChild(make('div', 'spp-empty', rows.length ? 'Nothing with that status.' : 'Nothing here yet. Press N on a game page to add a status or a note.'));
-        return;
-      }
-      shown.forEach((r) => {
-        const row = make('div', 'spp-row');
-        const box = make('div'); box.style.cssText = 'flex:1;min-width:0;';
-        const a = make('a', '', r.t || r.p); a.href = r.p + '/';
-        a.style.cssText = 'color:inherit;font-weight:600;text-decoration:none;';
-        box.appendChild(a);
-        const bits = [r.s ? STATUS[r.s] : '', (r.n || '').replace(/\s+/g, ' ').slice(0, 90)].filter(Boolean).join(' · ');
-        if (bits) box.appendChild(make('small', '', bits));
-        const rm = make('button', 'spp-x', '×'); rm.type = 'button'; rm.title = 'Remove';
-        rm.addEventListener('click', () => { const all = getNotes(); delete all[r.p]; saveNotes(all); draw(); decorateCards(); putNoteButton(); });
-        row.append(box, rm);
-        list.appendChild(row);
-      });
-    };
-    draw();
-    document.body.appendChild(m.overlay);
-  }
-  if (typeof GM_registerMenuCommand === 'function') GM_registerMenuCommand('SteamRip++: my games', openLibrary);
-
   // shortcuts
   document.addEventListener('keydown', (e) => {
     if (!settings.shortcuts || e.defaultPrevented) return;
@@ -2517,8 +2382,6 @@ main{z-index:1}
     const mod = e.ctrlKey || e.metaKey; const k = e.key.toLowerCase();
     if (e.key === '?' && !mod) { e.preventDefault(); openKeys(); return; }
     if (settings.quickSearch && ((e.key === '/' && !mod && !e.altKey) || (mod && k === 'k'))) { e.preventDefault(); openPalette(); }
-    else if (!mod && !e.altKey && !e.shiftKey && k === 'f' && settings.favBtn && onGamePage()) { e.preventDefault(); toggleFav(); }
-    else if (!mod && !e.altKey && !e.shiftKey && k === 'n' && settings.notes && onGamePage()) { e.preventDefault(); openNote(); }
     else if (!mod && !e.altKey && !e.shiftKey && k === 'd' && settings.jumpBtn && onGamePage()) { e.preventDefault(); jumpToDownloads(); }
   });
 
@@ -2530,6 +2393,7 @@ main{z-index:1}
     const out = [];
     out.push('SteamRip++ v' + VERSION + ' | URL: ' + location.href);
     out.push('settings: ' + JSON.stringify(settings));
+    { const cr = document.getElementById('spp-credit'); out.push('credit: ' + (cr ? 'present, float=' + cr.classList.contains('spp-credit-float') + ', rect=' + JSON.stringify(cr.getBoundingClientRect()) + ', display=' + getComputedStyle(cr).display : 'NOT IN DOM') + ' | showCredit=' + settings.showCredit); }
     const probeUrl = async (label, url, opts) => {
       try {
         const r = await fetch(url, Object.assign({ credentials: 'same-origin' }, opts || {}));
@@ -2569,29 +2433,28 @@ main{z-index:1}
   if (typeof GM_registerMenuCommand === 'function') GM_registerMenuCommand('SteamRip++: debug report', debugReport);
 
   function refreshPage() {
-    injectCss();
-    markCounts();
-    if (settings.cleanTitles) { cleanTexts(); cleanDocTitle(); }
-    hideTopRanges();
-    hideSocial();
-    scanAuthors();
-    putSettingsButton();
-    addMPRow();
-    trackVisit();
-    decorateCards();
-    putTopButton();
-    putJumpButton();
-    putFavButton();
-    putNoteButton();
-    putSearchButton();
-    putDock();
-    watchInfinite();
-    putCredit();
-    putProgress();
-    trackHistory();
-    watchLightbox();
-    checkNew();
-    if (!profileActive && /^#spp-author=/.test(location.hash)) routeCheck();
+    const run = (fn) => { try { fn(); } catch (e) { console.warn('[SteamRip++] ' + (fn.name || 'step') + ' failed', e); } };
+    run(injectCss);
+    run(putCredit);
+    run(markCounts);
+    if (settings.cleanTitles) { run(cleanTexts); run(cleanDocTitle); }
+    run(cleanUpdatesPage);
+    run(hideTopRanges);
+    run(hideSocial);
+    run(scanAuthors);
+    run(putSettingsButton);
+    run(addMPRow);
+    run(trackVisit);
+    run(decorateCards);
+    run(putTopButton);
+    run(putJumpButton);
+    run(labelButtons);
+    run(watchInfinite);
+    run(putProgress);
+    run(trackHistory);
+    run(watchLightbox);
+    run(checkNew);
+    run(() => { if (!profileActive && /^#spp-author=/.test(location.hash)) routeCheck(); });
   }
 
   injectCss();
@@ -2601,14 +2464,36 @@ main{z-index:1}
   setTimeout(refreshPage, 4000);
 
   let timer = null;
-  const ours = (n) => n.nodeType !== 1 || (n.id && n.id.indexOf('spp-') === 0) || (n.classList && (n.classList.contains('spp-mp-badge') || n.classList.contains('spp-fav-badge') || n.classList.contains('spp-status-badge')));
-  new MutationObserver((muts) => {
-    if (!muts.some((m) => Array.from(m.addedNodes).some((n) => !ours(n)))) return;
+  const ours = (n) => n.nodeType !== 1 || (n.id && n.id.indexOf('spp-') === 0) || (n.classList && (n.classList.contains('spp-mp-badge')));
+  function schedule() {
     clearTimeout(timer);
     timer = setTimeout(refreshPage, 200);
-  }).observe(document.body, { childList: true, subtree: true });
-})();
-</script>
+  }
+  new MutationObserver((muts) => {
+    for (const m of muts) {
+      if (m.type === 'childList') {
+        if (Array.from(m.addedNodes).some((n) => !ours(n))) { schedule(); return; }
+      } else if (m.type === 'characterData') {
+        // Some comment widgets (Hyvor Talk and others) update an existing
+        // text node's value in place once the real count loads, instead of
+        // replacing the node — a childList-only observer never sees that,
+        // so a "1 comment" that arrives late never gets caught and hidden.
+        const txt = m.target && m.target.nodeValue;
+        if (txt && /comment/i.test(txt)) { schedule(); return; }
+      }
+    }
+  }).observe(document.body, { childList: true, subtree: true, characterData: true });
+
+  // Belt-and-suspenders: in case a widget's late update slips past both the
+  // timed refreshes above and the mutation observer, keep re-checking for
+  // comment counts for a bit after load.
+  let countPolls = 0;
+  const countPoll = setInterval(() => {
+    if (++countPolls > 12) { clearInterval(countPoll); return; } // ~24s, then stop
+    markCounts();
+    putCredit();
+  }, 2000);
+})();</script>
 
 <script>
 const ID="1338747411065208882",USER="axiom423";
@@ -2618,6 +2503,19 @@ document.querySelectorAll(".yr").forEach(e=>e.textContent=new Date().getFullYear
 const MPN=(()=>{const m=($("srcode").textContent||"").match(/const MP_DATA = \[([\s\S]*?)\n  \];/);return m?(m[1].match(/^\s*\["/gm)||[]).length:0})();
 const VER=(($("srcode").textContent||"").match(/@version\s+(\S+)/)||[])[1];
 if(VER)$("ver").textContent="v"+VER;
+const UPD=(($("srcode").textContent||"").match(/@updated\s+(\S+)/)||[])[1];
+function relTime(iso){
+  const d=new Date(iso+"T00:00:00Z");if(isNaN(d))return"";
+  const days=Math.floor((Date.now()-d.getTime())/86400000);
+  if(days<=0)return"today";
+  if(days===1)return"yesterday";
+  if(days<7)return days+" days ago";
+  if(days<14)return"a week ago";
+  if(days<30)return Math.floor(days/7)+" weeks ago";
+  if(days<60)return"a month ago";
+  if(days<365)return Math.floor(days/30)+" months ago";
+  const y=Math.floor(days/365);return y+" year"+(y>1?"s":"")+" ago";
+}
 const FIXES=[
  ["Messy titles","Strips “Free Download” and version numbers from game titles, tabs and links."],
  ["Comments","Removes the comment section and every “N comments” counter."],
@@ -2629,11 +2527,10 @@ const FIXES=[
 const ADDS=[
  ["Multiplayer info",(MPN?MPN+" games":"Hundreds of games")+" with an MP badge and a Multiplayer row in GAME INFO (OnlineFix, official servers, LAN and more)."],
  ["Uploader profiles","Each uploader’s games with search, sort, date filters, stats and a 12-month activity chart."],
- ["Favorites, notes & status","Star games, mark them Want to play, Playing, Finished or Dropped, and keep a private note. Stays in your browser."],
  ["Settings panel","Gear icon in the header with a toggle for every feature, plus export and import."],
  ["Smarter lists","Dims games you already opened, shows what’s new since your last visit, optional infinite scroll and prefetch."],
  ["Screenshot viewer","Click a screenshot to see it full size, arrow keys to browse."],
- ["Shortcuts","/ or Ctrl+K to search, F to favorite, D or the jump button to reach the download links."],
+ ["Shortcuts","/ or Ctrl+K to search, D or the jump button to reach the download links."],
  ["Small extras","Reading progress bar, back-to-top button, random game and copy-list on uploader pages."]
 ];
 const STEPS=[
@@ -2649,10 +2546,9 @@ function drawSteps(br){const el=$("steps");el.replaceChildren();STEPS.filter(x=>
 (function(){const ff=/firefox/i.test(navigator.userAgent);const br=ff?"firefox":"chrome";document.querySelectorAll("#seg button").forEach(b=>{b.classList.toggle("on",b.dataset.b===br);b.onclick=()=>{document.querySelectorAll("#seg button").forEach(x=>x.classList.toggle("on",x===b));drawSteps(b.dataset.b)}});drawSteps(br)})();
 
 /* faq */
-[["Does it send my data anywhere?","No. It only talks to steamrip.com, the same site you are already on. Favorites, notes and settings are saved in your own browser."],
+[["Does it send my data anywhere?","No. It only talks to steamrip.com, the same site you are already on. Your settings are saved in your own browser."],
  ["Will it break when SteamRip changes?","It can, because it works with the site’s layout. Open the gear, go to Data &amp; help and press Copy debug report, then send it to me so I can fix it."],
- ["How do I update?","Press Copy code on this page, open the script in Tampermonkey, paste over everything and save. Your settings, favorites and notes stay."],
- ["Can I move my favorites and notes to another browser?","Yes. Gear → Data &amp; help → Export favorites &amp; notes, then Import on the other browser."],
+ ["How do I update?","Press Copy code on this page, open the script in Tampermonkey, paste over everything and save. Your settings stay."],
  ["Can I turn features off?","Every feature has its own switch in Settings, and there is a search box on top if you cannot find one."]
 ].forEach(([q,a])=>{const d=document.createElement("details");const s=document.createElement("summary");s.textContent=q;const p=document.createElement("p");p.innerHTML=a;d.append(s,p);$("faq").appendChild(d)});
 
@@ -2675,7 +2571,7 @@ addEventListener("hashchange",route);
 let codeText="";
 function loadCode(){
   const t=($("srcode").textContent||"").trim();
-  if(t){codeText=t;$("code").textContent=t;$("codeInfo").textContent="steamrip.user.js · "+t.split("\n").length.toLocaleString()+" lines · "+Math.round(t.length/1024)+" KB"}
+  if(t){codeText=t;$("code").textContent=t;const rt=UPD?relTime(UPD):"";$("codeInfo").textContent="steamrip.user.js · "+t.split("\n").length.toLocaleString()+" lines · "+Math.round(t.length/1024)+" KB"+(rt?" · Updated "+rt:"")}
   else $("code").textContent="No code found in this page.";
 }
 function legacyCopy(t){const a=document.createElement("textarea");a.value=t;a.setAttribute("readonly","");a.style.cssText="position:fixed;top:-100px;opacity:0";document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand("copy")}catch(e){}a.remove();return ok}
