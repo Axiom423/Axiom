@@ -3,8 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Axiom</title>
-<meta name="description" content="Axiom — SteamRip (But Better), a free userscript that cleans up SteamRip and adds multiplayer info, uploader profiles, quick search and more.">
+<title>Axiom — Free tools that run in your browser</title>
+<meta name="description" content="Free tools by Axiom. Convert 45+ file types (MP4, MP3, PDF, Word, Excel, HEIC and more) right in your browser with nothing uploaded, plus SteamRip (But Better), a userscript that adds multiplayer info, uploader profiles, favorites and notes.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Axiom">
+<meta property="og:title" content="Axiom — Free tools that run in your browser">
+<meta property="og:description" content="Free tools by Axiom. Convert 45+ file types (MP4, MP3, PDF, Word, Excel, HEIC and more) right in your browser with nothing uploaded, plus SteamRip (But Better), a userscript that adds multiplayer info, uploader profiles, favorites and notes.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Axiom — Free tools that run in your browser">
+<meta name="twitter:description" content="Free tools by Axiom. Convert 45+ file types (MP4, MP3, PDF, Word, Excel, HEIC and more) right in your browser with nothing uploaded, plus SteamRip (But Better), a userscript that adds multiplayer info, uploader profiles, favorites and notes.">
 <meta name="theme-color" content="#060607">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><rect width=%27100%27 height=%27100%27 rx=%2750%27 fill=%27black%27/><text x=%2750%27 y=%2768%27 font-size=%2760%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27Georgia%27>A</text></svg>">
 <style>
@@ -201,6 +208,10 @@ html{scrollbar-width:thin;scrollbar-color:#2a2a2f transparent}
 .note{color:var(--mute);font-size:12.5px;line-height:1.5;margin:-4px 0 14px;padding:9px 12px;border:1px solid var(--line);border-left:2px solid rgba(255,255,255,.35);border-radius:8px;background:var(--card)}
 .lst{width:100%;display:grid}.lst>div{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line);font-size:13px}.lst>div:last-child{border-bottom:0}
 .lst b{font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lst span{color:var(--mute);white-space:nowrap}
+#cvFmts{display:grid;gap:16px}
+.fmts .g{display:flex;flex-wrap:wrap;gap:8px}
+.fmts .g>small{width:100%;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.opts input[type=checkbox]{accent-color:#fff;width:15px;height:15px}
 @media(max-width:600px){.drop{padding:38px 16px}.opts input[type=range]{width:90px}}
 </style>
 </head>
@@ -271,7 +282,7 @@ html{scrollbar-width:thin;scrollbar-color:#2a2a2f transparent}
   <section class="hero c">
     <div class="eyebrow">Tool · by Axiom</div>
     <h2 class="t">Convert anything</h2>
-    <p class="lead">Drop a file, pick a format. It finds the shortest route between the two, and everything runs inside your browser. Nothing is uploaded.</p>
+    <p class="lead">Images, video, audio, documents, spreadsheets and data. Drop a file, pick a format, and it finds the best route between the two. Everything runs inside your browser, nothing is uploaded.</p>
     <div class="meta"><span class="chip">Private</span><span class="chip">No upload</span><span class="chip" id="cvCount">Many formats</span></div>
   </section>
 
@@ -293,7 +304,10 @@ html{scrollbar-width:thin;scrollbar-color:#2a2a2f transparent}
         <label data-o="v">Frame rate <select id="ofps"><option>8</option><option selected>12</option><option>15</option><option>20</option></select></label>
         <label data-o="v">Length <select id="osec"><option value="3">3 s</option><option value="6" selected>6 s</option><option value="10">10 s</option><option value="15">15 s</option></select></label>
         <label data-o="p">Page width <select id="opw"><option value="390">Phone</option><option value="768">Tablet</option><option value="1280" selected>Desktop</option><option value="1920">Wide</option></select></label>
-        <label data-o="k">Bitrate <select id="ok"><option value="128">128 kbps</option><option value="192" selected>192 kbps</option><option value="320">320 kbps</option></select></label>
+        <label data-o="k">Bitrate <select id="ok"><option value="64">64 kbps</option><option value="96">96 kbps</option><option value="128">128 kbps</option><option value="192" selected>192 kbps</option><option value="256">256 kbps</option><option value="320">320 kbps</option></select></label>
+        <label data-o="c">Trim to <select id="ocl"><option value="0">Full length</option><option value="10">10 s</option><option value="30">30 s</option><option value="60">1 min</option><option value="300">5 min</option></select></label>
+        <label data-o="g">Pages <select id="opg"><option value="1">First page</option><option value="0">All pages (ZIP)</option></select></label>
+        <label data-o="m"><input type="checkbox" id="omg" checked> Combine into one file</label>
       </div>
       <button class="btn main" id="cvGo" disabled>Choose a format</button>
       <div class="cvbar" id="cvBar"><i id="cvBarI"></i></div>
@@ -2719,10 +2733,21 @@ route();
 /* ===== Converter: formats are nodes, converters are edges, routes are found with a shortest-path search ===== */
 (()=>{
 const dec=new TextDecoder(),tick=()=>new Promise(r=>setTimeout(r)),esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const LBL={png:"PNG",jpg:"JPG",webp:"WebP",bmp:"BMP",gif:"GIF",ico:"ICO",svg:"SVG",avif:"AVIF",pdf:"PDF",txt:"TXT",md:"Markdown",html:"HTML",docx:"DOCX",json:"JSON",csv:"CSV",wav:"WAV",mp3:"MP3",ogg:"OGG",flac:"FLAC",m4a:"M4A",mp4:"MP4",webm:"WebM",mov:"MOV"};
-const MIME={png:"image/png",jpg:"image/jpeg",webp:"image/webp",bmp:"image/bmp",gif:"image/gif",ico:"image/x-icon",svg:"image/svg+xml",avif:"image/avif",pdf:"application/pdf",txt:"text/plain",md:"text/markdown",html:"text/html",json:"application/json",csv:"text/csv",wav:"audio/wav",mp3:"audio/mpeg",ogg:"audio/ogg",flac:"audio/flac",m4a:"audio/mp4",mp4:"video/mp4",webm:"video/webm",mov:"video/quicktime",docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"};
-const ALIAS={jpeg:"jpg",htm:"html",markdown:"md",text:"txt",opus:"ogg",tif:"tiff"};
-const IMG=new Set("png jpg webp bmp gif ico svg avif".split(" ")),AUD=new Set("wav mp3 ogg flac m4a".split(" ")),VID=new Set("mp4 webm mov".split(" ")),TXT=new Set("txt md html json csv".split(" "));
+const LBL={png:"PNG",jpg:"JPG",webp:"WebP",bmp:"BMP",gif:"GIF",ico:"ICO",svg:"SVG",avif:"AVIF",tiff:"TIFF",heic:"HEIC",
+mp4:"MP4",webm:"WebM",mkv:"MKV",mov:"MOV",avi:"AVI",flv:"FLV",wmv:"WMV",mpg:"MPEG","3gp":"3GP",ogv:"OGV",ts:"MPEG-TS",
+wav:"WAV",mp3:"MP3",ogg:"OGG",flac:"FLAC",m4a:"M4A",aac:"AAC",opus:"Opus",wma:"WMA",aiff:"AIFF",amr:"AMR",
+pdf:"PDF",txt:"TXT",md:"Markdown",html:"HTML",docx:"DOCX",odt:"ODT",rtf:"RTF",epub:"EPUB",
+json:"JSON",csv:"CSV",tsv:"TSV",xlsx:"Excel (XLSX)",xls:"Excel (XLS)",ods:"ODS",xml:"XML",yaml:"YAML",zip:"ZIP"};
+const MIME={png:"image/png",jpg:"image/jpeg",webp:"image/webp",bmp:"image/bmp",gif:"image/gif",ico:"image/x-icon",svg:"image/svg+xml",avif:"image/avif",tiff:"image/tiff",heic:"image/heic",
+mp4:"video/mp4",webm:"video/webm",mkv:"video/x-matroska",mov:"video/quicktime",avi:"video/x-msvideo",flv:"video/x-flv",wmv:"video/x-ms-wmv",mpg:"video/mpeg","3gp":"video/3gpp",ogv:"video/ogg",ts:"video/mp2t",
+wav:"audio/wav",mp3:"audio/mpeg",ogg:"audio/ogg",flac:"audio/flac",m4a:"audio/mp4",aac:"audio/aac",opus:"audio/ogg",wma:"audio/x-ms-wma",aiff:"audio/aiff",amr:"audio/amr",
+pdf:"application/pdf",txt:"text/plain",md:"text/markdown",html:"text/html",odt:"application/vnd.oasis.opendocument.text",rtf:"application/rtf",epub:"application/epub+zip",
+json:"application/json",csv:"text/csv",tsv:"text/tab-separated-values",xml:"application/xml",yaml:"text/yaml",zip:"application/zip",
+xlsx:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",xls:"application/vnd.ms-excel",ods:"application/vnd.oasis.opendocument.spreadsheet",
+docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"};
+const ALIAS={jpeg:"jpg",jfif:"jpg",htm:"html",markdown:"md",text:"txt",log:"txt",tif:"tiff",heif:"heic",mpeg:"mpg",m4v:"mp4",mts:"ts",m2ts:"ts",oga:"ogg",aif:"aiff",aifc:"aiff",yml:"yaml","3g2":"3gp",xlsm:"xlsx",mp2:"mp3",mka:"mkv",weba:"webm"};
+const CAT=[["Images","png jpg webp bmp gif ico svg avif tiff heic"],["Video","mp4 webm mkv mov avi flv wmv mpg 3gp ogv ts"],["Audio","wav mp3 ogg flac m4a aac opus wma aiff amr"],["Documents","pdf txt md html docx odt rtf epub"],["Data","json csv tsv xlsx xls ods xml yaml"]].map(([n,l])=>[n,l.split(" ")]);
+const IMG=new Set("png jpg webp bmp gif ico svg avif".split(" ")),AUD=new Set("wav mp3 ogg flac m4a aac opus wma aiff amr".split(" ")),VID=new Set("mp4 webm mkv mov avi flv wmv mpg 3gp ogv ts".split(" ")),TXT=new Set("txt md html json csv tsv xml yaml".split(" ")),MERGE=new Set([...IMG,"heic","tiff"]);
 
 /* ---------- helpers ---------- */
 const blobAsync=(c,t,q)=>new Promise(r=>c.toBlob(r,t,q));
@@ -2732,20 +2757,35 @@ const b64=u=>{let s="";for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.app
 async function load(b){
   const svg=b.type=="image/svg+xml",u=svg?await dataURL(b):URL.createObjectURL(b),i=new Image();i.src=u; /* data: URLs keep SVG canvases untainted */
   try{await i.decode()}catch(e){throw Error("This browser can't read that image")}finally{if(!svg)URL.revokeObjectURL(u)}return i}
-const loadScript=u=>new Promise((ok,no)=>{const s=document.createElement("script");s.src=u;s.onload=ok;s.onerror=()=>no(Error("Couldn't load the MP3 encoder (needs internet once)"));document.head.appendChild(s)});
+const loadScript=u=>new Promise((ok,no)=>{const s=document.createElement("script");s.src=u;s.onload=ok;s.onerror=()=>no(Error("Couldn't load a helper library. It needs an internet connection the first time."));document.head.appendChild(s)});
+const loadLib=async(test,urls)=>{if(test())return;let e;for(const u of urls){try{await loadScript(u);if(test())return}catch(x){e=x}}throw e||Error("Couldn't load a helper library")};
 
 /* ---------- format detection: magic bytes first, extension second ---------- */
 async function sniff(file){
-  const b=new Uint8Array(await file.slice(0,16).arrayBuffer()),s=String.fromCharCode(...b),ext=(file.name.split(".").pop()||"").toLowerCase();
+  const b=new Uint8Array(await file.slice(0,200).arrayBuffer()),s=String.fromCharCode(...b.subarray(0,64)),s2=String.fromCharCode(...b),e0=(file.name.split(".").pop()||"").toLowerCase(),ext=ALIAS[e0]||e0,u=(...l)=>l.includes(ext)?ext:l[0];
   if(b[0]==0x89&&s.slice(1,4)=="PNG")return"png";if(b[0]==0xff&&b[1]==0xd8)return"jpg";
-  if(s.startsWith("GIF8"))return"gif";if(s.startsWith("BM"))return"bmp";
-  if(s.startsWith("RIFF")){const t=s.slice(8,12);if(t=="WEBP")return"webp";if(t=="WAVE")return"wav"}
-  if(s.startsWith("%PDF"))return"pdf";if(s.startsWith("OggS"))return"ogg";if(s.startsWith("fLaC"))return"flac";
+  if(s.startsWith("GIF8"))return"gif";if(s.startsWith("BM")&&[12,40,108,124].includes(b[14])&&b[15]==0)return"bmp";
+  if(s.startsWith("RIFF")){const t=s.slice(8,12);if(t=="WEBP")return"webp";if(t=="WAVE")return"wav";if(t=="AVI ")return"avi"}
+  if(s.startsWith("%PDF"))return"pdf";
+  if(s.startsWith("OggS"))return ext=="ogv"?"ogv":s2.includes("OpusHead")?"opus":s2.includes("theora")?"ogv":"ogg";
+  if(s.startsWith("fLaC"))return"flac";
+  if(b[0]==0xff&&(b[1]&0xf6)==0xf0)return"aac";
   if(s.startsWith("ID3")||(b[0]==0xff&&(b[1]&0xe0)==0xe0))return"mp3";
-  if(s.slice(4,8)=="ftyp"){const t=s.slice(8,12);return t=="avif"||t=="avis"?"avif":t=="M4A "?"m4a":t=="qt  "?"mov":"mp4"}
-  if(b[0]==0x1a&&b[1]==0x45)return"webm";
-  if(s.startsWith("PK")&&ext=="docx")return"docx";
-  return ALIAS[ext]||ext}
+  if(s.slice(4,8)=="ftyp"){const t=s.slice(8,12);
+    if(t=="avif"||t=="avis")return"avif";if(/^(heic|heix|hevc|heim|heis|mif1|msf1)$/.test(t))return"heic";
+    if(t=="M4A "||t=="M4B ")return"m4a";if(t=="qt  ")return"mov";if(/^3g/.test(t))return"3gp";return u("mp4","mov","m4a","3gp")}
+  if(b[0]==0x1a&&b[1]==0x45&&b[2]==0xdf)return s2.includes("webm")&&ext!="mkv"?"webm":"mkv";
+  if(s.startsWith("FLV"))return"flv";
+  if(b[0]==0x30&&b[1]==0x26&&b[2]==0xb2)return ext=="wma"?"wma":"wmv";
+  if(b[0]==0&&b[1]==0&&b[2]==1&&(b[3]==0xba||b[3]==0xb3))return"mpg";
+  if(b[0]==0x47&&b[188]==0x47)return"ts";
+  if(s.startsWith("FORM")&&/AIF/.test(s.slice(8,12)))return"aiff";
+  if(s.startsWith("#!AMR"))return"amr";
+  if((b[0]==0x49&&b[1]==0x49&&b[2]==0x2a&&b[3]==0)||(b[0]==0x4d&&b[1]==0x4d&&b[2]==0&&b[3]==0x2a))return"tiff";
+  if(s.startsWith("{\\rtf"))return"rtf";
+  if(s.startsWith("PK")&&["docx","xlsx","ods","odt","epub"].includes(ext))return ext;
+  if(b[0]==0xd0&&b[1]==0xcf&&b[2]==0x11&&b[3]==0xe0&&ext=="xls")return"xls";
+  return ext}
 
 /* ---------- zip reader (for .docx) ---------- */
 async function unzip(blob){
@@ -2935,7 +2975,7 @@ async function docx2html(it,o,pr,nx){nx.m.doc=1;
   return new Blob([blk(doc.getElementsByTagName("w:body")[0])],{type:"text/html"})}
 
 /* ---------- data ---------- */
-const parseCSV=s=>{const r=[];let row=[],f="",q=false;for(let i=0;i<s.length;i++){const c=s[i];if(q){if(c=='"'){if(s[i+1]=='"'){f+='"';i++}else q=false}else f+=c}else if(c=='"')q=true;else if(c==","){row.push(f);f=""}else if(c=="\n"||c=="\r"){if(c=="\r"&&s[i+1]=="\n")i++;row.push(f);r.push(row);row=[];f=""}else f+=c}if(f||row.length){row.push(f);r.push(row)}return r.filter(x=>x.some(v=>v!==""))};
+const parseCSV=(s,d=",")=>{const r=[];let row=[],f="",q=false;for(let i=0;i<s.length;i++){const c=s[i];if(q){if(c=='"'){if(s[i+1]=='"'){f+='"';i++}else q=false}else f+=c}else if(c=='"')q=true;else if(c==d){row.push(f);f=""}else if(c=="\n"||c=="\r"){if(c=="\r"&&s[i+1]=="\n")i++;row.push(f);r.push(row);row=[];f=""}else f+=c}if(f||row.length){row.push(f);r.push(row)}return r.filter(x=>x.some(v=>v!==""))};
 const csv2json=async it=>{const[h,...r]=parseCSV(await it.b.text());return new Blob([JSON.stringify(r.map(x=>Object.fromEntries(h.map((k,i)=>[k,/^-?\d+(\.\d+)?$/.test(x[i]||"")?+x[i]:x[i]??""]))),null,2)],{type:"application/json"})};
 const json2csv=async it=>{let j=JSON.parse(await it.b.text());if(!Array.isArray(j))j=[j];const keys=[...new Set(j.flatMap(o=>Object.keys(o&&typeof o=="object"?o:{value:o})))],q=v=>{v=v==null?"":typeof v=="object"?JSON.stringify(v):String(v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
   return new Blob([[keys.join(","),...j.map(o=>{o=o&&typeof o=="object"?o:{value:o};return keys.map(k=>q(o[k])).join(",")})].join("\n")],{type:"text/csv"})};
@@ -2950,7 +2990,7 @@ function wavBlob(ab){
   const d=[...Array(ch)].map((_,i)=>ab.getChannelData(i));let p=44;
   for(let i=0;i<n;i++)for(let c=0;c<ch;c++){const v=Math.max(-1,Math.min(1,d[c][i]));u.setInt16(p,v<0?v*32768:v*32767,true);p+=2}
   return new Blob([u],{type:"audio/wav"})}
-const toWav=async it=>wavBlob(await audio(it.b));
+const toWav=async(it,o,pr,nx)=>{try{return wavBlob(await audio(it.b))}catch(e){return ff(it,o,pr,nx)}};
 async function wav2mp3(it,o,pr){
   await loadScript("https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js");
   const ab=await audio(it.b),ch=Math.min(2,ab.numberOfChannels),enc=new lamejs.Mp3Encoder(ch,ab.sampleRate,o.k);
@@ -2962,14 +3002,157 @@ async function wav2mp3(it,o,pr){
 async function vid(b){const v=document.createElement("video");v.muted=true;v.playsInline=true;v.preload="auto";v.src=URL.createObjectURL(b);await new Promise((ok,no)=>{v.onloadeddata=ok;v.onerror=()=>no(Error("This browser can't decode that video"))});return v}
 const seek=(v,t)=>new Promise(ok=>{v.onseeked=ok;v.currentTime=t});
 function snap(v,w){const s=w&&w<v.videoWidth?w/v.videoWidth:1,c=document.createElement("canvas");c.width=Math.round(v.videoWidth*s);c.height=Math.round(v.videoHeight*s);const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(v,0,0,c.width,c.height);return{c,x}}
-async function vid2gif(it,o,pr){
+async function vid2gifN(it,o,pr){
   const v=await vid(it.b),dur=Math.min(isFinite(v.duration)?v.duration:o.sec,o.sec),n=Math.max(1,Math.min(200,Math.floor(dur*o.fps))),fr=[];
   for(let i=0;i<n;i++){await seek(v,i/o.fps);const{c,x}=snap(v,o.w||480);fr.push(x.getImageData(0,0,c.width,c.height));pr(i/n*.6)}
   URL.revokeObjectURL(v.src);return gif(fr,Math.round(100/o.fps),p=>pr(.6+p*.4))}
-async function vidframe(it,o){
+async function vidframeN(it,o){
   const v=await vid(it.b),d=isFinite(v.duration)?v.duration:2;let best=null;
   for(const t of[Math.min(1,d/2),d*.5,d*.25,d*.75,0]){await seek(v,t);const{c}=snap(v,o.w),q=flat(c);if(!best)best=c;if(!(q.flat&&q.mean<12)){best=c;break}}
   URL.revokeObjectURL(v.src);return blobAsync(best,"image/png")}
+
+
+/* ---------- universal engine: FFmpeg (WebAssembly), downloaded the first time it's needed ---------- */
+let FFp=null;
+const CDNS=["https://cdn.jsdelivr.net/npm/","https://unpkg.com/"],FFV="@ffmpeg/ffmpeg@0.12.10/dist/umd/",FCV="@ffmpeg/core@0.12.6/dist/umd/";
+const status=t=>{$("cvGo").textContent=t};
+async function blobURL(p,t){for(const c of CDNS){try{const r=await fetch(c+p);if(r.ok)return URL.createObjectURL(new Blob([await r.arrayBuffer()],{type:t}))}catch(e){}}throw Error("Couldn't download the conversion engine. It needs an internet connection the first time.")}
+function getFF(){return FFp||(FFp=(async()=>{
+  status("Loading engine (first time only)…");
+  await loadLib(()=>window.FFmpegWASM,CDNS.map(c=>c+FFV+"ffmpeg.js"));
+  const F=new FFmpegWASM.FFmpeg();
+  await F.load({classWorkerURL:await blobURL(FFV+"814.ffmpeg.js","text/javascript"),coreURL:await blobURL(FCV+"ffmpeg-core.js","text/javascript"),wasmURL:await blobURL(FCV+"ffmpeg-core.wasm","application/wasm")});
+  status("Converting…");return F})().catch(e=>{FFp=null;throw e}))}
+function fargs(from,b,o){
+  const kb=o.k+"k",crf=String(Math.round(36-(o.q*100-40)*.3)),qv=String(Math.round(2+(1-o.q)*23)),
+    vf=o.w?`scale=min(${o.w}\\,iw):-2`:"scale=trunc(iw/2)*2:trunc(ih/2)*2",clip=o.cl?["-t",String(o.cl)]:[],
+    x264=["-c:v","libx264","-preset","veryfast","-crf",crf,"-pix_fmt","yuv420p","-c:a","aac","-b:a",kb],
+    V={mp4:[...x264,"-movflags","+faststart"],mov:x264,mkv:x264,ts:x264,"3gp":[...x264,"-ar","44100"],
+      webm:["-c:v","libvpx","-b:v","1500k","-crf",crf,"-deadline","realtime","-cpu-used","5","-c:a","libopus","-b:a",kb],
+      avi:["-c:v","mpeg4","-q:v",qv,"-c:a","libmp3lame","-b:a",kb],flv:["-c:v","flv","-q:v",qv,"-c:a","libmp3lame","-ar","44100","-b:a",kb],
+      wmv:["-c:v","wmv2","-b:v","2000k","-c:a","wmav2","-b:a",kb],mpg:["-c:v","mpeg2video","-q:v",qv,"-c:a","mp2","-b:a",kb],
+      ogv:["-c:v","libtheora","-q:v","7","-c:a","libvorbis","-b:a",kb]},
+    A={mp3:["-c:a","libmp3lame","-b:a",kb],ogg:["-c:a","libvorbis","-b:a",kb],opus:["-c:a","libopus","-b:a",kb],flac:["-c:a","flac"],m4a:["-c:a","aac","-b:a",kb,"-movflags","+faststart"],aac:["-c:a","aac","-b:a",kb],wav:["-c:a","pcm_s16le"],wma:["-c:a","wmav2","-b:a",kb],aiff:["-c:a","pcm_s16be"]};
+  if(A[b])return["-vn",...A[b],...clip];
+  if(V[b])return["-vf",vf,...V[b],...clip];
+  if(b=="gif")return["-vf",`fps=${o.fps},scale=min(${o.w||480}\\,iw):-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse`,"-t",String(o.sec),"-loop","0"];
+  if(b=="png"&&VID.has(from))return["-vf",o.w?`thumbnail=60,scale=min(${o.w}\\,iw):-2`:"thumbnail=60","-frames:v","1"];
+  return["-frames:v","1"]}
+async function ff(it,o,pr,nx){
+  const F=await getFF(),inn="in."+it.f,out="out."+nx.f;
+  await F.writeFile(inn,new Uint8Array(await it.b.arrayBuffer()));
+  const h=({progress})=>pr(Math.max(0,Math.min(1,progress||0)));F.on("progress",h);
+  try{
+    const code=await F.exec(["-hide_banner","-y","-i",inn,...fargs(it.f,nx.f,o),out]);
+    if(code!==0)throw Error("This file couldn't be converted. It may use a codec that isn't supported here.");
+    const d=await F.readFile(out);return new Blob([d],{type:MIME[nx.f]||""})}
+  finally{F.off("progress",h);for(const n of[inn,out])try{await F.deleteFile(n)}catch(e){}}}
+const vid2gif=async(it,o,pr,nx)=>{try{return await vid2gifN(it,o,pr)}catch(e){return ff(it,o,pr,nx)}};
+const vidframe=async(it,o,pr,nx)=>{try{return await vidframeN(it,o)}catch(e){return ff(it,o,pr,nx)}};
+
+/* ---------- HEIC, PDF reading, many images into one PDF ---------- */
+async function heic2img(it,o,pr,nx){await loadLib(()=>window.heic2any,["https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"]);
+  const r=await heic2any({blob:it.b,toType:nx.f=="png"?"image/png":"image/jpeg",quality:o.q});return Array.isArray(r)?r[0]:r}
+async function pdfLib(){await loadLib(()=>window.pdfjsLib,["https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"]);
+  if(!pdfLib.w){const r=await fetch("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js");pdfjsLib.GlobalWorkerOptions.workerSrc=URL.createObjectURL(new Blob([await r.text()],{type:"text/javascript"}));pdfLib.w=1}}
+async function pdfOpen(it){await pdfLib();try{return await pdfjsLib.getDocument({data:new Uint8Array(await it.b.arrayBuffer())}).promise}catch(e){throw Error(e&&e.name=="PasswordException"?"This PDF is password protected":"This PDF couldn't be read")}}
+async function pdf2img(it,o,pr,nx){
+  const d=await pdfOpen(it),pages=o.pg==0?[...Array(d.numPages)].map((_,i)=>i+1):[1],png=nx.f=="png",out=[];
+  for(let i=0;i<pages.length;i++){
+    const p=await d.getPage(pages[i]),v0=p.getViewport({scale:1});let s=o.w?Math.min(3,o.w/v0.width):2;s=Math.min(s,8000/Math.max(v0.width,v0.height));
+    const v=p.getViewport({scale:s}),c=document.createElement("canvas");c.width=Math.ceil(v.width);c.height=Math.ceil(v.height);
+    const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);await p.render({canvasContext:x,viewport:v}).promise;
+    out.push(await blobAsync(c,png?"image/png":"image/jpeg",o.q));pr((i+1)/pages.length);await tick()}
+  if(out.length==1)return out[0];
+  nx.f="zip";return zip(await Promise.all(out.map(async(b,i)=>({name:`${it.n}-page-${String(i+1).padStart(3,"0")}.${png?"png":"jpg"}`,u:new Uint8Array(await b.arrayBuffer())}))))}
+async function pdf2txt(it,o,pr,nx){
+  const d=await pdfOpen(it);let t="";
+  for(let i=1;i<=d.numPages;i++){const tc=await(await d.getPage(i)).getTextContent();let y=null,l="";
+    for(const m of tc.items){if(!("str" in m))continue;const yy=m.transform[5];if(y!==null&&Math.abs(yy-y)>3){t+=l.trimEnd()+"\n";l=""}l+=m.str;if(m.hasEOL){t+=l+"\n";l="";y=null;continue}y=yy}
+    t+=l.trimEnd()+"\n\n";pr(i/d.numPages);await tick()}
+  if(!t.trim())nx.m.note="No selectable text found. This looks like a scanned PDF, which would need OCR.";
+  return new Blob([t.trim()+"\n"],{type:"text/plain"})}
+async function imgs2pdf(bl){
+  const objs=["<</Type/Catalog/Pages 2 0 R>>",null],kids=[];
+  for(let i=0;i<bl.length;i++){const im=await load(bl[i]),k=Math.min(.75,14400/Math.max(im.naturalWidth,im.naturalHeight)),w=im.naturalWidth,h=im.naturalHeight,jb=new Uint8Array(await bl[i].arrayBuffer()),pw=(w*k).toFixed(2),ph=(h*k).toFixed(2),n=3+3*i;
+    kids.push(`${n+1} 0 R`);
+    objs.push(cat(lat(`<</Type/XObject/Subtype/Image/Width ${w}/Height ${h}/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length ${jb.length}>>\nstream\n`),jb,lat("\nendstream")),
+      `<</Type/Page/Parent 2 0 R/MediaBox[0 0 ${pw} ${ph}]/Resources<</XObject<</I ${n} 0 R>>>>/Contents ${n+2} 0 R>>`,stream(`q ${pw} 0 0 ${ph} 0 0 cm /I Do Q`))}
+  objs[1]=`<</Type/Pages/Kids[${kids.join(" ")}]/Count ${kids.length}>>`;return pdf(objs)}
+
+/* ---------- spreadsheets ---------- */
+const csvQ=(v,d)=>{v=v==null?"":String(v);return(v.includes(d)||/["\n\r]/.test(v))?'"'+v.replace(/"/g,'""')+'"':v};
+const sheetLib=()=>loadLib(()=>window.XLSX,["https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"]);
+async function getRows(it,nx){
+  if(it.f=="csv"||it.f=="tsv")return parseCSV(await it.b.text(),it.f=="tsv"?"\t":",");
+  await sheetLib();let wb;try{wb=XLSX.read(await it.b.arrayBuffer(),{type:"array"})}catch(e){throw Error("That spreadsheet couldn't be read")}
+  if(wb.SheetNames.length>1)nx.m.note=((nx.m.note||"")+" Only the first sheet ("+wb.SheetNames[0]+") was converted.").trim();
+  return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:""})}
+async function putRows(r,f){
+  if(f=="csv"||f=="tsv"){const d=f=="tsv"?"\t":",";return new Blob([r.map(x=>x.map(v=>f=="tsv"?String(v==null?"":v).replace(/[\t\r\n]+/g," "):csvQ(v,d)).join(d)).join("\n")],{type:MIME[f]})}
+  await sheetLib();const num=v=>typeof v=="string"&&/^-?(0|[1-9]\d{0,14})(\.\d+)?$/.test(v)?+v:v,wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(r.map(x=>x.map(num))),"Sheet1");
+  return new Blob([XLSX.write(wb,{type:"array",bookType:f=="xls"?"biff8":f})],{type:MIME[f]})}
+const sheetConv=async(it,o,pr,nx)=>putRows(await getRows(it,nx),nx.f);
+const sheet2json=async(it,o,pr,nx)=>{const[h=[],...r]=await getRows(it,nx),k=h.map(String);return new Blob([JSON.stringify(r.map(x=>Object.fromEntries(k.map((n,i)=>[n,/^-?\d+(\.\d+)?$/.test(x[i]||"")?+x[i]:x[i]??""]))),null,2)],{type:"application/json"})};
+const sheet2html=async(it,o,pr,nx)=>{nx.m.doc=1;const[h=[],...r]=await getRows(it,nx);return new Blob([`<table><tr>${h.map(c=>`<th>${esc(String(c))}</th>`).join("")}</tr>${r.map(x=>`<tr>${h.map((_,i)=>`<td>${esc(String(x[i]??""))}</td>`).join("")}</tr>`).join("")}</table>`],{type:"text/html"})};
+
+/* ---------- data: YAML, XML ---------- */
+const yamlLib=()=>loadLib(()=>window.jsyaml,["https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"]);
+const json2yaml=async it=>{await yamlLib();return new Blob([jsyaml.dump(JSON.parse(await it.b.text()),{lineWidth:-1})],{type:"text/yaml"})};
+const yaml2json=async it=>{await yamlLib();return new Blob([JSON.stringify(jsyaml.load(await it.b.text()),null,2)],{type:"application/json"})};
+function x2o(n){const o={},el=[...n.children];for(const a of n.attributes)o["@"+a.name]=a.value;
+  if(!el.length){const t=n.textContent.trim();if(!n.attributes.length)return t;if(t)o["#text"]=t;return o}
+  for(const c of el){const v=x2o(c);if(c.tagName in o){if(!Array.isArray(o[c.tagName]))o[c.tagName]=[o[c.tagName]];o[c.tagName].push(v)}else o[c.tagName]=v}return o}
+const xml2json=async it=>{const d=new DOMParser().parseFromString(await it.b.text(),"application/xml");if(d.querySelector("parsererror"))throw Error("That XML isn't valid");return new Blob([JSON.stringify({[d.documentElement.tagName]:x2o(d.documentElement)},null,2)],{type:"application/json"})};
+const xn=s=>String(s).replace(/[^\w.-]/g,"_").replace(/^(\d|[.-])/,"_$1");
+function o2x(k,v,p){const t=xn(k),pad="  ".repeat(p);
+  if(Array.isArray(v))return v.map(x=>o2x(k,x,p)).join("");
+  if(v&&typeof v=="object"){let at="",body="";for(const[kk,vv]of Object.entries(v)){if(kk[0]=="@")at+=` ${xn(kk.slice(1))}="${esc(String(vv))}"`;else if(kk=="#text")body+=esc(String(vv));else body+=o2x(kk,vv,p+1)}
+    return body.includes("<")?`${pad}<${t}${at}>\n${body}${pad}</${t}>\n`:`${pad}<${t}${at}>${body}</${t}>\n`}
+  return`${pad}<${t}>${esc(v==null?"":String(v))}</${t}>\n`}
+const json2xml=async it=>{const j=JSON.parse(await it.b.text()),ks=j&&typeof j=="object"&&!Array.isArray(j)?Object.keys(j):[];
+  return new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n'+(ks.length==1?o2x(ks[0],j[ks[0]],0):o2x("root",Array.isArray(j)?{item:j}:j,0))],{type:"application/xml"})};
+
+/* ---------- more documents: Markdown, ODT, EPUB, RTF ---------- */
+const html2md=async it=>{await loadLib(()=>window.TurndownService,["https://cdnjs.cloudflare.com/ajax/libs/turndown/7.1.2/turndown.min.js"]);
+  return new Blob([new TurndownService({headingStyle:"atx",codeBlockStyle:"fenced",bulletListMarker:"-"}).turndown(clean(await it.b.text()).body.innerHTML).trim()+"\n"],{type:"text/markdown"})};
+const md2txt=async it=>new Blob([(await it.b.text()).replace(/^```.*$/gm,"").replace(/^#{1,6}\s+/gm,"").replace(/!?\[([^\]]*)\]\(([^)]*)\)/g,"$1").replace(/(\*\*|__)(.+?)\1/g,"$2").replace(/(^|\W)[*_](.+?)[*_](?=\W|$)/g,"$1$2").replace(/`([^`]+)`/g,"$1").replace(/^>\s?/gm,"").replace(/^\s*[-*+]\s+/gm,"• ")],{type:"text/plain"});
+const copyMd=async it=>new Blob([it.b],{type:"text/markdown"});
+async function odt2html(it,o,pr,nx){nx.m.doc=1;
+  const z=await unzip(it.b);if(!z["content.xml"])throw Error("Not a valid .odt file");
+  const d=new DOMParser().parseFromString(dec.decode(await z["content.xml"]()),"application/xml"),body=d.getElementsByTagName("office:text")[0];if(!body)throw Error("Not a valid .odt file");
+  const inl=n=>[...n.childNodes].map(c=>c.nodeType==3?esc(c.nodeValue):c.nodeName=="text:s"?"&nbsp;".repeat(+c.getAttribute("text:c")||1):c.nodeName=="text:tab"?"&emsp;":c.nodeName=="text:line-break"?"<br/>":/^text:(span|a)$/.test(c.nodeName)?inl(c):"").join("");
+  const blk=n=>[...n.children].map(c=>{const g=c.nodeName;
+    if(g=="text:h"){const l=Math.min(6,+c.getAttribute("text:outline-level")||1);return`<h${l}>${inl(c)}</h${l}>`}
+    if(g=="text:p")return`<p>${inl(c)||"&nbsp;"}</p>`;
+    if(g=="text:list")return"<ul>"+[...c.children].map(li=>"<li>"+blk(li)+"</li>").join("")+"</ul>";
+    if(g=="text:section")return blk(c);
+    if(g=="table:table")return"<table>"+[...c.getElementsByTagName("table:table-row")].map(r=>"<tr>"+[...r.children].filter(x=>x.nodeName=="table:table-cell").map(x=>"<td>"+blk(x)+"</td>").join("")+"</tr>").join("")+"</table>";
+    return""}).join("");
+  return new Blob([blk(body)],{type:"text/html"})}
+async function epub2html(it,o,pr,nx){nx.m.doc=1;
+  const z=await unzip(it.b),rd=async n=>z[n]?dec.decode(await z[n]()):"",X=s=>new DOMParser().parseFromString(s,"application/xml");
+  const rf=X(await rd("META-INF/container.xml")).querySelector("rootfile");if(!rf)throw Error("Not a valid .epub file");
+  const op=rf.getAttribute("full-path"),dir=op.includes("/")?op.replace(/[^/]*$/,""):"",opf=X(await rd(op)),man={};
+  opf.querySelectorAll("manifest > item").forEach(i=>man[i.getAttribute("id")]=i.getAttribute("href"));
+  let out="";const refs=[...opf.querySelectorAll("spine > itemref")];
+  for(let i=0;i<refs.length;i++){const h=man[refs[i].getAttribute("idref")];if(!h)continue;
+    const path=decodeURI(new URL(dir+h,"http://x/").pathname.slice(1)),d=new DOMParser().parseFromString(await rd(path),"text/html");
+    d.querySelectorAll("script,style,link,svg,img,image").forEach(n=>n.remove());out+=d.body.innerHTML+"<hr/>";pr((i+1)/refs.length)}
+  nx.m.note="Images inside the book aren't included, only the text.";
+  return new Blob([out],{type:"text/html"})}
+function rtfText(s){let out="",skip=-1,d=0;
+  for(let i=0;i<s.length;i++){const c=s[i];
+    if(c=="{"){d++;if(skip<0&&/^\{\\(\*|fonttbl|colortbl|stylesheet|info|pict|header|footer)/.test(s.slice(i,i+14)))skip=d}
+    else if(c=="}"){if(d==skip)skip=-1;d--}
+    else if(c=="\\"){const m=s.slice(i+1).match(/^(?:([a-z]+)(-?\d+)? ?|'([0-9a-f]{2})|([\\{}]))/i);if(!m)continue;i+=m[0].length;if(skip>=0)continue;
+      if(m[4])out+=m[4];else if(m[3])out+=String.fromCharCode(parseInt(m[3],16));
+      else if(m[1]=="par"||m[1]=="line")out+="\n";else if(m[1]=="tab")out+="\t";
+      else if(m[1]=="u"){out+=String.fromCharCode(+m[2]<0?+m[2]+65536:+m[2]);if(s[i+1]=="?")i++}}
+    else if(skip<0&&c!="\n"&&c!="\r")out+=c}
+  return out}
+const rtf2txt=async it=>new Blob([rtfText(await it.b.text()).replace(/\n{3,}/g,"\n\n").trim()+"\n"],{type:"text/plain"});
 
 /* ---------- zip writer + docx writer ---------- */
 const crcT=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xedb88320^c>>>1:c>>>1;t[n]=c>>>0}return t})();
@@ -3017,6 +3200,15 @@ add("html","svg",1,html2svg,"p");add("html","docx",1,html2docx);add("html","txt"
 add("csv","json",1,csv2json);add("json","csv",1,json2csv);add("csv","html",1,csv2html);add("json","txt",1,json2txt);
 add("mp3 ogg flac m4a mp4 webm mov","wav",1,toWav);add("wav","mp3",1,wav2mp3,"k");
 add("mp4 webm mov","gif",1,vid2gif,"vw");add("mp4 webm mov","png",1,vidframe,"w");
+/* FFmpeg routes cost 3, so the lighter built-in converters win whenever they can do the job */
+const VF="mp4 webm mkv mov avi flv wmv mpg 3gp ogv ts",AF="mp3 wav ogg flac m4a aac opus wma aiff";
+add(VF,VF,3,ff,"qwc");add("gif",VF,3,ff,"qwc");add(VF,AF,3,ff,"kc");add(AF+" amr",AF,3,ff,"kc");add(VF,"gif",3,ff,"vw");add(VF,"png",3,ff,"w");
+add("png","tiff",3,ff);add("tiff","png",3,ff);add("heic","jpg png",1,heic2img,"q");
+add("pdf","png jpg",1,pdf2img,"gwq");add("pdf","txt",1,pdf2txt);
+add("csv tsv xlsx xls ods","csv tsv xlsx xls ods",1,sheetConv);add("tsv xlsx xls ods","json",1,sheet2json);add("tsv xlsx xls ods","html",1,sheet2html);
+add("json","yaml",1,json2yaml);add("yaml","json",1,yaml2json);add("json","xml",1,json2xml);add("xml","json",1,xml2json);
+add("html","md",1,html2md);add("txt","md",1,copyMd);add("md","txt",1,md2txt);
+add("odt","html",1,odt2html);add("epub","html",1,epub2html);add("rtf","txt",1,rtf2txt);
 const paths=from=>{const d={[from]:0},prev={};let ch=true;while(ch){ch=false;for(const e of E)if(e.a in d&&e.b!=from&&(!(e.b in d)||d[e.a]+e.c<d[e.b])){d[e.b]=d[e.a]+e.c;prev[e.b]=e;ch=true}}return{d,prev}};
 const route=(P,to)=>{const r=[];for(let x=to;P.prev[x];x=P.prev[x].a)r.unshift(P.prev[x]);return r};
 $("cvCount").textContent=new Set(E.flatMap(e=>[e.a,e.b])).size+" formats";
@@ -3043,7 +3235,9 @@ async function pick(fl){
   $("cvExt").textContent=f;$("cvName").textContent=keep.length>1?keep.length+" files":keep[0].name;
   $("cvInfo").textContent=fmtSize(keep.reduce((n,x)=>n+x.size,0))+" · "+(LBL[f]||f.toUpperCase())+(skip?` · ${skip} skipped (different type)`:"");
   const box=$("cvFmts");box.replaceChildren();
-  Object.keys(P.d).filter(t=>t!=f).sort((a,b)=>P.d[a]-P.d[b]||LBL[a].localeCompare(LBL[b])).forEach(t=>{const b=document.createElement("button");b.textContent=LBL[t];b.dataset.t=t;b.onclick=()=>choose(t);box.appendChild(b)});
+  const ts=Object.keys(P.d).filter(t=>t!=f).sort((a,b)=>P.d[a]-P.d[b]||LBL[a].localeCompare(LBL[b]));
+  CAT.forEach(([nm,l])=>{const m=ts.filter(t=>l.includes(t));if(!m.length)return;const g=document.createElement("div"),h=document.createElement("small");g.className="g";h.textContent=nm;g.appendChild(h);
+    m.forEach(t=>{const b=document.createElement("button");b.textContent=LBL[t];b.dataset.t=t;b.onclick=()=>choose(t);g.appendChild(b)});box.appendChild(g)});
   if(VID.has(f))$("ow").value="480";
   $("cvRoute").replaceChildren();$("cvGo").disabled=true;$("cvGo").textContent="Choose a format";$("cvOpts").style.display="none"}
 function choose(t){
@@ -3051,31 +3245,34 @@ function choose(t){
   $("cvFmts").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));
   const r=$("cvRoute");r.replaceChildren();
   if(path.length>1)[cur.f,...path.map(e=>e.b)].forEach((x,i)=>{if(i){const a=document.createElement("i");a.textContent="→";r.appendChild(a)}const s=document.createElement("span");s.className="chip";s.textContent=LBL[x];r.appendChild(s)});
-  const need=new Set(path.flatMap(e=>[...e.o]));if(cur.f!="html")need.delete("p");
+  const need=new Set(path.flatMap(e=>[...e.o]));if(cur.f!="html")need.delete("p");if(t=="pdf"&&cur.items.length>1&&MERGE.has(cur.f))need.add("m");
   $("cvOpts").style.display=need.size?"":"none";
   $("cvOpts").querySelectorAll("label").forEach(l=>l.style.display=need.has(l.dataset.o)?"":"none");
   $("cvGo").disabled=false;$("cvGo").textContent="Convert to "+LBL[t]+(cur.items.length>1?` (${cur.items.length} files)`:"")}
 function bar(x){$("cvBarI").style.width=Math.round(x*100)+"%"}
 $("cvGo").onclick=async()=>{
   if(!sel||$("cvGo").disabled)return;const go=$("cvGo"),label=go.textContent;go.disabled=true;go.textContent="Converting…";$("cvOut").hidden=true;$("cvBar").style.display="block";bar(.02);
-  const o={q:+$("oq").value/100,w:+$("ow").value,fps:+$("ofps").value,sec:+$("osec").value,k:+$("ok").value,pw:+$("opw").value},path=route(P,sel),N=cur.items.length,outs=[];let fail=0,msg="";
+  const o={q:+$("oq").value/100,w:+$("ow").value,fps:+$("ofps").value,sec:+$("osec").value,k:+$("ok").value,pw:+$("opw").value,cl:+$("ocl").value,pg:+$("opg").value},
+    merge=sel=="pdf"&&cur.items.length>1&&MERGE.has(cur.f)&&$("omg").checked,path=route(P,merge?"jpg":sel),N=cur.items.length;let outs=[],fail=0,msg="";
   for(let k=0;k<N;k++){
     let it={b:cur.items[k].b,f:cur.f,n:cur.items[k].n,m:{}};
     try{
-      for(let i=0;i<path.length;i++){const e=path[i],nx={b:null,f:e.b,n:it.n,m:{...it.m}};bar((k+i/path.length)/N+.02);await tick();nx.b=await e.fn(it,o,p=>bar((k+(i+p)/path.length)/N),nx);it=nx}
+      for(let i=0;i<path.length;i++){const e=path[i];if(it.f!=e.a)throw Error("Choose a single page for this conversion");const nx={b:null,f:e.b,n:it.n,m:{...it.m}};bar((k+i/path.length)/N+.02);await tick();nx.b=await e.fn(it,o,p=>bar((k+(i+p)/path.length)/N),nx);it=nx}
       outs.push({it,from:cur.items[k].size})}
     catch(err){console.error(err);fail++;msg=err.message||"Conversion failed"}}
+  if(merge&&outs.length>1){try{const b=await imgs2pdf(outs.map(x=>x.it.b));outs=[{it:{b,f:"pdf",n:cur.items[0].n+" (combined)",m:{}},from:outs.reduce((n,x)=>n+x.from,0)}]}catch(err){console.error(err);fail++;msg=err.message||"Conversion failed";outs=[]}}
   bar(1);if(outs.length)show(outs);if(fail)toast(N>1?`${fail} of ${N} failed: ${msg}`:msg);
   go.disabled=false;go.textContent=label;setTimeout(()=>{$("cvBar").style.display="none";bar(0)},500)};
 function show(outs){
   const N=outs.length,seen={};
   res=outs.map(({it,from})=>{let n=it.n;if(seen[n]){seen[n]++;n+=" ("+seen[n]+")"}else seen[n]=1;return{b:new Blob([it.b],{type:MIME[it.f]||it.b.type}),name:n+"."+it.f,from,f:it.f}});
   if(pvUrl)URL.revokeObjectURL(pvUrl);const pv=$("cvPv");pv.replaceChildren();
+  const big=(r,m)=>{const d=document.createElement("div");d.className="big";d.textContent=m||(LBL[r.f]+" ready · "+fmtSize(r.b.size));return d};
   if(N==1){const r=res[0];pvUrl=URL.createObjectURL(r.b);let el;
     if(IMG.has(r.f)){el=new Image();el.src=pvUrl}
-    else if(AUD.has(r.f)){el=document.createElement("audio");el.controls=true;el.src=pvUrl}
-    else if(r.f=="pdf"||r.f=="docx"){el=document.createElement("div");el.className="big";el.textContent=LBL[r.f]+" ready · "+fmtSize(r.b.size)}
-    else{el=document.createElement("pre");r.b.slice(0,4000).text().then(t=>el.textContent=t+(r.b.size>4000?"\n…":""))}
+    else if(AUD.has(r.f)||VID.has(r.f)){el=document.createElement(AUD.has(r.f)?"audio":"video");el.controls=true;el.src=pvUrl;el.onerror=()=>el.replaceWith(big(r,LBL[r.f]+" ready · "+fmtSize(r.b.size)+" (this browser can't preview it, but the file is fine)"))}
+    else if(TXT.has(r.f)){el=document.createElement("pre");r.b.slice(0,4000).text().then(t=>el.textContent=t+(r.b.size>4000?"\n…":""))}
+    else el=big(r);
     pv.appendChild(el)}
   else{pv.style.display="block";const l=document.createElement("div");l.className="lst";
     res.forEach(r=>{const row=document.createElement("div"),a=document.createElement("b"),z=document.createElement("span"),b=document.createElement("button");a.textContent=r.name;z.textContent=fmtSize(r.from)+" → "+fmtSize(r.b.size);b.className="mini";b.style.margin="0";b.textContent="Download";b.onclick=()=>save(r.b,r.name);row.append(a,z,b);l.appendChild(row)});pv.appendChild(l)}
