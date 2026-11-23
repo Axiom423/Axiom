@@ -2812,7 +2812,7 @@ async function ico(c){
   d.setUint16(2,1,true);d.setUint16(4,1,true);d.setUint8(6,w&255);d.setUint8(7,h&255);d.setUint16(10,1,true);d.setUint16(12,32,true);d.setUint32(14,png.length,true);d.setUint32(18,22,true);
   return new Blob([d.buffer,png],{type:"image/x-icon"})}
 async function img2img(it,o,pr,nx){
-  const im=await load(it.b),w0=im.naturalWidth||300,h0=im.naturalHeight||150,f=nx.f;
+  if(it.f=="gif"&&nx.f!="gif")nx.m.note="Animated GIFs keep only their first frame as a still image.";const im=await load(it.b),w0=im.naturalWidth||300,h0=im.naturalHeight||150,f=nx.f;
   let s=o.w?Math.min(1,o.w/w0):1;if(it.f=="svg"&&!o.w)s=Math.max(1,1024/w0);s=Math.min(s,16000/h0,Math.sqrt(6.7e7/(w0*h0)));
   const w=Math.max(1,Math.round(w0*s)),h=Math.max(1,Math.round(h0*s)),c=document.createElement("canvas");c.width=w;c.height=h;
   const x=c.getContext("2d",{willReadFrequently:true});
@@ -2977,7 +2977,7 @@ async function docx2html(it,o,pr,nx){nx.m.doc=1;
 /* ---------- data ---------- */
 const parseCSV=(s,d=",")=>{const r=[];let row=[],f="",q=false;for(let i=0;i<s.length;i++){const c=s[i];if(q){if(c=='"'){if(s[i+1]=='"'){f+='"';i++}else q=false}else f+=c}else if(c=='"')q=true;else if(c==d){row.push(f);f=""}else if(c=="\n"||c=="\r"){if(c=="\r"&&s[i+1]=="\n")i++;row.push(f);r.push(row);row=[];f=""}else f+=c}if(f||row.length){row.push(f);r.push(row)}return r.filter(x=>x.some(v=>v!==""))};
 const csv2json=async it=>{const[h,...r]=parseCSV(await it.b.text());return new Blob([JSON.stringify(r.map(x=>Object.fromEntries(h.map((k,i)=>[k,/^-?\d+(\.\d+)?$/.test(x[i]||"")?+x[i]:x[i]??""]))),null,2)],{type:"application/json"})};
-const json2csv=async it=>{let j=JSON.parse(await it.b.text());if(!Array.isArray(j))j=[j];const keys=[...new Set(j.flatMap(o=>Object.keys(o&&typeof o=="object"?o:{value:o})))],q=v=>{v=v==null?"":typeof v=="object"?JSON.stringify(v):String(v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+const json2csv=async it=>{let j=JSON.parse(await it.b.text());while(j&&!Array.isArray(j)&&typeof j=="object"&&Object.keys(j).length==1){const v=j[Object.keys(j)[0]];if(v&&typeof v=="object")j=v;else break}if(!Array.isArray(j))j=[j];const keys=[...new Set(j.flatMap(o=>Object.keys(o&&typeof o=="object"?o:{value:o})))],q=v=>{v=v==null?"":typeof v=="object"?JSON.stringify(v):String(v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
   return new Blob([[keys.join(","),...j.map(o=>{o=o&&typeof o=="object"?o:{value:o};return keys.map(k=>q(o[k])).join(",")})].join("\n")],{type:"text/csv"})};
 const csv2html=async(it,o,pr,nx)=>{nx.m.doc=1;const[h,...r]=parseCSV(await it.b.text());return new Blob([`<table><tr>${h.map(c=>`<th>${esc(c)}</th>`).join("")}</tr>${r.map(x=>`<tr>${h.map((_,i)=>`<td>${esc(x[i]||"")}</td>`).join("")}</tr>`).join("")}</table>`],{type:"text/html"})};
 const json2txt=async it=>new Blob([JSON.stringify(JSON.parse(await it.b.text()),null,2)],{type:"text/plain"});
@@ -3044,7 +3044,7 @@ async function ff(it,o,pr,nx){
   const h=({progress})=>pr(Math.max(0,Math.min(1,progress||0)));F.on("progress",h);
   try{
     const code=await F.exec(["-hide_banner","-y","-i",inn,...fargs(it.f,nx.f,o),out]);
-    if(code!==0)throw Error("This file couldn't be converted. It may use a codec that isn't supported here.");
+    if(code!==0)throw Error(AUD.has(nx.f)&&VID.has(it.f)?"This video has no audio track, or its audio can't be read.":"This file couldn't be converted. It may use a codec that isn't supported here.");
     const d=await F.readFile(out);return new Blob([d],{type:MIME[nx.f]||""})}
   finally{F.off("progress",h);for(const n of[inn,out])try{await F.deleteFile(n)}catch(e){}}}
 const vid2gif=async(it,o,pr,nx)=>{try{return await vid2gifN(it,o,pr)}catch(e){return ff(it,o,pr,nx)}};
@@ -3095,6 +3095,7 @@ async function putRows(r,f){
   return new Blob([XLSX.write(wb,{type:"array",bookType:f=="xls"?"biff8":f})],{type:MIME[f]})}
 const sheetConv=async(it,o,pr,nx)=>putRows(await getRows(it,nx),nx.f);
 const sheet2json=async(it,o,pr,nx)=>{const[h=[],...r]=await getRows(it,nx),k=h.map(String);return new Blob([JSON.stringify(r.map(x=>Object.fromEntries(k.map((n,i)=>[n,/^-?\d+(\.\d+)?$/.test(x[i]||"")?+x[i]:x[i]??""]))),null,2)],{type:"application/json"})};
+const sheet2txt=async(it,o,pr,nx)=>new Blob([await putRows(await getRows(it,nx),"tsv")],{type:"text/plain"});
 const sheet2html=async(it,o,pr,nx)=>{nx.m.doc=1;const[h=[],...r]=await getRows(it,nx);return new Blob([`<table><tr>${h.map(c=>`<th>${esc(String(c))}</th>`).join("")}</tr>${r.map(x=>`<tr>${h.map((_,i)=>`<td>${esc(String(x[i]??""))}</td>`).join("")}</tr>`).join("")}</table>`],{type:"text/html"})};
 
 /* ---------- data: YAML, XML ---------- */
@@ -3197,7 +3198,7 @@ add("png jpg webp bmp gif avif svg ico","png jpg webp bmp gif ico",1,img2img,"qw
 add("jpg","pdf",1,jpg2pdf);
 add("txt","html",1,txt2html);add("md","html",1,async(it,o,pr,nx)=>{nx.m.doc=1;return new Blob([md2html(await it.b.text())],{type:"text/html"})});add("docx","html",1,docx2html);
 add("html","svg",1,html2svg,"p");add("html","docx",1,html2docx);add("html","txt",2,html2txt);add("txt","pdf",2,txt2pdf);
-add("csv","json",1,csv2json);add("json","csv",1,json2csv);add("csv","html",1,csv2html);add("json","txt",1,json2txt);
+add("csv","json",1,csv2json);add("json","csv",1,json2csv);add("csv","html",1,csv2html);add("json","txt",2,json2txt);
 add("mp3 ogg flac m4a mp4 webm mov","wav",1,toWav);add("wav","mp3",1,wav2mp3,"k");
 add("mp4 webm mov","gif",1,vid2gif,"vw");add("mp4 webm mov","png",1,vidframe,"w");
 /* FFmpeg routes cost 3, so the lighter built-in converters win whenever they can do the job */
@@ -3205,7 +3206,7 @@ const VF="mp4 webm mkv mov avi flv wmv mpg 3gp ogv ts",AF="mp3 wav ogg flac m4a 
 add(VF,VF,3,ff,"qwc");add("gif",VF,3,ff,"qwc");add(VF,AF,3,ff,"kc");add(AF+" amr",AF,3,ff,"kc");add(VF,"gif",3,ff,"vw");add(VF,"png",3,ff,"w");
 add("png","tiff",3,ff);add("tiff","png",3,ff);add("heic","jpg png",1,heic2img,"q");
 add("pdf","png jpg",1,pdf2img,"gwq");add("pdf","txt",1,pdf2txt);
-add("csv tsv xlsx xls ods","csv tsv xlsx xls ods",1,sheetConv);add("tsv xlsx xls ods","json",1,sheet2json);add("tsv xlsx xls ods","html",1,sheet2html);
+add("csv tsv xlsx xls ods","csv tsv xlsx xls ods",1,sheetConv);add("tsv xlsx xls ods","json",1,sheet2json);add("tsv xlsx xls ods","html",1,sheet2html);add("csv tsv xlsx xls ods","txt",2.5,sheet2txt);
 add("json","yaml",1,json2yaml);add("yaml","json",1,yaml2json);add("json","xml",1,json2xml);add("xml","json",1,xml2json);
 add("html","md",1,html2md);add("txt","md",1,copyMd);add("md","txt",1,md2txt);
 add("odt","html",1,odt2html);add("epub","html",1,epub2html);add("rtf","txt",1,rtf2txt);
@@ -3214,6 +3215,17 @@ const route=(P,to)=>{const r=[];for(let x=to;P.prev[x];x=P.prev[x].a)r.unshift(P
 $("cvCount").textContent=new Set(E.flatMap(e=>[e.a,e.b])).size+" formats";
 
 /* ---------- UI ---------- */
+const em=e=>(e&&e.message)||(typeof e=="string"&&e)||"Conversion failed";
+/* Only offer conversions that make sense. Without this the route finder would happily turn a spreadsheet into a video, or a photo into audio. */
+const KIND={};CAT.forEach(([n,l])=>l.forEach(f=>KIND[f]=n));
+const RASTER=["png","jpg","webp"];
+function allowed(f,t){const a=KIND[f],b=KIND[t];
+  if(a=="Images"){if(b=="Images")return t!="svg";if(t=="pdf")return true;return f=="gif"&&b=="Video"}
+  if(a=="Video")return b=="Video"||b=="Audio"||["png","jpg","webp","bmp","gif","tiff"].includes(t);
+  if(a=="Audio")return b=="Audio";
+  if(a=="Documents")return b=="Documents"||RASTER.includes(t)||(t=="svg"&&f!="pdf");
+  if(a=="Data")return b=="Data"||["pdf","txt","html","md","docx",...RASTER].includes(t);
+  return false}
 let cur=null,P=null,sel=null,res=null,pvUrl=null;
 const fmtSize=n=>n<1024?n+" B":n<1048576?(n/1024).toFixed(1)+" KB":(n/1048576).toFixed(1)+" MB";
 const drop=$("drop"),inp=$("cvFile"),on=()=>$("cv").classList.contains("on");inp.multiple=true;
@@ -3227,7 +3239,7 @@ const back=()=>{$("cvWork").hidden=true;drop.hidden=false;$("cvOut").hidden=true
 $("cvReset").onclick=back;$("cvAgain").onclick=back;
 
 async function pick(fl){
-  fl=[...fl];if(!fl.length)return;const types=await Promise.all(fl.map(sniff)),f=types[0];P=paths(f);
+  fl=[...fl];if(!fl.length)return;const types=await Promise.all(fl.map(sniff)),f=types[0];P=paths(f);for(const t of Object.keys(P.d))if(t!=f&&!allowed(f,t))delete P.d[t];
   if(Object.keys(P.d).length<2)return toast(f?`.${f} files aren't supported yet`:"Unknown file type");
   const keep=fl.filter((_,i)=>types[i]==f),skip=fl.length-keep.length;
   cur={f,items:keep.map(x=>({b:new Blob([x],{type:MIME[f]||x.type}),n:x.name.replace(/\.[^.]+$/,"")||"file",size:x.size}))};sel=null;
@@ -3257,10 +3269,10 @@ $("cvGo").onclick=async()=>{
   for(let k=0;k<N;k++){
     let it={b:cur.items[k].b,f:cur.f,n:cur.items[k].n,m:{}};
     try{
-      for(let i=0;i<path.length;i++){const e=path[i];if(it.f!=e.a)throw Error("Choose a single page for this conversion");const nx={b:null,f:e.b,n:it.n,m:{...it.m}};bar((k+i/path.length)/N+.02);await tick();nx.b=await e.fn(it,o,p=>bar((k+(i+p)/path.length)/N),nx);it=nx}
+      for(let i=0;i<path.length;i++){const e=path[i];if(it.f!=e.a)throw Error("Choose a single page for this conversion");const nx={b:null,f:e.b,n:it.n,m:{...it.m}};bar((k+i/path.length)/N+.02);await tick();nx.b=await e.fn(it,e.fn===pdf2img&&i<path.length-1?{...o,pg:1}:o,p=>bar((k+(i+p)/path.length)/N),nx);it=nx}
       outs.push({it,from:cur.items[k].size})}
-    catch(err){console.error(err);fail++;msg=err.message||"Conversion failed"}}
-  if(merge&&outs.length>1){try{const b=await imgs2pdf(outs.map(x=>x.it.b));outs=[{it:{b,f:"pdf",n:cur.items[0].n+" (combined)",m:{}},from:outs.reduce((n,x)=>n+x.from,0)}]}catch(err){console.error(err);fail++;msg=err.message||"Conversion failed";outs=[]}}
+    catch(err){console.error(err);fail++;msg=em(err)}}
+  if(merge&&outs.length>1){try{const b=await imgs2pdf(outs.map(x=>x.it.b));outs=[{it:{b,f:"pdf",n:cur.items[0].n+" (combined)",m:{}},from:outs.reduce((n,x)=>n+x.from,0)}]}catch(err){console.error(err);fail++;msg=em(err);outs=[]}}
   bar(1);if(outs.length)show(outs);if(fail)toast(N>1?`${fail} of ${N} failed: ${msg}`:msg);
   go.disabled=false;go.textContent=label;setTimeout(()=>{$("cvBar").style.display="none";bar(0)},500)};
 function show(outs){
