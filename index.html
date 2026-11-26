@@ -3,15 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Axiom — Free tools that run in your browser</title>
-<meta name="description" content="Free tools by Axiom. Convert 45+ file types (MP4, MP3, PDF, Word, Excel, HEIC and more) right in your browser with nothing uploaded, plus SteamRip (But Better), a userscript that adds multiplayer info, uploader profiles, favorites and notes.">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Axiom">
-<meta property="og:title" content="Axiom — Free tools that run in your browser">
-<meta property="og:description" content="Free tools by Axiom. Convert 45+ file types (MP4, MP3, PDF, Word, Excel, HEIC and more) right in your browser with nothing uploaded, plus SteamRip (But Better), a userscript that adds multiplayer info, uploader profiles, favorites and notes.">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Axiom — Free tools that run in your browser">
-<meta name="twitter:description" content="Free tools by Axiom. Convert 45+ file types (MP4, MP3, PDF, Word, Excel, HEIC and more) right in your browser with nothing uploaded, plus SteamRip (But Better), a userscript that adds multiplayer info, uploader profiles, favorites and notes.">
+<title>Axiom</title>
+<meta name="description" content="Axiom — SteamRip (But Better), a free userscript that cleans up SteamRip and adds multiplayer info, game reviews, uploader profiles, quick search and more.">
 <meta name="theme-color" content="#060607">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><rect width=%27100%27 height=%27100%27 rx=%2750%27 fill=%27black%27/><text x=%2750%27 y=%2768%27 font-size=%2760%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27Georgia%27>A</text></svg>">
 <style>
@@ -213,6 +206,140 @@ html{scrollbar-width:thin;scrollbar-color:#2a2a2f transparent}
 .fmts .g>small{width:100%;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
 .opts input[type=checkbox]{accent-color:#fff;width:15px;height:15px}
 @media(max-width:600px){.drop{padding:38px 16px}.opts input[type=range]{width:90px}}
+/* v1.4 home polish: same layout, cleaner and easier on the eye */
+#home .top{gap:20px}
+#home .pfp{width:80px;height:80px}
+#home .pfp::before{inset:-6px;opacity:.55;animation-duration:14s}
+#home .dot{width:16px;height:16px;border-width:3px;right:1px;bottom:1px}
+#home h1{font-size:46px;line-height:1.05;letter-spacing:-.025em}
+#home .sub{margin-top:10px;font-size:13.5px;color:var(--mute)}
+#home .sub b{color:#e4e4e7}
+#home .roles{margin-top:24px;gap:8px}
+#home .roles span{font-size:10.5px;letter-spacing:.14em;color:#b4b4bb;background:rgba(255,255,255,.025);border-color:rgba(255,255,255,.09);padding:5px 13px}
+#home .card{margin-top:28px;padding:20px 22px;border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));box-shadow:0 20px 50px -30px rgba(0,0,0,.9)}
+#home .who b{font-size:15px;letter-spacing:.005em}
+#home .who span{font-size:13px;color:var(--dim)}
+#home .state{margin-top:14px;font-size:13px}
+#home .btns{margin-top:20px;gap:10px}
+#home .btn{padding:11px 16px;border-radius:11px}
+#home .links{margin-top:28px;gap:12px}
+#home .link{padding:17px 22px;border-radius:14px;background:rgba(255,255,255,.022);font-size:14.5px}
+#home .link em{margin-right:16px;font-size:11px;letter-spacing:.08em;color:#6c6c73}
+#home .tag{font-size:9.5px;letter-spacing:.12em;padding:2px 9px;color:#c8c8ce;border-color:rgba(255,255,255,.16);background:rgba(255,255,255,.03)}
+#home .link.dead{background:none;border-color:rgba(255,255,255,.07)}
+#home .end{margin-top:22px;font-size:12px;color:#6c6c73}
+#home footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:#6c6c73}
+body::before{background:radial-gradient(ellipse 70% 42% at 50% -10%,rgba(255,255,255,.07),transparent 70%),radial-gradient(ellipse at center,transparent 55%,#000 150%)}
+@media(max-width:600px){#home h1{font-size:40px}#home .pfp{width:72px;height:72px}}
+/* v1.5 cleaner: less noise, flatter surfaces, calmer spacing everywhere */
+:root{--bg:#09090a;--card:rgba(255,255,255,.025);--line:rgba(255,255,255,.07);--mute:#9a9aa2;--dim:#7a7a82}
+body::after,.aurora{display:none}
+body::before{background:radial-gradient(ellipse 60% 36% at 50% -12%,rgba(255,255,255,.06),transparent 70%)}
+.c{background:var(--card);border-color:var(--line);box-shadow:none!important}
+.c::before{display:none}
+.c:hover{border-color:rgba(255,255,255,.16)}
+.link:hover,.link.dead:hover{transform:none}
+.link:hover .a{transform:none}
+h1,h2.t{background:none;-webkit-background-clip:initial;background-clip:initial;color:var(--fg)}
+.btn{border-radius:10px;font-weight:500}
+.btn.main:hover,.btn.main{box-shadow:none}
+.btn.main:hover{background:#fff}
+.btn:active{transform:none}
+.eyebrow,.sec h3{letter-spacing:.14em;color:var(--dim)}
+.sec{margin-top:52px}
+.sec h3{margin-bottom:16px}
+.sec h3::after{background:var(--line)}
+.hero{background:var(--card);box-shadow:none;padding:36px 30px}
+.chip,.roles span,.tag,.jump button{background:transparent}
+.jump button:hover{background:var(--card)}
+.win{box-shadow:none;background:#0b0b0c}
+.win header i{display:none}
+.win header{padding:10px 14px}
+.expand{background:transparent}
+.faq details{background:var(--card)}
+#sticky{background:rgba(9,9,10,.8);border-bottom:1px solid var(--line)}
+#home .card{background:var(--card);box-shadow:none}
+#home .link{background:var(--card)}
+#home .pfp::before{animation:none;opacity:.35}
+#home .roles span{background:transparent}
+.drop{background:transparent;border-color:rgba(255,255,255,.12)}
+.drop:hover{border-color:rgba(255,255,255,.22)}
+.fmts button,.seg{background:transparent}
+.fmts button:hover,.seg button:hover{background:var(--card)}
+.pv{background:#0b0b0c}
+.top,.roles,.card,.links>*,.end,footer{animation:none}
+.view{animation-duration:.3s}
+.rv{transition-duration:.35s}
+/* v1.6 UI polish: consistent rhythm, softer contrast, clearer hover/focus states */
+:root{--fg:#ededef;--line:rgba(255,255,255,.075);--line2:rgba(255,255,255,.16);--r:14px}
+body{font-size:15px;line-height:1.65;font-feature-settings:"cv11","ss01";text-rendering:optimizeLegibility}
+main{padding-top:calc(72px + env(safe-area-inset-top,0px))}
+#clock{font-variant-numeric:tabular-nums}
+.c,.item,.step,.faq details,.win,.file,.out{border-radius:var(--r)}
+.c{transition:border-color .2s,background .2s}
+.c:hover{background:rgba(255,255,255,.035)}
+.link{padding:17px 20px}
+.link .a{opacity:.6}.link:hover .a{opacity:1}
+.link.dead:hover{background:none;border-color:var(--line)}
+.btn{padding:11px 18px;letter-spacing:.005em}
+.btn.main{background:var(--fg);border-color:var(--fg)}
+.btn:hover{border-color:var(--line2);background:rgba(255,255,255,.04)}
+.btn.main:hover{background:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+.btns .btn,.row .btn{min-height:42px}
+.back{margin-bottom:22px;padding:4px 0}
+.hero{padding:34px 30px}
+h2.t{font-size:clamp(32px,6.5vw,46px);line-height:1.08}
+.lead{font-size:15px;color:var(--mute)}
+.meta{margin-top:18px}.chip{padding:3px 11px;font-size:11.5px;letter-spacing:.02em}
+.jump{margin-top:16px;gap:6px}
+.jump button{padding:6px 14px}
+.sec h3{font-size:10.5px;letter-spacing:.16em;margin-bottom:16px}
+.item{padding:17px 19px}
+.item b{font-size:14.5px}
+.item span{font-size:13px;color:var(--mute)}
+.fix b::before{color:#6fbf86;font-size:13px}
+.step{padding:17px 19px}
+.step::before{background:transparent;color:var(--fg);border:1px solid var(--line2);width:26px;height:26px;font-size:12px;font-weight:500}
+.seg{padding:3px}.seg button{padding:6px 15px;font-size:12.5px}
+.seg button.on{background:var(--fg);color:#09090a}
+.faq summary{font-size:14.5px;padding:16px 0}
+.faq details[open] summary{color:#fff}
+.faq p{font-size:13.5px}
+.win pre{font-size:12px;line-height:1.7}
+.win header{font-size:11.5px}
+.mini{padding:4px 11px;border-radius:8px}
+.drop{padding:44px 20px;border-color:var(--line2)}
+.drop:hover,.drop.over{background:rgba(255,255,255,.03)}
+.drop b{font-size:15px}
+.fmts{gap:7px}.fmts button{padding:6px 14px;font-size:12.5px}
+.fmts .g>small{margin-top:6px}
+.file .ext{border-radius:10px}
+.route .chip{font-size:11px}
+.opts{gap:10px 20px}
+#cvGo{min-height:46px;font-size:14px}
+.out{padding:18px 20px}
+#toast{background:var(--fg);box-shadow:0 8px 30px rgba(0,0,0,.45)}
+#sticky b{font-size:16px}
+footer,.end{color:var(--dim)}
+html{scrollbar-color:#2a2a2f transparent}
+:focus-visible{outline:2px solid rgba(255,255,255,.65);outline-offset:3px;border-radius:8px}
+@media(max-width:600px){main{padding-left:18px;padding-right:18px}.hero{padding:26px 20px}.item,.step{padding:16px 17px}.row .btn{flex:1 1 auto}.sec{margin-top:44px}}
+/* v1.7 restore OG effects: drifting blobs + cursor spotlight hover */
+.aurora{display:block}
+.aurora i{opacity:1;background:radial-gradient(circle,rgba(255,255,255,.07),transparent 65%)}
+.c::before{display:block;background:radial-gradient(240px circle at var(--x,50%) var(--y,0%),rgba(255,255,255,.08),transparent 70%);opacity:0;transition:opacity .3s}
+.c:hover::before{opacity:1}
+.link:hover{transform:translateY(-2px)}
+.link:hover .a{transform:translateX(3px);opacity:1}
+.link.dead:hover{transform:none}
+.link.dead::before{display:none}
+#home .pfp::before{animation:spin 8s linear infinite;opacity:.55}
+.top,.roles,.card,.links>*,.end,footer{animation:in .7s backwards}
+.roles{animation-delay:.06s}.card{animation-delay:.12s}
+.links>*:nth-child(1){animation-delay:.2s}.links>*:nth-child(2){animation-delay:.26s}.links>*:nth-child(3){animation-delay:.32s}.links>*:nth-child(4){animation-delay:.38s}.end{animation-delay:.44s}
+.view{animation-duration:.5s}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -225,7 +352,7 @@ html{scrollbar-width:thin;scrollbar-color:#2a2a2f transparent}
     <div class="pfp"><div class="img" id="pfp">A</div><div class="dot" id="dot"></div></div>
     <div><h1>Axiom</h1><p class="sub">real name <b>Mason</b></p></div>
   </section>
-  <div class="roles"><span>SR Staff</span><span>SR Uploader</span></div>
+  <div class="roles"><span>SR Staff</span></div>
 
   <section class="card c">
     <div class="who"><b id="dn">axiom423</b><span id="un">@axiom423</span></div>
@@ -256,7 +383,7 @@ html{scrollbar-width:thin;scrollbar-color:#2a2a2f transparent}
     <div class="eyebrow">Userscript · by Axiom</div>
     <h2 class="t">SteamRip (But Better)</h2>
     <p class="lead">Cleans up SteamRip and adds the tools the site should have had. Free, runs only in your browser.</p>
-    <div class="meta"><span class="chip" id="ver">v1.3.6</span><span class="chip">steamrip.com</span><span class="chip">Tampermonkey</span><span class="chip">Desktop</span></div>
+    <div class="meta"><span class="chip" id="ver">v1.4.3</span><span class="chip">steamrip.com</span><span class="chip">Tampermonkey</span><span class="chip">Desktop</span></div>
     <div class="row">
       <button class="btn main" id="srCopy">Copy code</button>
       <button class="btn" id="srDl">Download .user.js</button>
@@ -329,9 +456,9 @@ html{scrollbar-width:thin;scrollbar-color:#2a2a2f transparent}
 // ==UserScript==
 // @name         SteamRip++
 // @namespace    https://steamrip.com/
-// @version      1.3.6
-// @updated      2026-11-22
-// @description  Cleaner titles, comments off, Multiplayer info, uploader profiles, quick search, shortcuts and a Settings panel.
+// @version      1.4.3
+// @updated      2026-11-26
+// @description  Cleaner titles, comments off, Multiplayer info, game reviews (IGN, Metacritic, OpenCritic), uploader profiles, quick search, shortcuts and a Settings panel.
 // @author       Axiom
 // @match        https://steamrip.com/*
 // @match        https://www.steamrip.com/*
@@ -342,6 +469,15 @@ html{scrollbar-width:thin;scrollbar-color:#2a2a2f transparent}
 // @grant        GM_deleteValue
 // @grant        GM_setClipboard
 // @grant        GM_registerMenuCommand
+// @grant        GM_xmlhttpRequest
+// @connect      metacritic.com
+// @connect      www.metacritic.com
+// @connect      ign.com
+// @connect      www.ign.com
+// @connect      api.opencritic.com
+// @connect      html.duckduckgo.com
+// @connect      opencritic.com
+// @connect      www.opencritic.com
 // ==/UserScript==
 
 (function () {
@@ -353,7 +489,7 @@ html{scrollbar-width:thin;scrollbar-color:#2a2a2f transparent}
   const SHARE_SELECTORS = ['.share-links', '.post-share', '.share-buttons', '#share-buttons-top', '#share-buttons-bottom'];
   const RELATED_SELECTORS = ['#related-posts', '.related-posts', '.related-posts-list'];
   const ROUTE = 'spp-author=';
-  const VERSION = '1.3.6';
+  const VERSION = '1.4.3';
 
   const store = {
     get(k, d) { try { return typeof GM_getValue === 'function' ? GM_getValue(k, d) : d; } catch { return d; } },
@@ -389,6 +525,7 @@ html{scrollbar-width:thin;scrollbar-color:#2a2a2f transparent}
     cleanTitles: true,
     cleanUpdates: true,
     mpRow: true,
+    reviews: true,
     mpBadge: true,
     jumpBtn: true,
     pageSize: 20,
@@ -1815,6 +1952,7 @@ html{scrollbar-width:thin;scrollbar-color:#2a2a2f transparent}
     if (settings.hideRelated) css += '\n' + RELATED_SELECTORS.join(',') + '{display:none!important;}';
     if (settings.wideLayout) css += '\n.sidebar{display:none!important;}\n.main-content{width:100%!important;max-width:100%!important;flex:0 0 100%!important;}';
     if (!settings.mpRow) css += '\n[data-spp-mp]{display:none!important;}';
+    if (!settings.reviews) css += '\n[data-spp-reviews]{display:none!important;}';
     if (st.textContent !== css) st.textContent = css;
   }
 
@@ -1901,6 +2039,7 @@ html{scrollbar-width:thin;scrollbar-color:#2a2a2f transparent}
       ['cleanUpdates', 'Clean Recently Updated page', 'Removes the build and version tags and the extra info in brackets from the Recently Updated Games list.', true]]],
     ['Game page', [
       ['mpRow', 'Multiplayer row', 'Adds a Multiplayer line to GAME INFO for games that have online or co-op.'],
+      ['reviews', 'Game reviews', 'Shows IGN, Metacritic and OpenCritic scores with a short verdict under GAME INFO.'],
       ['jumpBtn', 'Jump-to-downloads button', 'Floating button that scrolls straight to the download links.']]],
     ['Lists & browsing', [
       ['mpBadge', 'Multiplayer badges', 'Shows a small MP tag on game cards in lists and on uploader pages.'],
@@ -2081,6 +2220,26 @@ html{scrollbar-width:thin;scrollbar-color:#2a2a2f transparent}
   }
 
   let topBtnBound = false;
+  function nativeTop() {
+    const sel = '[id*="top" i],[class*="top" i],[id*="scroll" i],[class*="scroll" i],a[href="#"],a[href="#top"]';
+    for (const e of qsa(sel)) {
+      if (e.id === 'spp-top-btn' || e.id === 'spp-jump-btn' || e.closest('#spp-modal,#spp-profile,#spp-top-bar')) continue;
+      const cs = getComputedStyle(e);
+      if (cs.position !== 'fixed' || cs.display === 'none' || cs.visibility === 'hidden' || +cs.opacity < 0.1) continue;
+      const r = e.getBoundingClientRect();
+      if (r.width < 20 || r.width > 90 || r.height < 20 || r.height > 90) continue;
+      if (innerWidth - r.right < 120 && innerHeight - r.bottom < 160 && r.bottom > 0) return r;
+    }
+    return null;
+  }
+  let cornerAt = 0;
+  function fixCornerButtons(force) {
+    const now = Date.now(); if (!force && now - cornerAt < 400) return; cornerAt = now;
+    const t = document.getElementById('spp-top-btn'), j = document.getElementById('spp-jump-btn');
+    const n = nativeTop();
+    if (t) { if (n) t.style.setProperty('display', 'none', 'important'); else t.style.removeProperty('display'); }
+    if (j) j.style.bottom = n ? Math.round(innerHeight - n.top + 12) + 'px' : '';
+  }
   function putTopButton() {
     let b = document.getElementById('spp-top-btn');
     if (!settings.backToTop) { if (b) b.remove(); return; }
@@ -2091,11 +2250,13 @@ html{scrollbar-width:thin;scrollbar-color:#2a2a2f transparent}
       b.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
       document.body.appendChild(b);
     }
+    fixCornerButtons(true);
     if (!topBtnBound) {
       topBtnBound = true;
       window.addEventListener('scroll', () => {
         const t = document.getElementById('spp-top-btn');
         if (t) t.classList.toggle('spp-show', window.scrollY > 700);
+        fixCornerButtons();
       }, { passive: true });
     }
   }
@@ -2117,9 +2278,10 @@ html{scrollbar-width:thin;scrollbar-color:#2a2a2f transparent}
     if (b) return;
     sampleTheme();
     b = make('button'); b.id = 'spp-jump-btn'; b.type = 'button'; b.title = 'Jump to downloads'; b.setAttribute('aria-label', 'Jump to downloads');
-    b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16.6l-7-7 1.8-1.8L12 13l5.2-5.2L19 9.6z"/></svg>';
+    b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3h2v9.2l3.3-3.3 1.4 1.4L12 16l-5.7-5.7 1.4-1.4 3.3 3.3V3zM5 18h14v2H5z"/></svg>';
     b.addEventListener('click', jumpToDownloads);
     document.body.appendChild(b);
+    fixCornerButtons(true);
   }
 
   // infinite scroll (listing pages)
@@ -2520,6 +2682,169 @@ html{scrollbar-width:thin;scrollbar-color:#2a2a2f transparent}
   }
   if (typeof GM_registerMenuCommand === 'function') GM_registerMenuCommand('SteamRip++: debug report', debugReport);
 
+  // ---------- Game reviews: IGN, Metacritic, Steam ----------
+  const REV_KEY = 'spp_reviews4';
+  const revNet = {};
+  const REV_OK = 7 * 864e5;
+  const REV_MISS = 864e5;
+  let revBusy = '';
+  function gmGet(url, headers) {
+    const host = (url.match(/^https?:\/\/([^\/]+)/) || [])[1];
+    return new Promise((res) => {
+      try {
+        if (typeof GM_xmlhttpRequest !== 'function') { revNet[host] = true; return res(null); }
+        GM_xmlhttpRequest({ method: 'GET', url, headers: headers || {}, timeout: 12000,
+          onload: (r) => { delete revNet[host]; res(r.status >= 200 && r.status < 300 ? r.responseText : null); },
+          onerror: () => { revNet[host] = true; res(null); }, ontimeout: () => { revNet[host] = true; res(null); } });
+      } catch { revNet[host] = true; res(null); }
+    });
+  }
+  const revSlug = (n) => n.toLowerCase().replace(/['’]/g, '').replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const revName = () => gameTitleOnPage()
+    .replace(/\s*free\s*download.*$/i, '').replace(/\s*[\(\[].*?[\)\]]/g, '')
+    .replace(/\s+v?\d+(\.\d+)+.*$/i, '').replace(/\s*[-–—]\s*(build|update|v\d).*$/i, '').trim();
+  const revClip = (t, n) => { t = String(t || '').replace(/\s+/g, ' ').trim(); return t.length > n ? t.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : t; };
+  function revMeta(html, name) {
+    const a = html.match(new RegExp('<meta[^>]+(?:property|name)=["\']' + name + '["\'][^>]*content=["\']([^"\']*)', 'i'));
+    const b = html.match(new RegExp('<meta[^>]+content=["\']([^"\']*)["\'][^>]+(?:property|name)=["\']' + name + '["\']', 'i'));
+    return decode((a || b || [])[1] || '');
+  }
+  function revLd(html) {
+    const out = []; const re = /<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi; let m;
+    while ((m = re.exec(html))) {
+      try { const j = JSON.parse(m[1]); (Array.isArray(j) ? j : [j]).forEach((x) => { out.push(x); if (x && Array.isArray(x['@graph'])) out.push(...x['@graph']); }); } catch {}
+    }
+    return out.filter(Boolean);
+  }
+  async function revSearch(q) {
+    const html = await gmGet('https://html.duckduckgo.com/html/?q=' + encodeURIComponent(q));
+    if (!html) return [];
+    const urls = []; const re = /uddg=([^&"']+)/g; let m;
+    while ((m = re.exec(html))) { try { urls.push(decodeURIComponent(m[1])); } catch {} }
+    return urls;
+  }
+  async function revMetacritic(name) {
+    let url = 'https://www.metacritic.com/game/' + revSlug(name) + '/';
+    let html = await gmGet(url);
+    if (!html) {
+      const hit = (await revSearch('site:metacritic.com/game ' + name)).find((u) => /metacritic\.com\/game\/[^\/?#]+\/?$/.test(u));
+      if (!hit) return null;
+      url = hit; html = await gmGet(url);
+    }
+    if (!html) return null;
+    const ag = revLd(html).map((x) => x.aggregateRating).find((a) => a && a.ratingValue);
+    if (!ag) return null;
+    const v = Math.round(parseFloat(ag.ratingValue));
+    if (!(v > 0)) return null;
+    const label = v >= 81 ? 'Universal acclaim' : v >= 61 ? 'Generally favorable' : v >= 40 ? 'Mixed or average' : v >= 20 ? 'Generally unfavorable' : 'Overwhelming dislike';
+    const n = ag.reviewCount || ag.ratingCount;
+    return { pct: v, score: v + '/100', reply: label + (n ? ' · ' + n + ' critic reviews' : ''), url };
+  }
+  async function revIgn(name) {
+    let url = 'https://www.ign.com/articles/' + revSlug(name) + '-review';
+    let html = await gmGet(url);
+    if (!html || !revLd(html).some((x) => x.reviewRating)) {
+      const hit = (await revSearch('site:ign.com ' + name + ' review')).find((u) => /ign\.com\/articles\/[^?#]*review/i.test(u));
+      if (!hit) return null;
+      url = hit; html = await gmGet(url);
+    }
+    if (!html) return null;
+    const node = revLd(html).find((x) => x.reviewRating && x.reviewRating.ratingValue);
+    if (!node) return null;
+    const v = parseFloat(node.reviewRating.ratingValue), best = parseFloat(node.reviewRating.bestRating) || 10;
+    if (!(v > 0)) return null;
+    const reply = revClip(node.description || revMeta(html, 'og:description') || revMeta(html, 'description'), 170);
+    return { pct: Math.round(v / best * 100), score: v + '/' + best, reply, url };
+  }
+  async function revOpenCritic(name) {
+    const H = { Referer: 'https://opencritic.com/', Origin: 'https://opencritic.com', Accept: 'application/json' };
+    const norm = (t) => String(t).toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]/g, '');
+    const tries = [name, name.split(/\s*[:–—-]\s+/)[0]].map((t) => t.trim()).filter((t, i, arr) => t.length > 1 && arr.indexOf(t) === i);
+    let hit = null;
+    for (const t of tries) {
+      let list = [];
+      try { list = JSON.parse(await gmGet('https://api.opencritic.com/api/meta/search?criteria=' + encodeURIComponent(t), H)) || []; } catch {}
+      const want = norm(t);
+      hit = list.find((g) => { const n = norm(g.name); return n === want || n.indexOf(want) === 0 || (n.length > 3 && want.indexOf(n) === 0); });
+      if (hit) break;
+    }
+    if (!hit) return null;
+    let g = null;
+    try { g = JSON.parse(await gmGet('https://api.opencritic.com/api/game/' + hit.id, H)); } catch {}
+    const v = g ? Math.round(g.topCriticScore > 0 ? g.topCriticScore : g.medianScore || 0) : 0;
+    if (!(v > 0)) return null;
+    const n = g.numTopCriticReviews || g.numReviews;
+    let reply = (g.tier ? g.tier + ' · ' : '') + (n ? n + ' critic reviews' : 'Critic average') + (g.percentRecommended > 0 ? ' · ' + Math.round(g.percentRecommended) + '% recommend' : '');
+    try {
+      const rv = JSON.parse(await gmGet('https://api.opencritic.com/api/reviews/game/' + hit.id + '?skip=0&sort=popularity', H));
+      const r = (rv || []).find((x) => x && x.snippet);
+      if (r) reply += ' · “' + revClip(r.snippet, 110) + '”' + (r.Outlet && r.Outlet.name ? ' — ' + r.Outlet.name : '');
+    } catch {}
+    return { pct: v, score: v + '/100', reply, url: 'https://opencritic.com/game/' + hit.id + '/' + revSlug(hit.name || name) };
+  }
+  const REV_SOURCES = [['IGN', revIgn], ['Metacritic', revMetacritic], ['OpenCritic', revOpenCritic]];
+  const REV_HOSTS = ['www.ign.com', 'www.metacritic.com', 'api.opencritic.com'];
+  function revStyle() {
+    if (document.getElementById('spp-rev-css')) return;
+    const st = make('style'); st.id = 'spp-rev-css';
+    st.textContent = [
+      '[data-spp-reviews]{margin:18px 0;padding:6px 16px;border:1px solid rgba(128,128,128,.3);border-radius:10px;}',
+      '[data-spp-reviews] h4{margin:10px 0 4px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.7;}',
+      '[data-spp-reviews] .spp-rv{display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-top:1px solid rgba(128,128,128,.2);}',
+      '[data-spp-reviews] h4+.spp-rv{border-top:0;}',
+      '[data-spp-reviews] .spp-rv b.src{flex:0 0 86px;font-size:13px;}',
+      '[data-spp-reviews] .spp-rv .sc{flex:0 0 auto;min-width:62px;text-align:center;padding:3px 9px;border-radius:7px;font-weight:700;font-size:13px;color:#fff;background:#6b7280;}',
+      '[data-spp-reviews] .spp-rv .sc.g{background:#1f9d55;}[data-spp-reviews] .spp-rv .sc.y{background:#b7791f;}[data-spp-reviews] .spp-rv .sc.r{background:#c0392b;}',
+      '[data-spp-reviews] .spp-rv .tx{flex:1;min-width:0;font-size:13px;line-height:1.5;opacity:.9;}',
+      '[data-spp-reviews] .spp-rv .tx a{margin-left:6px;white-space:nowrap;}'
+    ].join('\n');
+    document.head.appendChild(st);
+  }
+  function revRow(name, d, err) {
+    const row = make('div', 'spp-rv');
+    row.appendChild(make('b', 'src', (d && d.label) || name));
+    const sc = make('span', 'sc', d ? d.score : '—');
+    if (d) sc.classList.add(d.pct >= 75 ? 'g' : d.pct >= 50 ? 'y' : 'r');
+    row.appendChild(sc);
+    const tx = make('div', 'tx', d ? d.reply : err ? 'Couldn’t connect. Click Allow on the Tampermonkey prompt, or reinstall the script.' : 'No review found.');
+    if (d && d.url) { const a = make('a', '', 'Read →'); a.href = d.url; a.target = '_blank'; a.rel = 'noopener noreferrer'; tx.appendChild(a); }
+    row.appendChild(tx);
+    return row;
+  }
+  async function addReviews() {
+    if (!settings.reviews || profileActive || !/^\/[^\/]+\/?$/.test(location.pathname)) return;
+    const live = document.querySelector('[data-spp-reviews]');
+    if (live && live.isConnected) return;
+    const ul = findInfoList();
+    if (!ul) return;
+    const name = revName();
+    if (!name || revBusy === name) return;
+    revBusy = name;
+    revStyle();
+    const box = make('div'); box.setAttribute('data-spp-reviews', '1');
+    box.appendChild(make('h4', '', 'Reviews'));
+    box.appendChild(make('div', 'spp-rv tx', 'Loading reviews…'));
+    ul.parentNode.insertBefore(box, ul.nextSibling);
+    const cache = parse(store.get(REV_KEY, '{}'), {}), key = name.toLowerCase();
+    const ent = cache[key], now = Date.now();
+    let data = ent && ent.d && now - (ent.s || ent.t) < REV_OK ? ent.d.slice() : [null, null, null];
+    const retry = !ent || now - ent.t > REV_MISS;
+    const need = data.map((d) => !d && retry);
+    if (need.some(Boolean)) {
+      const got = await Promise.all(REV_SOURCES.map(([, fn], i) => (need[i] ? fn(name).catch(() => null) : null)));
+      data = data.map((d, i) => d || got[i]);
+      cache[key] = { t: now, s: data.some(Boolean) && (!ent || !ent.s || now - ent.s >= REV_OK) ? now : (ent && ent.s) || now, d: data };
+      const keys = Object.keys(cache); if (keys.length > 60) keys.sort((a, b) => cache[a].t - cache[b].t).slice(0, keys.length - 60).forEach((k) => delete cache[k]);
+      store.set(REV_KEY, JSON.stringify(cache));
+    }
+    const errs = REV_HOSTS.map((h) => !!revNet[h]);
+    revBusy = '';
+    if (!box.isConnected) return;
+    box.replaceChildren(make('h4', '', 'Reviews'));
+    if (data.every((d) => !d) && !errs.some(Boolean)) { box.appendChild(make('div', 'spp-rv tx', 'No reviews found for this game yet.')); return; }
+    REV_SOURCES.forEach(([n], i) => box.appendChild(revRow(n, data[i], errs[i])));
+  }
+
   function refreshPage() {
     const run = (fn) => { try { fn(); } catch (e) { console.warn('[SteamRip++] ' + (fn.name || 'step') + ' failed', e); } };
     run(injectCss);
@@ -2532,6 +2857,7 @@ html{scrollbar-width:thin;scrollbar-color:#2a2a2f transparent}
     run(scanAuthors);
     run(putSettingsButton);
     run(addMPRow);
+    run(addReviews);
     run(trackVisit);
     run(decorateCards);
     run(putTopButton);
@@ -2614,6 +2940,7 @@ const FIXES=[
 ];
 const ADDS=[
  ["Multiplayer info",(MPN?MPN+" games":"Hundreds of games")+" with an MP badge and a Multiplayer row in GAME INFO (OnlineFix, official servers, LAN and more)."],
+ ["Game reviews","IGN, Metacritic and OpenCritic scores on every game page, each with a short verdict and a link to read more."],
  ["Uploader profiles","Each uploader’s games with search, sort, date filters, stats and a 12-month activity chart."],
  ["Settings panel","Gear icon in the header with a toggle for every feature, plus export and import."],
  ["Smarter lists","Dims games you already opened, shows what’s new since your last visit, optional infinite scroll and prefetch."],
@@ -2812,7 +3139,7 @@ async function ico(c){
   d.setUint16(2,1,true);d.setUint16(4,1,true);d.setUint8(6,w&255);d.setUint8(7,h&255);d.setUint16(10,1,true);d.setUint16(12,32,true);d.setUint32(14,png.length,true);d.setUint32(18,22,true);
   return new Blob([d.buffer,png],{type:"image/x-icon"})}
 async function img2img(it,o,pr,nx){
-  if(it.f=="gif"&&nx.f!="gif")nx.m.note="Animated GIFs keep only their first frame as a still image.";const im=await load(it.b),w0=im.naturalWidth||300,h0=im.naturalHeight||150,f=nx.f;
+  const im=await load(it.b),w0=im.naturalWidth||300,h0=im.naturalHeight||150,f=nx.f;
   let s=o.w?Math.min(1,o.w/w0):1;if(it.f=="svg"&&!o.w)s=Math.max(1,1024/w0);s=Math.min(s,16000/h0,Math.sqrt(6.7e7/(w0*h0)));
   const w=Math.max(1,Math.round(w0*s)),h=Math.max(1,Math.round(h0*s)),c=document.createElement("canvas");c.width=w;c.height=h;
   const x=c.getContext("2d",{willReadFrequently:true});
@@ -2977,7 +3304,7 @@ async function docx2html(it,o,pr,nx){nx.m.doc=1;
 /* ---------- data ---------- */
 const parseCSV=(s,d=",")=>{const r=[];let row=[],f="",q=false;for(let i=0;i<s.length;i++){const c=s[i];if(q){if(c=='"'){if(s[i+1]=='"'){f+='"';i++}else q=false}else f+=c}else if(c=='"')q=true;else if(c==d){row.push(f);f=""}else if(c=="\n"||c=="\r"){if(c=="\r"&&s[i+1]=="\n")i++;row.push(f);r.push(row);row=[];f=""}else f+=c}if(f||row.length){row.push(f);r.push(row)}return r.filter(x=>x.some(v=>v!==""))};
 const csv2json=async it=>{const[h,...r]=parseCSV(await it.b.text());return new Blob([JSON.stringify(r.map(x=>Object.fromEntries(h.map((k,i)=>[k,/^-?\d+(\.\d+)?$/.test(x[i]||"")?+x[i]:x[i]??""]))),null,2)],{type:"application/json"})};
-const json2csv=async it=>{let j=JSON.parse(await it.b.text());while(j&&!Array.isArray(j)&&typeof j=="object"&&Object.keys(j).length==1){const v=j[Object.keys(j)[0]];if(v&&typeof v=="object")j=v;else break}if(!Array.isArray(j))j=[j];const keys=[...new Set(j.flatMap(o=>Object.keys(o&&typeof o=="object"?o:{value:o})))],q=v=>{v=v==null?"":typeof v=="object"?JSON.stringify(v):String(v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+const json2csv=async it=>{let j=JSON.parse(await it.b.text());if(!Array.isArray(j))j=[j];const keys=[...new Set(j.flatMap(o=>Object.keys(o&&typeof o=="object"?o:{value:o})))],q=v=>{v=v==null?"":typeof v=="object"?JSON.stringify(v):String(v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
   return new Blob([[keys.join(","),...j.map(o=>{o=o&&typeof o=="object"?o:{value:o};return keys.map(k=>q(o[k])).join(",")})].join("\n")],{type:"text/csv"})};
 const csv2html=async(it,o,pr,nx)=>{nx.m.doc=1;const[h,...r]=parseCSV(await it.b.text());return new Blob([`<table><tr>${h.map(c=>`<th>${esc(c)}</th>`).join("")}</tr>${r.map(x=>`<tr>${h.map((_,i)=>`<td>${esc(x[i]||"")}</td>`).join("")}</tr>`).join("")}</table>`],{type:"text/html"})};
 const json2txt=async it=>new Blob([JSON.stringify(JSON.parse(await it.b.text()),null,2)],{type:"text/plain"});
@@ -3044,7 +3371,7 @@ async function ff(it,o,pr,nx){
   const h=({progress})=>pr(Math.max(0,Math.min(1,progress||0)));F.on("progress",h);
   try{
     const code=await F.exec(["-hide_banner","-y","-i",inn,...fargs(it.f,nx.f,o),out]);
-    if(code!==0)throw Error(AUD.has(nx.f)&&VID.has(it.f)?"This video has no audio track, or its audio can't be read.":"This file couldn't be converted. It may use a codec that isn't supported here.");
+    if(code!==0)throw Error("This file couldn't be converted. It may use a codec that isn't supported here.");
     const d=await F.readFile(out);return new Blob([d],{type:MIME[nx.f]||""})}
   finally{F.off("progress",h);for(const n of[inn,out])try{await F.deleteFile(n)}catch(e){}}}
 const vid2gif=async(it,o,pr,nx)=>{try{return await vid2gifN(it,o,pr)}catch(e){return ff(it,o,pr,nx)}};
@@ -3095,7 +3422,6 @@ async function putRows(r,f){
   return new Blob([XLSX.write(wb,{type:"array",bookType:f=="xls"?"biff8":f})],{type:MIME[f]})}
 const sheetConv=async(it,o,pr,nx)=>putRows(await getRows(it,nx),nx.f);
 const sheet2json=async(it,o,pr,nx)=>{const[h=[],...r]=await getRows(it,nx),k=h.map(String);return new Blob([JSON.stringify(r.map(x=>Object.fromEntries(k.map((n,i)=>[n,/^-?\d+(\.\d+)?$/.test(x[i]||"")?+x[i]:x[i]??""]))),null,2)],{type:"application/json"})};
-const sheet2txt=async(it,o,pr,nx)=>new Blob([await putRows(await getRows(it,nx),"tsv")],{type:"text/plain"});
 const sheet2html=async(it,o,pr,nx)=>{nx.m.doc=1;const[h=[],...r]=await getRows(it,nx);return new Blob([`<table><tr>${h.map(c=>`<th>${esc(String(c))}</th>`).join("")}</tr>${r.map(x=>`<tr>${h.map((_,i)=>`<td>${esc(String(x[i]??""))}</td>`).join("")}</tr>`).join("")}</table>`],{type:"text/html"})};
 
 /* ---------- data: YAML, XML ---------- */
@@ -3198,7 +3524,7 @@ add("png jpg webp bmp gif avif svg ico","png jpg webp bmp gif ico",1,img2img,"qw
 add("jpg","pdf",1,jpg2pdf);
 add("txt","html",1,txt2html);add("md","html",1,async(it,o,pr,nx)=>{nx.m.doc=1;return new Blob([md2html(await it.b.text())],{type:"text/html"})});add("docx","html",1,docx2html);
 add("html","svg",1,html2svg,"p");add("html","docx",1,html2docx);add("html","txt",2,html2txt);add("txt","pdf",2,txt2pdf);
-add("csv","json",1,csv2json);add("json","csv",1,json2csv);add("csv","html",1,csv2html);add("json","txt",2,json2txt);
+add("csv","json",1,csv2json);add("json","csv",1,json2csv);add("csv","html",1,csv2html);add("json","txt",1,json2txt);
 add("mp3 ogg flac m4a mp4 webm mov","wav",1,toWav);add("wav","mp3",1,wav2mp3,"k");
 add("mp4 webm mov","gif",1,vid2gif,"vw");add("mp4 webm mov","png",1,vidframe,"w");
 /* FFmpeg routes cost 3, so the lighter built-in converters win whenever they can do the job */
@@ -3206,7 +3532,7 @@ const VF="mp4 webm mkv mov avi flv wmv mpg 3gp ogv ts",AF="mp3 wav ogg flac m4a 
 add(VF,VF,3,ff,"qwc");add("gif",VF,3,ff,"qwc");add(VF,AF,3,ff,"kc");add(AF+" amr",AF,3,ff,"kc");add(VF,"gif",3,ff,"vw");add(VF,"png",3,ff,"w");
 add("png","tiff",3,ff);add("tiff","png",3,ff);add("heic","jpg png",1,heic2img,"q");
 add("pdf","png jpg",1,pdf2img,"gwq");add("pdf","txt",1,pdf2txt);
-add("csv tsv xlsx xls ods","csv tsv xlsx xls ods",1,sheetConv);add("tsv xlsx xls ods","json",1,sheet2json);add("tsv xlsx xls ods","html",1,sheet2html);add("csv tsv xlsx xls ods","txt",2.5,sheet2txt);
+add("csv tsv xlsx xls ods","csv tsv xlsx xls ods",1,sheetConv);add("tsv xlsx xls ods","json",1,sheet2json);add("tsv xlsx xls ods","html",1,sheet2html);
 add("json","yaml",1,json2yaml);add("yaml","json",1,yaml2json);add("json","xml",1,json2xml);add("xml","json",1,xml2json);
 add("html","md",1,html2md);add("txt","md",1,copyMd);add("md","txt",1,md2txt);
 add("odt","html",1,odt2html);add("epub","html",1,epub2html);add("rtf","txt",1,rtf2txt);
@@ -3215,17 +3541,6 @@ const route=(P,to)=>{const r=[];for(let x=to;P.prev[x];x=P.prev[x].a)r.unshift(P
 $("cvCount").textContent=new Set(E.flatMap(e=>[e.a,e.b])).size+" formats";
 
 /* ---------- UI ---------- */
-const em=e=>(e&&e.message)||(typeof e=="string"&&e)||"Conversion failed";
-/* Only offer conversions that make sense. Without this the route finder would happily turn a spreadsheet into a video, or a photo into audio. */
-const KIND={};CAT.forEach(([n,l])=>l.forEach(f=>KIND[f]=n));
-const RASTER=["png","jpg","webp"];
-function allowed(f,t){const a=KIND[f],b=KIND[t];
-  if(a=="Images"){if(b=="Images")return t!="svg";if(t=="pdf")return true;return f=="gif"&&b=="Video"}
-  if(a=="Video")return b=="Video"||b=="Audio"||["png","jpg","webp","bmp","gif","tiff"].includes(t);
-  if(a=="Audio")return b=="Audio";
-  if(a=="Documents")return b=="Documents"||RASTER.includes(t)||(t=="svg"&&f!="pdf");
-  if(a=="Data")return b=="Data"||["pdf","txt","html","md","docx",...RASTER].includes(t);
-  return false}
 let cur=null,P=null,sel=null,res=null,pvUrl=null;
 const fmtSize=n=>n<1024?n+" B":n<1048576?(n/1024).toFixed(1)+" KB":(n/1048576).toFixed(1)+" MB";
 const drop=$("drop"),inp=$("cvFile"),on=()=>$("cv").classList.contains("on");inp.multiple=true;
@@ -3239,7 +3554,7 @@ const back=()=>{$("cvWork").hidden=true;drop.hidden=false;$("cvOut").hidden=true
 $("cvReset").onclick=back;$("cvAgain").onclick=back;
 
 async function pick(fl){
-  fl=[...fl];if(!fl.length)return;const types=await Promise.all(fl.map(sniff)),f=types[0];P=paths(f);for(const t of Object.keys(P.d))if(t!=f&&!allowed(f,t))delete P.d[t];
+  fl=[...fl];if(!fl.length)return;const types=await Promise.all(fl.map(sniff)),f=types[0];P=paths(f);
   if(Object.keys(P.d).length<2)return toast(f?`.${f} files aren't supported yet`:"Unknown file type");
   const keep=fl.filter((_,i)=>types[i]==f),skip=fl.length-keep.length;
   cur={f,items:keep.map(x=>({b:new Blob([x],{type:MIME[f]||x.type}),n:x.name.replace(/\.[^.]+$/,"")||"file",size:x.size}))};sel=null;
@@ -3269,10 +3584,10 @@ $("cvGo").onclick=async()=>{
   for(let k=0;k<N;k++){
     let it={b:cur.items[k].b,f:cur.f,n:cur.items[k].n,m:{}};
     try{
-      for(let i=0;i<path.length;i++){const e=path[i];if(it.f!=e.a)throw Error("Choose a single page for this conversion");const nx={b:null,f:e.b,n:it.n,m:{...it.m}};bar((k+i/path.length)/N+.02);await tick();nx.b=await e.fn(it,e.fn===pdf2img&&i<path.length-1?{...o,pg:1}:o,p=>bar((k+(i+p)/path.length)/N),nx);it=nx}
+      for(let i=0;i<path.length;i++){const e=path[i];if(it.f!=e.a)throw Error("Choose a single page for this conversion");const nx={b:null,f:e.b,n:it.n,m:{...it.m}};bar((k+i/path.length)/N+.02);await tick();nx.b=await e.fn(it,o,p=>bar((k+(i+p)/path.length)/N),nx);it=nx}
       outs.push({it,from:cur.items[k].size})}
-    catch(err){console.error(err);fail++;msg=em(err)}}
-  if(merge&&outs.length>1){try{const b=await imgs2pdf(outs.map(x=>x.it.b));outs=[{it:{b,f:"pdf",n:cur.items[0].n+" (combined)",m:{}},from:outs.reduce((n,x)=>n+x.from,0)}]}catch(err){console.error(err);fail++;msg=em(err);outs=[]}}
+    catch(err){console.error(err);fail++;msg=err.message||"Conversion failed"}}
+  if(merge&&outs.length>1){try{const b=await imgs2pdf(outs.map(x=>x.it.b));outs=[{it:{b,f:"pdf",n:cur.items[0].n+" (combined)",m:{}},from:outs.reduce((n,x)=>n+x.from,0)}]}catch(err){console.error(err);fail++;msg=err.message||"Conversion failed";outs=[]}}
   bar(1);if(outs.length)show(outs);if(fail)toast(N>1?`${fail} of ${N} failed: ${msg}`:msg);
   go.disabled=false;go.textContent=label;setTimeout(()=>{$("cvBar").style.display="none";bar(0)},500)};
 function show(outs){
