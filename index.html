@@ -228,6 +228,7 @@ html{scrollbar-width:thin;scrollbar-color:#2a2a2f transparent}
 #home .tag{font-size:9.5px;letter-spacing:.12em;padding:2px 9px;color:#c8c8ce;border-color:rgba(255,255,255,.16);background:rgba(255,255,255,.03)}
 #home .link.dead{background:none;border-color:rgba(255,255,255,.07)}
 #home .end{margin-top:22px;font-size:12px;color:#6c6c73}
+#vis{margin-top:6px!important;min-height:1.5em;opacity:0;transition:opacity .5s}#vis.on{opacity:1}#vis b{color:var(--mute);font-weight:500;font-variant-numeric:tabular-nums}
 #home footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:#6c6c73}
 body::before{background:radial-gradient(ellipse 70% 42% at 50% -10%,rgba(255,255,255,.07),transparent 70%),radial-gradient(ellipse at center,transparent 55%,#000 150%)}
 @media(max-width:600px){#home h1{font-size:40px}#home .pfp{width:72px;height:72px}}
@@ -388,6 +389,7 @@ html{scrollbar-color:#2a2a2f transparent}
     <a class="link c" href="#tools"><div><em>04</em>Utilities<span class="tag">New</span></div></a>
   </nav>
   <p class="end">that’s everything for now. more is on the way.</p>
+  <p class="end" id="vis" aria-live="polite"><b id="visN"></b> <span id="visT">visitors</span></p>
   <footer><span id="clock"></span><span>press <kbd>C</kbd> to copy</span></footer>
 </div>
 
@@ -3778,6 +3780,32 @@ function js(ind){const st=g("jStat"),t=g("jIn").value.trim();
   try{JSON.parse(t);const out=fmtJ(t,ind);g("jOut").value=out;st.textContent="✓ Valid JSON · "+out.length.toLocaleString()+" characters";st.className="ut-res ok"}
   catch(e){g("jOut").value="";st.textContent="✗ "+e.message;st.className="ut-res bad"}}
 g("jFmt").onclick=()=>js(2);g("jMin").onclick=()=>js(0);g("jCopy").onclick=()=>copy(g("jOut").value);
+})();
+</script>
+<script>
+/* Visitor count. One hit per browser, and again if that browser comes back 3+ days later.
+   The total lives on the Abacus counting API (abacus.jasoncameron.dev), so it is shared by everyone and never resets when someone clears anything. */
+(()=>{
+const NS="axiom423-github-io",KEY="visitors",BASE="https://abacus.jasoncameron.dev",WAIT=3*24*60*60*1000,
+  LAST="axiom-visit-last",CACHE="axiom-visit-count",SKIP="axiom-nocount",el=document.getElementById("vis");
+if(!el)return;
+const ls={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v);return localStorage.getItem(k)===String(v)}catch(e){return false}},del:k=>{try{localStorage.removeItem(k)}catch(e){}}};
+const show=n=>{n=Math.floor(Number(n));if(!isFinite(n)||n<0)return;const c=+ls.get(CACHE)||0;if(n<c)n=c;ls.set(CACHE,n);document.getElementById("visN").textContent=n.toLocaleString("en-US");document.getElementById("visT").textContent=n==1?"visitor":"visitors";el.classList.add("on")};
+const call=async op=>{const ac=new AbortController(),t=setTimeout(()=>ac.abort(),7000);try{const r=await fetch(BASE+"/"+op+"/"+NS+"/"+KEY,{credentials:"omit",referrerPolicy:"no-referrer",cache:"no-store",signal:ac.signal});if(!r.ok)throw Error(r.status);const j=await r.json();if(!isFinite(+j.value))throw Error("bad");return +j.value}finally{clearTimeout(t)}};
+/* add ?nocount to your own link once to stop counting yourself in this browser (?count turns it back on) */
+if(/[?&]nocount\b/.test(location.search))ls.set(SKIP,"1");if(/[?&]count\b/.test(location.search))ls.del(SKIP);
+const c=+ls.get(CACHE);if(c>0)show(c);
+(async()=>{
+  const now=Date.now(),last=+ls.get(LAST),
+    canStore=ls.set("axiom-probe","1"),                        /* without storage we can't tell repeat visits apart, so we only read */
+    due=!last||isNaN(last)||last>now||now-last>=WAIT;
+  ls.del("axiom-probe");
+  if(canStore&&due&&!navigator.webdriver&&!ls.get(SKIP)){
+    ls.set(LAST,now);                                          /* claim first so two tabs opened together count once */
+    try{show(await call("hit"));return}catch(e){if(last)ls.set(LAST,last);else ls.del(LAST)}  /* failed: try again next visit */
+  }
+  try{show(await call("get"))}catch(e){}
+})();
 })();
 </script>
 </body>
