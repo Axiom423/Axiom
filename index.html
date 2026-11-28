@@ -3363,9 +3363,10 @@ async function docx2html(it,o,pr,nx){nx.m.doc=1;
   return new Blob([blk(doc.getElementsByTagName("w:body")[0])],{type:"text/html"})}
 
 /* ---------- data ---------- */
-const parseCSV=(s,d=",")=>{const r=[];let row=[],f="",q=false;for(let i=0;i<s.length;i++){const c=s[i];if(q){if(c=='"'){if(s[i+1]=='"'){f+='"';i++}else q=false}else f+=c}else if(c=='"')q=true;else if(c==d){row.push(f);f=""}else if(c=="\n"||c=="\r"){if(c=="\r"&&s[i+1]=="\n")i++;row.push(f);r.push(row);row=[];f=""}else f+=c}if(f||row.length){row.push(f);r.push(row)}return r.filter(x=>x.some(v=>v!==""))};
-const csv2json=async it=>{const[h,...r]=parseCSV(await it.b.text());return new Blob([JSON.stringify(r.map(x=>Object.fromEntries(h.map((k,i)=>[k,/^-?\d+(\.\d+)?$/.test(x[i]||"")?+x[i]:x[i]??""]))),null,2)],{type:"application/json"})};
-const json2csv=async it=>{let j=JSON.parse(await it.b.text());if(!Array.isArray(j))j=[j];const keys=[...new Set(j.flatMap(o=>Object.keys(o&&typeof o=="object"?o:{value:o})))],q=v=>{v=v==null?"":typeof v=="object"?JSON.stringify(v):String(v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+const sniffDelim=s=>{const l=s.slice(0,4000).split(/\r?\n/)[0].replace(/"(?:[^"]|"")*"/g,""),c=[",",";","\t"].map(d=>[d,l.split(d).length-1]).sort((a,b)=>b[1]-a[1]);return c[0][1]?c[0][0]:","};
+const parseCSV=(s,d=sniffDelim(s))=>{const r=[];let row=[],f="",q=false;for(let i=0;i<s.length;i++){const c=s[i];if(q){if(c=='"'){if(s[i+1]=='"'){f+='"';i++}else q=false}else f+=c}else if(c=='"')q=true;else if(c==d){row.push(f);f=""}else if(c=="\n"||c=="\r"){if(c=="\r"&&s[i+1]=="\n")i++;row.push(f);r.push(row);row=[];f=""}else f+=c}if(f||row.length){row.push(f);r.push(row)}return r.filter(x=>x.some(v=>v!==""))};
+const csv2json=async it=>{const[h,...r]=parseCSV(await it.b.text());return new Blob([JSON.stringify(r.map(x=>Object.fromEntries(h.map((k,i)=>[k,/^-?(0|[1-9]\d{0,14})(\.\d+)?$/.test(x[i]||"")?+x[i]:x[i]??""]))),null,2)],{type:"application/json"})};
+const json2csv=async it=>{let j=JSON.parse(await it.b.text());if(!Array.isArray(j))j=[j];const keys=[...new Set(j.flatMap(o=>Object.keys(o&&typeof o=="object"?o:{value:o})))],q=v=>{v=v==null?"":typeof v=="object"?JSON.stringify(v):String(v);return/[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
   return new Blob([[keys.join(","),...j.map(o=>{o=o&&typeof o=="object"?o:{value:o};return keys.map(k=>q(o[k])).join(",")})].join("\n")],{type:"text/csv"})};
 const csv2html=async(it,o,pr,nx)=>{nx.m.doc=1;const[h,...r]=parseCSV(await it.b.text());return new Blob([`<table><tr>${h.map(c=>`<th>${esc(c)}</th>`).join("")}</tr>${r.map(x=>`<tr>${h.map((_,i)=>`<td>${esc(x[i]||"")}</td>`).join("")}</tr>`).join("")}</table>`],{type:"text/html"})};
 const json2txt=async it=>new Blob([JSON.stringify(JSON.parse(await it.b.text()),null,2)],{type:"text/plain"});
@@ -3490,7 +3491,7 @@ async function imgs2pdf(bl){
 const csvQ=(v,d)=>{v=v==null?"":String(v);return(v.includes(d)||/["\n\r]/.test(v))?'"'+v.replace(/"/g,'""')+'"':v};
 const sheetLib=()=>loadLib(()=>window.XLSX,["https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"]);
 async function getRows(it,nx){
-  if(it.f=="csv"||it.f=="tsv")return parseCSV(await it.b.text(),it.f=="tsv"?"\t":",");
+  if(it.f=="csv"||it.f=="tsv")return parseCSV(await it.b.text(),it.f=="tsv"?"\t":undefined);
   await sheetLib();let wb;try{wb=XLSX.read(await it.b.arrayBuffer(),{type:"array"})}catch(e){throw Error("That spreadsheet couldn't be read")}
   if(wb.SheetNames.length>1)nx.m.note=((nx.m.note||"")+" Only the first sheet ("+wb.SheetNames[0]+") was converted.").trim();
   return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:""})}
@@ -3500,7 +3501,7 @@ async function putRows(r,f){
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(r.map(x=>x.map(num))),"Sheet1");
   return new Blob([XLSX.write(wb,{type:"array",bookType:f=="xls"?"biff8":f})],{type:MIME[f]})}
 const sheetConv=async(it,o,pr,nx)=>putRows(await getRows(it,nx),nx.f);
-const sheet2json=async(it,o,pr,nx)=>{const[h=[],...r]=await getRows(it,nx),k=h.map(String);return new Blob([JSON.stringify(r.map(x=>Object.fromEntries(k.map((n,i)=>[n,/^-?\d+(\.\d+)?$/.test(x[i]||"")?+x[i]:x[i]??""]))),null,2)],{type:"application/json"})};
+const sheet2json=async(it,o,pr,nx)=>{const[h=[],...r]=await getRows(it,nx),k=h.map(String);return new Blob([JSON.stringify(r.map(x=>Object.fromEntries(k.map((n,i)=>[n,/^-?(0|[1-9]\d{0,14})(\.\d+)?$/.test(x[i]||"")?+x[i]:x[i]??""]))),null,2)],{type:"application/json"})};
 const sheet2html=async(it,o,pr,nx)=>{nx.m.doc=1;const[h=[],...r]=await getRows(it,nx);return new Blob([`<table><tr>${h.map(c=>`<th>${esc(String(c))}</th>`).join("")}</tr>${r.map(x=>`<tr>${h.map((_,i)=>`<td>${esc(String(x[i]??""))}</td>`).join("")}</tr>`).join("")}</table>`],{type:"text/html"})};
 
 /* ---------- data: YAML, XML ---------- */
@@ -3672,8 +3673,8 @@ $("cvGo").onclick=async()=>{
   const er=$("cvErr");if(fail){er.textContent=N>1?`${fail} of ${N} failed: ${msg}`:msg;er.hidden=false}else er.hidden=true;
   go.disabled=false;go.textContent=label;setTimeout(()=>{$("cvBar").style.display="none";bar(0)},500)};
 function show(outs){
-  const N=outs.length,seen={};
-  res=outs.map(({it,from})=>{let n=it.n;if(seen[n]){seen[n]++;n+=" ("+seen[n]+")"}else seen[n]=1;return{b:new Blob([it.b],{type:MIME[it.f]||it.b.type}),name:n+"."+it.f,from,f:it.f}});
+  const N=outs.length,seen=Object.create(null);
+  res=outs.map(({it,from})=>{let n=it.n,k=n.toLowerCase();if(seen[k]){let c=seen[k];while(seen[(n+" ("+(++c)+")").toLowerCase()]);seen[k]=c;n+=" ("+c+")"}seen[n.toLowerCase()]=seen[n.toLowerCase()]||1;return{b:new Blob([it.b],{type:MIME[it.f]||it.b.type}),name:n+"."+it.f,from,f:it.f}});
   if(pvUrl)URL.revokeObjectURL(pvUrl);const pv=$("cvPv");pv.replaceChildren();
   const big=(r,m)=>{const d=document.createElement("div");d.className="big";d.textContent=m||(LBL[r.f]+" ready · "+fmtSize(r.b.size));return d};
   if(N==1){const r=res[0];pvUrl=URL.createObjectURL(r.b);let el;
@@ -3750,21 +3751,31 @@ g("utFile").onchange=e=>{pick(e.target.files[0]);e.target.value=""};
 ["dragover","dragenter"].forEach(v=>dz.addEventListener(v,e=>{e.preventDefault();dz.classList.add("over")}));
 ["dragleave","drop"].forEach(v=>dz.addEventListener(v,e=>{e.preventDefault();dz.classList.remove("over")}));
 dz.addEventListener("drop",e=>pick(e.dataTransfer.files[0]));
-g("utCmp").oninput=e=>{const v=e.target.value.trim().toLowerCase().replace(/[^0-9a-f]/g,""),r=g("utRes");
+g("utCmp").oninput=e=>{const raw=e.target.value.trim().toLowerCase(),runs=raw.match(/[0-9a-f]{8,}/g),v=/[g-z]/.test(raw)&&runs?runs.sort((a,b)=>b.length-a.length)[0]:raw.replace(/[^0-9a-f]/g,""),r=g("utRes");
   if(!v||!cur){r.textContent="";r.className="ut-res";return}
   const k=Object.keys(cur).find(k=>cur[k]===v);
   if(k){r.textContent="✓ Match · "+k;r.className="ut-res ok"}else{r.textContent="✗ Doesn’t match. The file may be corrupted or a different version.";r.className="ut-res bad"}};
 /* base64 */
 const enc=(t,url)=>{const u=new TextEncoder().encode(t);let s="";for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));let b=btoa(s);return url?b.replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""):b};
 const dec=t=>{let b=t.trim().replace(/\s+/g,"").replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";const s=atob(b),u=Uint8Array.from(s,c=>c.charCodeAt(0));return new TextDecoder("utf-8",{fatal:true}).decode(u)};
-g("b64Enc").onclick=()=>{try{g("b64Out").value=enc(g("b64In").value,g("b64Url").checked)}catch(e){say("Couldn’t encode that")}};
-g("b64Dec").onclick=()=>{try{g("b64Out").value=dec(g("b64In").value)}catch(e){say("Not valid Base64 text")}};
+g("b64Enc").onclick=()=>{try{g("b64Out").value=enc(g("b64In").value,g("b64Url").checked)}catch(e){g("b64Out").value="";say("Couldn’t encode that")}};
+g("b64Dec").onclick=()=>{try{g("b64Out").value=dec(g("b64In").value)}catch(e){g("b64Out").value="";say("Not valid Base64 text")}};
 g("b64Copy").onclick=()=>copy(g("b64Out").value);
 g("b64Swap").onclick=()=>{g("b64In").value=g("b64Out").value;g("b64Out").value=""};
 /* json */
+function fmtJ(t,ind){const pad=" ".repeat(ind);let o="",l=0,i=0;const n=t.length,nl=()=>ind?"\n"+pad.repeat(l):"";
+  while(i<n){const c=t[i];
+    if(c=='"'){let j=i+1;while(t[j]!='"'){if(t[j]=="\\")j++;j++}o+=t.slice(i,j+1);i=j+1;continue}
+    if(c==" "||c=="\t"||c=="\n"||c=="\r"){i++;continue}
+    if(c=="{"||c=="["){let j=i+1;while(/\s/.test(t[j]))j++;if(t[j]==(c=="{"?"}":"]")){o+=c+t[j];i=j+1;continue}l++;o+=c+nl();i++;continue}
+    if(c=="}"||c=="]"){l--;o+=nl()+c;i++;continue}
+    if(c==","){o+=","+nl();i++;continue}
+    if(c==":"){o+=ind?": ":":";i++;continue}
+    o+=c;i++}
+  return o}
 function js(ind){const st=g("jStat"),t=g("jIn").value.trim();
   if(!t){st.textContent="";st.className="ut-res";g("jOut").value="";return}
-  try{const o=JSON.parse(t),out=JSON.stringify(o,null,ind);g("jOut").value=out;st.textContent="✓ Valid JSON · "+out.length.toLocaleString()+" characters";st.className="ut-res ok"}
+  try{JSON.parse(t);const out=fmtJ(t,ind);g("jOut").value=out;st.textContent="✓ Valid JSON · "+out.length.toLocaleString()+" characters";st.className="ut-res ok"}
   catch(e){g("jOut").value="";st.textContent="✗ "+e.message;st.className="ut-res bad"}}
 g("jFmt").onclick=()=>js(2);g("jMin").onclick=()=>js(0);g("jCopy").onclick=()=>copy(g("jOut").value);
 })();
