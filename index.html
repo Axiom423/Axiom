@@ -340,6 +340,20 @@ html{scrollbar-color:#2a2a2f transparent}
 .links>*:nth-child(1){animation-delay:.2s}.links>*:nth-child(2){animation-delay:.26s}.links>*:nth-child(3){animation-delay:.32s}.links>*:nth-child(4){animation-delay:.38s}.end{animation-delay:.44s}
 .view{animation-duration:.5s}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* Utilities view */
+.ut{padding:22px;margin-top:0}
+.ut-in{width:100%;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--fg);background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:12px;padding:12px 14px;resize:vertical;outline:0;transition:border-color .2s}
+.ut-in:focus{border-color:var(--line2)}
+.ut-l{display:block;margin-top:22px;font-size:12.5px;color:var(--mute)}.ut-l .ut-in{margin-top:8px}
+.ut-chk{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--mute);margin-left:6px}
+.ut-bar{height:3px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:22px}.ut-bar i{display:block;height:100%;width:0;background:var(--fg);transition:width .15s}
+.ut-meta{margin-top:12px;font-size:13px;color:var(--mute)}
+.ut-rows{margin-top:10px;display:grid;gap:8px}
+.ut-row{display:flex;align-items:center;gap:14px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.02)}
+.ut-row b{flex:0 0 72px;font-size:12px;letter-spacing:.08em;color:var(--mute);font-weight:600}
+.ut-row code{flex:1;min-width:0;font:12.5px ui-monospace,Menlo,Consolas,monospace;word-break:break-all;color:var(--fg)}
+.ut-res{margin-top:12px;font-size:13.5px;min-height:20px}.ut-res.ok{color:#6fbf86}.ut-res.bad{color:#e07a7a}
+@media(max-width:600px){.ut{padding:16px}.ut-row{flex-wrap:wrap;gap:6px}.ut-row b{flex-basis:100%}}
 </style>
 </head>
 <body>
@@ -371,7 +385,7 @@ html{scrollbar-color:#2a2a2f transparent}
     <a class="link c" href="https://github.com/Axiom423" target="_blank" rel="noopener"><div><em>01</em>GitHub<span class="tag">New permanent GitHub</span></div></a>
     <a class="link c" href="#steamrip"><div><em>02</em>SteamRip (But Better)</div></a>
     <a class="link c" href="#convert"><div><em>03</em>Convert<span class="tag">New</span></div></a>
-    <div class="link c dead"><div><em>04</em>More tools<span class="tag">Soon</span></div></div>
+    <a class="link c" href="#tools"><div><em>04</em>Utilities<span class="tag">New</span></div></a>
   </nav>
   <p class="end">that’s everything for now. more is on the way.</p>
   <footer><span id="clock"></span><span>press <kbd>C</kbd> to copy</span></footer>
@@ -438,6 +452,7 @@ html{scrollbar-color:#2a2a2f transparent}
       </div>
       <button class="btn main" id="cvGo" disabled>Choose a format</button>
       <div class="cvbar" id="cvBar"><i id="cvBarI"></i></div>
+      <p class="note" id="cvErr" role="alert" hidden style="margin:14px 0 0;border-left-color:#e07a7a;color:#e9b3b3"></p>
     </section>
     <section class="out c" id="cvOut" hidden>
       <div class="pv" id="cvPv"></div>
@@ -447,6 +462,47 @@ html{scrollbar-color:#2a2a2f transparent}
     </section>
   </div>
   <footer><span>© <span class="yr"></span> Axiom</span><span>files never leave this page</span></footer>
+</div>
+<div class="view" id="ut">
+  <a class="back" href="#">← Back</a>
+  <section class="hero c">
+    <div class="eyebrow">Tool · by Axiom</div>
+    <h2 class="t">Utilities</h2>
+    <p class="lead">Small tools that run inside your browser. Check a file’s hash, encode Base64, tidy JSON. Nothing is uploaded.</p>
+    <div class="meta"><span class="chip">Private</span><span class="chip">No upload</span><span class="chip">Any file size</span></div>
+  </section>
+  <div class="seg" id="utTabs" style="margin-top:22px"><button class="on" data-t="hash">Hash check</button><button data-t="b64">Base64</button><button data-t="json">JSON</button></div>
+
+  <section class="ut c" data-p="hash">
+    <div class="drop" id="utDrop" tabindex="0" role="button" aria-label="Choose a file to hash" style="margin-top:0">
+      <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+      <b>Drop a file to get its hash</b><span>MD5 · SHA-256 · CRC32 · big files are fine, they’re read in pieces</span>
+      <input type="file" id="utFile" hidden>
+    </div>
+    <div id="utHashOut" hidden>
+      <div class="ut-bar"><i id="utBar"></i></div>
+      <div class="ut-meta" id="utHashInfo"></div>
+      <div class="ut-rows" id="utRows"></div>
+      <label class="ut-l">Compare with a hash you were given
+        <input class="ut-in" id="utCmp" placeholder="Paste MD5, SHA-256 or CRC32" spellcheck="false" autocomplete="off"></label>
+      <div class="ut-res" id="utRes"></div>
+    </div>
+  </section>
+
+  <section class="ut c" data-p="b64" hidden>
+    <textarea class="ut-in" id="b64In" rows="6" placeholder="Text to encode, or Base64 to decode" spellcheck="false"></textarea>
+    <div class="btns" style="margin-top:12px"><button class="btn main" id="b64Enc">Encode</button><button class="btn" id="b64Dec">Decode</button><label class="ut-chk"><input type="checkbox" id="b64Url"> URL-safe</label></div>
+    <textarea class="ut-in" id="b64Out" rows="6" placeholder="Result" readonly spellcheck="false" style="margin-top:12px"></textarea>
+    <div class="btns" style="margin-top:12px"><button class="btn" id="b64Copy">Copy</button><button class="btn" id="b64Swap">Use result as input</button></div>
+  </section>
+
+  <section class="ut c" data-p="json" hidden>
+    <textarea class="ut-in" id="jIn" rows="8" placeholder="Paste JSON here" spellcheck="false"></textarea>
+    <div class="btns" style="margin-top:12px"><button class="btn main" id="jFmt">Format</button><button class="btn" id="jMin">Minify</button><button class="btn" id="jCopy">Copy</button></div>
+    <div class="ut-res" id="jStat"></div>
+    <textarea class="ut-in" id="jOut" rows="10" placeholder="Result" readonly spellcheck="false" style="margin-top:12px"></textarea>
+  </section>
+  <footer><span>© <span class="yr"></span> Axiom</span><span>everything stays on this page</span></footer>
 </div>
 </main>
 <div id="toast"></div>
@@ -2972,10 +3028,10 @@ document.addEventListener("pointermove",e=>{const c=e.target.closest&&e.target.c
 
 /* routing */
 function route(){
-  const h=location.hash,sr=h==="#steamrip"||h==="#install",cv=h==="#convert";
-  $("home").classList.toggle("on",!sr&&!cv);$("sr").classList.toggle("on",sr);$("cv").classList.toggle("on",cv);
-  $("main").classList.toggle("wide",sr||cv);
-  document.title=sr?"SteamRip (But Better) — Axiom":cv?"Convert — Axiom":"Axiom";
+  const h=location.hash,sr=h==="#steamrip"||h==="#install",cv=h==="#convert",ut=h==="#tools";
+  $("home").classList.toggle("on",!sr&&!cv&&!ut);$("sr").classList.toggle("on",sr);$("cv").classList.toggle("on",cv);$("ut").classList.toggle("on",ut);
+  $("main").classList.toggle("wide",sr||cv||ut);
+  document.title=sr?"SteamRip (But Better) — Axiom":cv?"Convert — Axiom":ut?"Utilities — Axiom":"Axiom";
   if(sr)loadCode();
   if(h!=="#install")scrollTo(0,0);
   onScroll();
@@ -3007,7 +3063,7 @@ function onScroll(){
 }
 addEventListener("scroll",onScroll,{passive:true});
 document.querySelectorAll(".jump button").forEach(b=>b.onclick=()=>$(b.dataset.go).scrollIntoView({behavior:"smooth",block:"start"}));
-addEventListener("keydown",e=>{if(e.key==="Escape"&&($("sr").classList.contains("on")||$("cv").classList.contains("on")))location.hash=""});
+addEventListener("keydown",e=>{if(e.key==="Escape"&&($("sr").classList.contains("on")||$("cv").classList.contains("on")||$("ut").classList.contains("on")))location.hash=""});
 ["srCopy2","srCopy3"].forEach(i=>$(i).onclick=()=>$("srCopy").click());
 
 let tt;function toast(m){const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),1700)}
@@ -3187,7 +3243,12 @@ function pdf(objs){
   parts.push(lat(`xref\n0 ${objs.length+1}\n0000000000 65535 f \n`+xr.map(o=>String(o).padStart(10,"0")+" 00000 n \n").join("")+`trailer\n<</Size ${objs.length+1}/Root 1 0 R>>\nstartxref\n${off}\n%%EOF`));
   return new Blob(parts,{type:"application/pdf"})}
 const stream=(s,d="")=>`<<${d}/Length ${s.length}>>\nstream\n${s}\nendstream`;
+const jpgComps=u=>{for(let i=2;i<u.length-9;){if(u[i]!=0xff){i++;continue}const m=u[i+1];if(m==0xff){i++;continue}if(m>=0xc0&&m<=0xcf&&m!=0xc4&&m!=0xc8&&m!=0xcc)return u[i+9];if(m==0xd8||m==0x01||(m>=0xd0&&m<=0xd7)){i+=2;continue}i+=2+(u[i+2]<<8|u[i+3])}return 3};
+async function rgbJpeg(b){
+  const u=new Uint8Array(await b.arrayBuffer());if(jpgComps(u)==3)return b;
+  const im=await load(b),c=document.createElement("canvas");c.width=im.naturalWidth;c.height=im.naturalHeight;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0);return blobAsync(c,"image/jpeg",.92)}
 async function jpg2pdf(it){
+  it={...it,b:await rgbJpeg(it.b)};
   const im=await load(it.b),w=im.naturalWidth,h=im.naturalHeight,jb=new Uint8Array(await it.b.arrayBuffer()),PW=595,PH=842;
   const paged=!!it.m.paged||h*.75>14400,pw=paged?PW:w*.75,ph=paged?PH:h*.75,H=paged?h*PW/w:ph,n=paged?Math.max(1,Math.ceil(H/PH-.01)):1;
   const objs=["<</Type/Catalog/Pages 2 0 R>>",`<</Type/Pages/Kids[${[...Array(n)].map((_,i)=>`${4+2*i} 0 R`).join(" ")}]/Count ${n}>>`,
@@ -3317,26 +3378,42 @@ function wavBlob(ab){
   const d=[...Array(ch)].map((_,i)=>ab.getChannelData(i));let p=44;
   for(let i=0;i<n;i++)for(let c=0;c<ch;c++){const v=Math.max(-1,Math.min(1,d[c][i]));u.setInt16(p,v<0?v*32768:v*32767,true);p+=2}
   return new Blob([u],{type:"audio/wav"})}
-const toWav=async(it,o,pr,nx)=>{try{return wavBlob(await audio(it.b))}catch(e){return ff(it,o,pr,nx)}};
-async function wav2mp3(it,o,pr){
-  await loadScript("https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js");
+const toWav=async(it,o,pr,nx)=>{try{return wavBlob(await audio(it.b))}catch(e){return viaFF(e,it,o,pr,nx)}};
+async function wav2mp3(it,o,pr,nx){
+  try{await loadLib(()=>window.lamejs,["https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js","https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"])}catch(e){return ff(it,o,pr,nx)}
   const ab=await audio(it.b),ch=Math.min(2,ab.numberOfChannels),enc=new lamejs.Mp3Encoder(ch,ab.sampleRate,o.k);
   const pcm=[...Array(ch)].map((_,i)=>{const f=ab.getChannelData(i),s=new Int16Array(f.length);for(let j=0;j<f.length;j++){const v=Math.max(-1,Math.min(1,f[j]));s[j]=v<0?v*32768:v*32767}return s});
   const out=[];for(let i=0;i<pcm[0].length;i+=1152){const a=enc.encodeBuffer(pcm[0].subarray(i,i+1152),ch>1?pcm[1].subarray(i,i+1152):undefined);if(a.length)out.push(a);if(!(i/1152%300)){pr(i/pcm[0].length);await tick()}}
   out.push(enc.flush());return new Blob(out,{type:"audio/mpeg"})}
 
 /* ---------- video ---------- */
-async function vid(b){const v=document.createElement("video");v.muted=true;v.playsInline=true;v.preload="auto";v.src=URL.createObjectURL(b);await new Promise((ok,no)=>{v.onloadeddata=ok;v.onerror=()=>no(Error("This browser can't decode that video"))});return v}
-const seek=(v,t)=>new Promise(ok=>{v.onseeked=ok;v.currentTime=t});
+async function vid(b){
+  const v=document.createElement("video");v.muted=true;v.playsInline=true;v.setAttribute("playsinline","");v.preload="auto";const u=URL.createObjectURL(b);v.src=u;
+  try{await new Promise((ok,no)=>{
+    const t=setTimeout(()=>no(Error("This browser took too long to open that video. It may use a codec it can't decode")),20000);
+    v.onloadeddata=()=>{clearTimeout(t);ok()};
+    v.onloadedmetadata=()=>{try{const p=v.play();if(p&&p.then)p.then(()=>v.pause(),()=>{})}catch(e){}}; /* Safari and phones hold the first frame back until asked */
+    v.onerror=()=>{clearTimeout(t);no(Error("This browser can't decode that video"))}});
+    if(!v.videoWidth||!v.videoHeight)throw Error("This browser can't decode that video's picture")}
+  catch(e){URL.revokeObjectURL(u);throw e}
+  v.pause();return v}
+const seek=(v,t)=>new Promise(ok=>{
+  const d=isFinite(v.duration)&&v.duration>0?v.duration:0;t=Math.max(0,d?Math.min(t,d-.05):t);
+  let done=false;const fin=()=>{if(done)return;done=true;clearTimeout(k);v.removeEventListener("seeked",fin);setTimeout(ok,20)},k=setTimeout(fin,4000);
+  v.addEventListener("seeked",fin);const same=Math.abs(v.currentTime-t)<.002;v.currentTime=t;if(same)setTimeout(fin,60)});
 function snap(v,w){const s=w&&w<v.videoWidth?w/v.videoWidth:1,c=document.createElement("canvas");c.width=Math.round(v.videoWidth*s);c.height=Math.round(v.videoHeight*s);const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(v,0,0,c.width,c.height);return{c,x}}
 async function vid2gifN(it,o,pr){
-  const v=await vid(it.b),dur=Math.min(isFinite(v.duration)?v.duration:o.sec,o.sec),n=Math.max(1,Math.min(200,Math.floor(dur*o.fps))),fr=[];
-  for(let i=0;i<n;i++){await seek(v,i/o.fps);const{c,x}=snap(v,o.w||480);fr.push(x.getImageData(0,0,c.width,c.height));pr(i/n*.6)}
-  URL.revokeObjectURL(v.src);return gif(fr,Math.round(100/o.fps),p=>pr(.6+p*.4))}
+  const v=await vid(it.b);try{
+    const dur=Math.min(isFinite(v.duration)&&v.duration>0?v.duration:o.sec,o.sec),n=Math.max(1,Math.min(200,Math.floor(dur*o.fps))),fr=[];
+    for(let i=0;i<n;i++){await seek(v,i/o.fps);const{c,x}=snap(v,o.w||480);fr.push(x.getImageData(0,0,c.width,c.height));pr(i/n*.6);await tick()}
+    return await gif(fr,Math.round(100/o.fps),p=>pr(.6+p*.4))}
+  finally{URL.revokeObjectURL(v.src)}}
 async function vidframeN(it,o){
-  const v=await vid(it.b),d=isFinite(v.duration)?v.duration:2;let best=null;
-  for(const t of[Math.min(1,d/2),d*.5,d*.25,d*.75,0]){await seek(v,t);const{c}=snap(v,o.w),q=flat(c);if(!best)best=c;if(!(q.flat&&q.mean<12)){best=c;break}}
-  URL.revokeObjectURL(v.src);return blobAsync(best,"image/png")}
+  const v=await vid(it.b);try{
+    const d=isFinite(v.duration)&&v.duration>0?v.duration:2;let best=null;
+    for(const t of[Math.min(1,d/2),d*.5,d*.25,d*.75,d*.1,0]){await seek(v,t);const{c}=snap(v,o.w),q=flat(c);if(!best)best=c;if(!(q.flat&&q.mean<12)){best=c;break}}
+    return await blobAsync(best,"image/png")}
+  finally{URL.revokeObjectURL(v.src)}}
 
 
 /* ---------- universal engine: FFmpeg (WebAssembly), downloaded the first time it's needed ---------- */
@@ -3374,8 +3451,9 @@ async function ff(it,o,pr,nx){
     if(code!==0)throw Error("This file couldn't be converted. It may use a codec that isn't supported here.");
     const d=await F.readFile(out);return new Blob([d],{type:MIME[nx.f]||""})}
   finally{F.off("progress",h);for(const n of[inn,out])try{await F.deleteFile(n)}catch(e){}}}
-const vid2gif=async(it,o,pr,nx)=>{try{return await vid2gifN(it,o,pr)}catch(e){return ff(it,o,pr,nx)}};
-const vidframe=async(it,o,pr,nx)=>{try{return await vidframeN(it,o)}catch(e){return ff(it,o,pr,nx)}};
+const viaFF=async(e,it,o,pr,nx)=>{try{return await ff(it,o,pr,nx)}catch(e2){throw Error(/internet|engine|helper/i.test(e2.message)?e.message+". The backup converter couldn't load either. It needs internet the first time, so check your connection and try again.":e2.message)}};
+const vid2gif=async(it,o,pr,nx)=>{try{return await vid2gifN(it,o,pr)}catch(e){return viaFF(e,it,o,pr,nx)}};
+const vidframe=async(it,o,pr,nx)=>{try{return await vidframeN(it,o)}catch(e){return viaFF(e,it,o,pr,nx)}};
 
 /* ---------- HEIC, PDF reading, many images into one PDF ---------- */
 async function heic2img(it,o,pr,nx){await loadLib(()=>window.heic2any,["https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"]);
@@ -3401,6 +3479,7 @@ async function pdf2txt(it,o,pr,nx){
   return new Blob([t.trim()+"\n"],{type:"text/plain"})}
 async function imgs2pdf(bl){
   const objs=["<</Type/Catalog/Pages 2 0 R>>",null],kids=[];
+  bl=await Promise.all(bl.map(rgbJpeg));
   for(let i=0;i<bl.length;i++){const im=await load(bl[i]),k=Math.min(.75,14400/Math.max(im.naturalWidth,im.naturalHeight)),w=im.naturalWidth,h=im.naturalHeight,jb=new Uint8Array(await bl[i].arrayBuffer()),pw=(w*k).toFixed(2),ph=(h*k).toFixed(2),n=3+3*i;
     kids.push(`${n+1} 0 R`);
     objs.push(cat(lat(`<</Type/XObject/Subtype/Image/Width ${w}/Height ${h}/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length ${jb.length}>>\nstream\n`),jb,lat("\nendstream")),
@@ -3550,7 +3629,7 @@ inp.onchange=()=>{pick(inp.files);inp.value=""};
 ["dragleave","drop"].forEach(t=>addEventListener(t,e=>{if(!on())return;e.preventDefault();drop.classList.remove("over");if(t=="drop"&&e.dataTransfer.files.length)pick(e.dataTransfer.files)}));
 addEventListener("paste",e=>{if(on()&&e.clipboardData&&e.clipboardData.files.length)pick(e.clipboardData.files)});
 $("oq").oninput=()=>$("oqv").textContent=$("oq").value;
-const back=()=>{$("cvWork").hidden=true;drop.hidden=false;$("cvOut").hidden=true;cur=null;sel=null};
+const back=()=>{$("cvErr").hidden=true;$("cvWork").hidden=true;drop.hidden=false;$("cvOut").hidden=true;cur=null;sel=null};
 $("cvReset").onclick=back;$("cvAgain").onclick=back;
 
 async function pick(fl){
@@ -3565,10 +3644,11 @@ async function pick(fl){
   const ts=Object.keys(P.d).filter(t=>t!=f).sort((a,b)=>P.d[a]-P.d[b]||LBL[a].localeCompare(LBL[b]));
   CAT.forEach(([nm,l])=>{const m=ts.filter(t=>l.includes(t));if(!m.length)return;const g=document.createElement("div"),h=document.createElement("small");g.className="g";h.textContent=nm;g.appendChild(h);
     m.forEach(t=>{const b=document.createElement("button");b.textContent=LBL[t];b.dataset.t=t;b.onclick=()=>choose(t);g.appendChild(b)});box.appendChild(g)});
-  if(VID.has(f))$("ow").value="480";
+  $("ow").value="0";
   $("cvRoute").replaceChildren();$("cvGo").disabled=true;$("cvGo").textContent="Choose a format";$("cvOpts").style.display="none"}
 function choose(t){
-  sel=t;const path=route(P,t);
+  sel=t;const path=route(P,t);$("cvErr").hidden=true;
+  if(VID.has(cur.f)){const small=t=="gif"||VID.has(t);$("ow").value=small?"480":"0"}
   $("cvFmts").querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));
   const r=$("cvRoute");r.replaceChildren();
   if(path.length>1)[cur.f,...path.map(e=>e.b)].forEach((x,i)=>{if(i){const a=document.createElement("i");a.textContent="→";r.appendChild(a)}const s=document.createElement("span");s.className="chip";s.textContent=LBL[x];r.appendChild(s)});
@@ -3578,7 +3658,7 @@ function choose(t){
   $("cvGo").disabled=false;$("cvGo").textContent="Convert to "+LBL[t]+(cur.items.length>1?` (${cur.items.length} files)`:"")}
 function bar(x){$("cvBarI").style.width=Math.round(x*100)+"%"}
 $("cvGo").onclick=async()=>{
-  if(!sel||$("cvGo").disabled)return;const go=$("cvGo"),label=go.textContent;go.disabled=true;go.textContent="Converting…";$("cvOut").hidden=true;$("cvBar").style.display="block";bar(.02);
+  if(!sel||$("cvGo").disabled)return;const go=$("cvGo"),label=go.textContent;go.disabled=true;go.textContent="Converting…";$("cvOut").hidden=true;$("cvErr").hidden=true;$("cvBar").style.display="block";bar(.02);
   const o={q:+$("oq").value/100,w:+$("ow").value,fps:+$("ofps").value,sec:+$("osec").value,k:+$("ok").value,pw:+$("opw").value,cl:+$("ocl").value,pg:+$("opg").value},
     merge=sel=="pdf"&&cur.items.length>1&&MERGE.has(cur.f)&&$("omg").checked,path=route(P,merge?"jpg":sel),N=cur.items.length;let outs=[],fail=0,msg="";
   for(let k=0;k<N;k++){
@@ -3588,7 +3668,8 @@ $("cvGo").onclick=async()=>{
       outs.push({it,from:cur.items[k].size})}
     catch(err){console.error(err);fail++;msg=err.message||"Conversion failed"}}
   if(merge&&outs.length>1){try{const b=await imgs2pdf(outs.map(x=>x.it.b));outs=[{it:{b,f:"pdf",n:cur.items[0].n+" (combined)",m:{}},from:outs.reduce((n,x)=>n+x.from,0)}]}catch(err){console.error(err);fail++;msg=err.message||"Conversion failed";outs=[]}}
-  bar(1);if(outs.length)show(outs);if(fail)toast(N>1?`${fail} of ${N} failed: ${msg}`:msg);
+  bar(1);if(outs.length)show(outs);
+  const er=$("cvErr");if(fail){er.textContent=N>1?`${fail} of ${N} failed: ${msg}`:msg;er.hidden=false}else er.hidden=true;
   go.disabled=false;go.textContent=label;setTimeout(()=>{$("cvBar").style.display="none";bar(0)},500)};
 function show(outs){
   const N=outs.length,seen={};
@@ -3612,6 +3693,80 @@ function show(outs){
 function save(b,name){const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
 $("cvDl").onclick=async()=>{if(!res)return;if(res.length==1)return save(res[0].b,res[0].name);
   save(zip(await Promise.all(res.map(async r=>({name:r.name,u:new Uint8Array(await r.b.arrayBuffer())})))),"converted.zip")};
+})();
+</script>
+<script>
+/* Utilities: streaming hashes (MD5, SHA-256, CRC32), Base64, JSON */
+(()=>{
+const g=i=>document.getElementById(i),say=m=>{const t=g("toast");t.textContent=m;t.classList.add("on");clearTimeout(say.t);say.t=setTimeout(()=>t.classList.remove("on"),1700)};
+const copy=async t=>{if(!t)return say("Nothing to copy");try{await navigator.clipboard.writeText(t);say("Copied")}catch(e){say("Copy failed")}};
+/* tabs */
+g("utTabs").onclick=e=>{const b=e.target.closest("button");if(!b)return;g("utTabs").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));document.querySelectorAll("#ut .ut").forEach(p=>p.hidden=p.dataset.p!==b.dataset.t)};
+/* hashes */
+const P=[];for(let n=2;P.length<64;n++)if(P.every(p=>n%p))P.push(n);
+const frac=x=>x-Math.floor(x),K=P.map(p=>(frac(Math.pow(p,1/3))*4294967296)|0),H0=P.slice(0,8).map(p=>(frac(Math.sqrt(p))*4294967296)|0);
+const MK=Array.from({length:64},(_,i)=>(Math.abs(Math.sin(i+1))*4294967296)|0);
+const SH=[];for(let r=0;r<4;r++)for(let i=0;i<16;i++)SH.push([[7,12,17,22],[5,9,14,20],[4,11,16,23],[6,10,15,21]][r][i%4]);
+const CT=new Uint32Array(256).map((_,n)=>{let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;return c>>>0});
+const w256=new Int32Array(64);
+function sha(H,u,o){for(let i=0;i<16;i++)w256[i]=u[o+4*i]<<24|u[o+4*i+1]<<16|u[o+4*i+2]<<8|u[o+4*i+3];
+for(let i=16;i<64;i++){const a=w256[i-15],b=w256[i-2];w256[i]=(w256[i-16]+(((a>>>7)|(a<<25))^((a>>>18)|(a<<14))^(a>>>3))+w256[i-7]+(((b>>>17)|(b<<15))^((b>>>19)|(b<<13))^(b>>>10)))|0}
+let a=H[0],b=H[1],c=H[2],d=H[3],e=H[4],f=H[5],gg=H[6],h=H[7];
+for(let i=0;i<64;i++){const t1=(h+(((e>>>6)|(e<<26))^((e>>>11)|(e<<21))^((e>>>25)|(e<<7)))+((e&f)^(~e&gg))+K[i]+w256[i])|0,t2=((((a>>>2)|(a<<30))^((a>>>13)|(a<<19))^((a>>>22)|(a<<10)))+((a&b)^(a&c)^(b&c)))|0;h=gg;gg=f;f=e;e=(d+t1)|0;d=c;c=b;b=a;a=(t1+t2)|0}
+H[0]=(H[0]+a)|0;H[1]=(H[1]+b)|0;H[2]=(H[2]+c)|0;H[3]=(H[3]+d)|0;H[4]=(H[4]+e)|0;H[5]=(H[5]+f)|0;H[6]=(H[6]+gg)|0;H[7]=(H[7]+h)|0}
+const m5=new Int32Array(16);
+function md5(H,u,o){for(let i=0;i<16;i++)m5[i]=u[o+4*i]|u[o+4*i+1]<<8|u[o+4*i+2]<<16|u[o+4*i+3]<<24;
+let a=H[0],b=H[1],c=H[2],d=H[3];
+for(let i=0;i<64;i++){let f,k;if(i<16){f=(b&c)|(~b&d);k=i}else if(i<32){f=(d&b)|(~d&c);k=(5*i+1)%16}else if(i<48){f=b^c^d;k=(3*i+5)%16}else{f=c^(b|~d);k=(7*i)%16}
+const x=(f+a+MK[i]+m5[k])|0,t=d;d=c;c=b;b=(b+((x<<SH[i])|(x>>>(32-SH[i]))))|0;a=t}
+H[0]=(H[0]+a)|0;H[1]=(H[1]+b)|0;H[2]=(H[2]+c)|0;H[3]=(H[3]+d)|0}
+const hx=(arr,le)=>arr.map(x=>{let s="";for(let i=0;i<4;i++){const v=le?(x>>>(8*i))&255:(x>>>(24-8*i))&255;s+=v.toString(16).padStart(2,"0")}return s}).join("");
+async function hashFile(file,prog){
+  const CH=8<<20,T=file.size,S=H0.slice(),M=[0x67452301,0xefcdab89|0,0x98badcfe|0,0x10325476];let crc=-1;
+  for(let off=0;;off+=CH){
+    const last=off+CH>=T,u=new Uint8Array(await file.slice(off,Math.min(off+CH,T)).arrayBuffer()),n=u.length,full=last?n-(n%64):n;
+    for(let i=0;i<full;i+=64){sha(S,u,i);md5(M,u,i)}
+    for(let i=0;i<n;i++)crc=CT[(crc^u[i])&255]^(crc>>>8);
+    if(last){const rem=n-full,sz=rem<56?64:128,a=new Uint8Array(sz),b=new Uint8Array(sz),lo=(T<<3)>>>0,hi=Math.floor(T/536870912);
+      a.set(u.subarray(full));a[rem]=0x80;b.set(a);
+      [24,16,8,0].forEach((s,i)=>{a[sz-8+i]=(hi>>>s)&255;a[sz-4+i]=(lo>>>s)&255});
+      [0,8,16,24].forEach((s,i)=>{b[sz-8+i]=(lo>>>s)&255;b[sz-4+i]=(hi>>>s)&255});
+      for(let i=0;i<sz;i+=64){sha(S,a,i);md5(M,b,i)}break}
+    prog((off+CH)/T);await new Promise(r=>setTimeout(r))
+  }
+  return{MD5:hx(M,true),"SHA-256":hx(S,false),CRC32:((crc^-1)>>>0).toString(16).padStart(8,"0")}
+}
+let cur=null;
+async function pick(file){
+  if(!file)return;g("utHashOut").hidden=false;g("utRows").textContent="";g("utRes").textContent="";g("utRes").className="ut-res";g("utCmp").value="";
+  g("utHashInfo").textContent=file.name+" · "+(file.size/1048576).toFixed(file.size>1e8?0:1)+" MB · hashing…";g("utBar").style.width="0";
+  try{cur=await hashFile(file,p=>g("utBar").style.width=Math.min(100,p*100)+"%");
+    g("utBar").style.width="100%";g("utHashInfo").textContent=file.name+" · "+(file.size/1048576).toFixed(file.size>1e8?0:1)+" MB";
+    for(const k in cur){const r=document.createElement("div");r.className="ut-row";const b=document.createElement("b");b.textContent=k;const c=document.createElement("code");c.textContent=cur[k];const x=document.createElement("button");x.className="mini";x.textContent="Copy";x.onclick=()=>copy(cur[k]);r.append(b,c,x);g("utRows").appendChild(r)}
+  }catch(e){g("utHashInfo").textContent="Couldn’t read that file.";cur=null}
+}
+const dz=g("utDrop");dz.onclick=()=>g("utFile").click();dz.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();g("utFile").click()}};
+g("utFile").onchange=e=>{pick(e.target.files[0]);e.target.value=""};
+["dragover","dragenter"].forEach(v=>dz.addEventListener(v,e=>{e.preventDefault();dz.classList.add("over")}));
+["dragleave","drop"].forEach(v=>dz.addEventListener(v,e=>{e.preventDefault();dz.classList.remove("over")}));
+dz.addEventListener("drop",e=>pick(e.dataTransfer.files[0]));
+g("utCmp").oninput=e=>{const v=e.target.value.trim().toLowerCase().replace(/[^0-9a-f]/g,""),r=g("utRes");
+  if(!v||!cur){r.textContent="";r.className="ut-res";return}
+  const k=Object.keys(cur).find(k=>cur[k]===v);
+  if(k){r.textContent="✓ Match · "+k;r.className="ut-res ok"}else{r.textContent="✗ Doesn’t match. The file may be corrupted or a different version.";r.className="ut-res bad"}};
+/* base64 */
+const enc=(t,url)=>{const u=new TextEncoder().encode(t);let s="";for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));let b=btoa(s);return url?b.replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""):b};
+const dec=t=>{let b=t.trim().replace(/\s+/g,"").replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";const s=atob(b),u=Uint8Array.from(s,c=>c.charCodeAt(0));return new TextDecoder("utf-8",{fatal:true}).decode(u)};
+g("b64Enc").onclick=()=>{try{g("b64Out").value=enc(g("b64In").value,g("b64Url").checked)}catch(e){say("Couldn’t encode that")}};
+g("b64Dec").onclick=()=>{try{g("b64Out").value=dec(g("b64In").value)}catch(e){say("Not valid Base64 text")}};
+g("b64Copy").onclick=()=>copy(g("b64Out").value);
+g("b64Swap").onclick=()=>{g("b64In").value=g("b64Out").value;g("b64Out").value=""};
+/* json */
+function js(ind){const st=g("jStat"),t=g("jIn").value.trim();
+  if(!t){st.textContent="";st.className="ut-res";g("jOut").value="";return}
+  try{const o=JSON.parse(t),out=JSON.stringify(o,null,ind);g("jOut").value=out;st.textContent="✓ Valid JSON · "+out.length.toLocaleString()+" characters";st.className="ut-res ok"}
+  catch(e){g("jOut").value="";st.textContent="✗ "+e.message;st.className="ut-res bad"}}
+g("jFmt").onclick=()=>js(2);g("jMin").onclick=()=>js(0);g("jCopy").onclick=()=>copy(g("jOut").value);
 })();
 </script>
 </body>
